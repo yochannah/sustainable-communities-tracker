@@ -1,0 +1,22 @@
+{
+  "name": "sustainable-communities-tracker",
+  "version": "1.0.0",
+  "description": "sustainable open source and open science project study ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yochannah/sustainable-communities-tracker.git"
+  },
+  "author": "Yo Yehudi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yochannah/sustainable-communities-tracker/issues"
+  },
+  "homepage": "https://github.com/yochannah/sustainable-communities-tracker#readme",
+  "dependencies": {
+    "octonode": "^0.10.2"
+  }
+}
