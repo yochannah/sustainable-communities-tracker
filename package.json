@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/yochannah/sustainable-communities-tracker#readme",
   "dependencies": {
-    "octonode": "^0.10.2"
+    "@octokit/core": "^3.4.0"
   }
 }
