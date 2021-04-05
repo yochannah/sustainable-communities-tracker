@@ -36,7 +36,7 @@ const checkCoC = async function() {
 //   # * see how many items are on it
 //   # * multiply the number of pages - 1 by the page size
 //   # * and add the two together. Boom. Commit count in 2 api calls
-const checkNoOfResults = async function(endpoint) {
+const checkNoOfResults = async function(endpoint, state) {
   try {
     const url = 'GET /repos/{owner}/{repo}/' + endpoint,
 
@@ -44,7 +44,7 @@ const checkNoOfResults = async function(endpoint) {
       "owner": owner,
       "repo": repo,
       "per_page" : maxPerPage,
-      "state" : "all"
+      "state" : state
     });
 
     return result;
@@ -54,10 +54,10 @@ const checkNoOfResults = async function(endpoint) {
   }
 }
 
-const countPaginatedResults = async function (result, endpoint) {
+const countPaginatedResults = async function (result, endpoint, state) {
     const numOnFirstPage =  result.data.length,
     links = parse(result.headers.link);
-    var lastPage = 1, //We'll always have at least one page of results
+    var lastPage = 1,  // We'll always have at least one page of results
     lastPageCount = 0; // this is only used if we get higher than one page
 
     //if there's more than one page, we'll need to count how many
@@ -69,7 +69,7 @@ const countPaginatedResults = async function (result, endpoint) {
         "repo": repo,
         "per_page" : maxPerPage,
         "page" : lastPage,
-        state : "all"
+        "state" : state
       });
       lastPageCount = lastPageResult.data.length
     }
@@ -131,16 +131,16 @@ const processRepoInfo = function(repoInfo) {
   }
 }
 
-const processIssuesAndPRAggregates = async function() {
+const processIssuesAndPRAggregates = async function(state) {
 
   //first page results for each of the counts
-  let intIssueCount = checkNoOfResults("issues"),
-  intprCount = checkNoOfResults("pulls"),
+  let intIssueCount = checkNoOfResults("issues", state),
+  intprCount = checkNoOfResults("pulls", state),
   interimResponse = await Promise.all([intIssueCount, intprCount]);
 
   //this request set depends on the previous two
-  let issueCount = countPaginatedResults(interimResponse[0], "issues"),
-  prCount = countPaginatedResults(interimResponse[1], "pulls"),
+  let issueCount = countPaginatedResults(interimResponse[0], "issues", state),
+  prCount = countPaginatedResults(interimResponse[1], "pulls", state),
   results = await Promise.all([prCount, issueCount]);
   // github returns pulls and issuess when you ask for issues so we have to calculate
   // real issues by subtracting the prs!
@@ -155,19 +155,30 @@ async function fullRun() {
     let repoInfo = checkRepoInfo(),
     commitNumber = checkNoOfResults("commits"),
     locCount = checkLocCount(),
-    prsAndIssues = processIssuesAndPRAggregates(),
+    allPrsAndIssues = processIssuesAndPRAggregates("all"),
+    closedPrsAndIssues =  processIssuesAndPRAggregates("closed"),
     interimResponse = await Promise.all([
       repoInfo,     //0
       commitNumber, //1
       locCount,     //2
-      prsAndIssues  //3
+      allPrsAndIssues,  //3
+      closedPrsAndIssues //4
     ]),
     resultStore = {
       repoInfo : processRepoInfo(interimResponse[0]),
       commitCount : await countPaginatedResults(interimResponse[1], "commits"),
       locCount : await processLocCount(interimResponse[2]),
-      prs : interimResponse[3].prs,
-      issues : interimResponse[3].issues
+      prs : {
+        all: interimResponse[3].prs,
+        closed: interimResponse[4].prs,
+        open: interimResponse[3].prs - interimResponse[4].prs
+      },
+      issues : {
+        all: interimResponse[3].issues,
+        closed: interimResponse[4].issues,
+        open: interimResponse[3].issues - interimResponse[4].issues
+      },
+      dateSnapshotTaken : new Date().toISOString()
     };
     return resultStore;
   } catch (e) {
