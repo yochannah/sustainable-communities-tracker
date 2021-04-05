@@ -36,41 +36,46 @@ const checkCoC = async function() {
 //   # * see how many items are on it
 //   # * multiply the number of pages - 1 by the page size
 //   # * and add the two together. Boom. Commit count in 2 api calls
-const checkNoOfCommits = async function() {
+const checkNoOfResults = async function(endpoint) {
   try {
-    return result = await octokit.request('GET /repos/{owner}/{repo}/commits', {
+    const url = 'GET /repos/{owner}/{repo}/' + endpoint,
+
+    result = await octokit.request(url, {
       "owner": owner,
       "repo": repo,
-      "per_page" : maxPerPage
+      "per_page" : maxPerPage,
+      "state" : "all"
     });
+
+    return result;
   } catch (e) {
     console.error(e);
     return e;
   }
 }
 
-const processCommits = async function (result) {
-  const numOnFirstPage =  result.data.length,
-  links = parse(result.headers.link);
-  var lastPage = 1, //We'll always have at least one page of results
-  lastPageCount = 0; // this is only used if we get higher than one page
+const countPaginatedResults = async function (result, endpoint) {
+    const numOnFirstPage =  result.data.length,
+    links = parse(result.headers.link);
+    var lastPage = 1, //We'll always have at least one page of results
+    lastPageCount = 0; // this is only used if we get higher than one page
 
-  //if there's more than one page, we'll need to count how many
-  // results are on the last page as it may be less than the maxPerPage
-  if (numOnFirstPage === maxPerPage) {
-    lastPage = links.last.page;
-    var lastPageResult = await octokit.request('GET /repos/{owner}/{repo}/commits', {
-      "owner": owner,
-      "repo": repo,
-      "per_page" : maxPerPage,
-      "page" : 9
-    });
-    lastPageCount = lastPageResult.data.length
-  }
+    //if there's more than one page, we'll need to count how many
+    // results are on the last page as it may be less than the maxPerPage
+    if (numOnFirstPage === maxPerPage) {
+      lastPage = links.last.page;
+      var lastPageResult = await octokit.request('GET /repos/{owner}/{repo}/' + endpoint, {
+        "owner": owner,
+        "repo": repo,
+        "per_page" : maxPerPage,
+        "page" : lastPage,
+        state : "all"
+      });
+      lastPageCount = lastPageResult.data.length
+    }
 
-  const fullPages = (lastPage - 1) * maxPerPage;
-
-  return noOfCommits = fullPages + lastPageCount;
+    const fullPages = (lastPage - 1) * maxPerPage;
+    return noOfResults = fullPages + lastPageCount;
 }
 
 // We're using bytes per language as a proxy for the amount of content
@@ -126,36 +131,40 @@ const processRepoInfo = function(repoInfo) {
   }
 }
 
-const checkIssues = async function() {
-  return repoIssues = await octokit.request('GET /repos/{owner}/{repo}/issues', {
-  owner: owner,
-  repo: repo
-})
-
-}
-
-
-
 async function fullRun() {
-  // this probably doesn't work right now
-  // we want some async all promises thing going on
-  // and more error handling pls
-
-  let repoInfo = checkRepoInfo(),
-  commitNumber = checkNoOfCommits(),
-  locCount = checkLocCount();
-
-  let interimResponse = await Promise.all([repoInfo, commitNumber, locCount]);
-
-
-  resultStore = {
-    repoInfo : processRepoInfo(interimResponse[0]),
-    commitCount : await processCommits(interimResponse[1]),
-    locCount : await processLocCount(interimResponse[2])
-  };
-  return resultStore;
+  try {
+    let repoInfo = checkRepoInfo(),
+    commitNumber = checkNoOfResults("commits"),
+    locCount = checkLocCount(),
+    issueCount = checkNoOfResults("issues"),
+    prCount = checkNoOfResults("pulls"),
+    interimResponse = await Promise.all([
+      repoInfo,     //0
+      commitNumber, //1
+      locCount,     //2
+      prCount,      //3
+      issueCount    //4
+    ]),
+    resultStore = {
+      repoInfo : processRepoInfo(interimResponse[0]),
+      commitCount : await countPaginatedResults(interimResponse[1], "commits"),
+      locCount : await processLocCount(interimResponse[2]),
+      prCount : await countPaginatedResults(interimResponse[3], "pulls"),
+      issueAndPrCount : await countPaginatedResults(interimResponse[4], "issues")
+    };
+    return resultStore;
+  } catch (e) {
+    console.error(e);
+    return e;
+  }
 }
 
 fullRun().then(function(result){
   console.log(result)
 });
+
+// checkIssues().then(function(x){
+//     checkPulls().then(function(y){
+//           console.log("\n --> done");
+//     });
+// });
