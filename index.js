@@ -150,6 +150,29 @@ const processIssuesAndPRAggregates = async function(state) {
   };
 }
 
+const getCommunityStats = async function() {
+  return await octokit.request('GET /repos/{owner}/{repo}/community/profile', {
+    "owner": owner,
+    "repo": repo
+  });
+}
+
+const getContributors = async function() {
+  return await octokit.request('GET /repos/{owner}/{repo}/stats/contributors', {
+    "owner": owner,
+    "repo": repo
+  });
+}
+
+const processContributors = function(response) {
+  return response.data.map(function(contributor) {
+    return {
+      commits: contributor.total,
+      github_id : contributor.author.login
+    }
+  });
+}
+
 async function fullRun() {
   try {
     let repoInfo = checkRepoInfo(),
@@ -157,12 +180,16 @@ async function fullRun() {
     locCount = checkLocCount(),
     allPrsAndIssues = processIssuesAndPRAggregates("all"),
     closedPrsAndIssues =  processIssuesAndPRAggregates("closed"),
+    community = getCommunityStats(),
+    contributors = getContributors(),
     interimResponse = await Promise.all([
       repoInfo,     //0
       commitNumber, //1
       locCount,     //2
       allPrsAndIssues,  //3
-      closedPrsAndIssues //4
+      closedPrsAndIssues, //4
+      community,    //5
+      contributors  //6
     ]),
     resultStore = {
       repoInfo : processRepoInfo(interimResponse[0]),
@@ -178,6 +205,8 @@ async function fullRun() {
         closed: interimResponse[4].issues,
         open: interimResponse[3].issues - interimResponse[4].issues
       },
+      community : interimResponse[5],
+      contributors: processContributors(interimResponse[6]),
       dateSnapshotTaken : new Date().toISOString()
     };
     return resultStore;
