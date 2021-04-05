@@ -131,26 +131,43 @@ const processRepoInfo = function(repoInfo) {
   }
 }
 
+const processIssuesAndPRAggregates = async function() {
+
+  //first page results for each of the counts
+  let intIssueCount = checkNoOfResults("issues"),
+  intprCount = checkNoOfResults("pulls"),
+  interimResponse = await Promise.all([intIssueCount, intprCount]);
+
+  //this request set depends on the previous two
+  let issueCount = countPaginatedResults(interimResponse[0], "issues"),
+  prCount = countPaginatedResults(interimResponse[1], "pulls"),
+  results = await Promise.all([prCount, issueCount]);
+  // github returns pulls and issuess when you ask for issues so we have to calculate
+  // real issues by subtracting the prs!
+  return {
+    prs : results[0],
+    issues : results[1] - results[0]
+  };
+}
+
 async function fullRun() {
   try {
     let repoInfo = checkRepoInfo(),
     commitNumber = checkNoOfResults("commits"),
     locCount = checkLocCount(),
-    issueCount = checkNoOfResults("issues"),
-    prCount = checkNoOfResults("pulls"),
+    prsAndIssues = processIssuesAndPRAggregates(),
     interimResponse = await Promise.all([
       repoInfo,     //0
       commitNumber, //1
       locCount,     //2
-      prCount,      //3
-      issueCount    //4
+      prsAndIssues  //3
     ]),
     resultStore = {
       repoInfo : processRepoInfo(interimResponse[0]),
       commitCount : await countPaginatedResults(interimResponse[1], "commits"),
       locCount : await processLocCount(interimResponse[2]),
-      prCount : await countPaginatedResults(interimResponse[3], "pulls"),
-      issueAndPrCount : await countPaginatedResults(interimResponse[4], "issues")
+      prs : interimResponse[3].prs,
+      issues : interimResponse[3].issues
     };
     return resultStore;
   } catch (e) {
