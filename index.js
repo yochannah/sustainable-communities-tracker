@@ -30,7 +30,7 @@ const checkCoC = async function(resultStore) {
 //   # * see how many items are on it
 //   # * multiply the number of pages - 1 by the page size
 //   # * and add the two together. Boom. Commit count in 2 api calls
-checkNoOfCommits = async function(resultStore) {
+const checkNoOfCommits = async function(resultStore) {
   var maxPerPage = 100;
   try {
     const result = await octokit.request('GET /repos/{owner}/{repo}/commits', {
@@ -65,18 +65,73 @@ checkNoOfCommits = async function(resultStore) {
   }
 }
 
-checkNoOfCommits(resultStore).then(function(){
+// We're using bytes per language as a proxy for the amount of content
+// or  "lines of code".
+// use with caution, this is not comparable from project to project,
+// but can be used as an internal measure of change or stability.
+const checkLocCount = async function(resultStore){
+  const langs = await octokit.request('GET /repos/{owner}/{repo}/languages', {
+    "owner": owner,
+    "repo": repo
+  });
+
+  //adds the totals of bytes per language for one easy to parse metric
+  function summariseLangs(langs) {
+    var oneCountToRuleThemAll = 0;
+    Object.keys(langs.data).map(function(lang){
+      oneCountToRuleThemAll = oneCountToRuleThemAll + langs.data[lang];
+    });
+    return oneCountToRuleThemAll;
+  }
+
+  resultStore.bytesOfContent = {
+    breakdown : langs.data,
+    totalBytes : summariseLangs(langs)
+  }
+}
+
+const checkOrgInfo = async function(resultStore) {
+  const repoInfo = await octokit.request('GET /repos/{owner}/{repo}', {
+    "owner": owner,
+    "repo": repo,
+    "mediaType": {'previews': ['scarlet-witch']}
+  });
+  const data = repoInfo.data;
+  resultStore.repoInfo= {
+    code_of_conduct : data.code_of_conduct,
+    license : data.license,
+    created_at : data.created_at,
+    updated_at : data.updated_at,
+    stargazers_count: data.stargazers_count,
+    watchers_count: data.watchers_count,
+    forks_count: data.forks_count,
+    archived: data.archived,
+    disabled: data.disabled,
+    issues : {
+      currently_open : data.open_issues_count
+    }
+  }
+}
+
+
+checkOrgInfo(resultStore).then(function(){
   console.log("=*=*=*=*=*=*=*==================",resultStore);
 });
 
 function fullRun() {
   // this probably doesn't work right now
+  // we want some async all promises thing going on
+  // and more error handling pls
 
   checkNoOfCommits(resultStore).then(function(){
     console.log("=*=*=*=*=*=*=*==================",resultStore);
   });
 
   checkCoC(resultStore).then(function(){
+    console.log("=*=*=*=*=*=*=*==================",resultStore);
+  });
+
+  checkLocCount(resultStore).then(function(){
     console.log("=*=*=*=*=*=*=*==================",resultStore);
   });
 
