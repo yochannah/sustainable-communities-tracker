@@ -21,10 +21,6 @@ const checkCoC = async function(resultStore) {
    resultStore.code_of_conduct = result.data;
 }
 
-// checkCoC(resultStore).then(function(){
-//   console.log("=*=*=*=*=*=*=*==================",resultStore);
-// });
-
 // Method taken from https://stackoverflow.com/questions/27931139/how-to-use-github-v3-api-to-get-commit-count-for-a-repo
 // which is licensed CC-BY-SA - thanks Snowe!
 //
@@ -48,8 +44,6 @@ checkNoOfCommits = async function(resultStore) {
     var lastPage = 1, //We'll always have at least one page of results
     lastPageCount = 0; // this is only used if we get higher than one page
 
-    console.log(">>>>>>>>",links)
-
     //if there's more than one page, we'll need to count how many
     // results are on the last page as it may be less than the maxPerPage
     if (numOnFirstPage === maxPerPage) {
@@ -61,11 +55,9 @@ checkNoOfCommits = async function(resultStore) {
         "page" : 9
       });
       lastPageCount = lastPageResult.data.length
-      console.log("%%%%%Last page count",lastPageCount);
     }
 
     const fullPages = (lastPage - 1) * maxPerPage;
-
 
     resultStore.noOfCommits = fullPages + lastPageCount;
   } catch (e) {
@@ -76,3 +68,16 @@ checkNoOfCommits = async function(resultStore) {
 checkNoOfCommits(resultStore).then(function(){
   console.log("=*=*=*=*=*=*=*==================",resultStore);
 });
+
+function fullRun() {
+  // this probably doesn't work right now
+
+  checkNoOfCommits(resultStore).then(function(){
+    console.log("=*=*=*=*=*=*=*==================",resultStore);
+  });
+
+  checkCoC(resultStore).then(function(){
+    console.log("=*=*=*=*=*=*=*==================",resultStore);
+  });
+
+}
