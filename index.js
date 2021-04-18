@@ -7,7 +7,9 @@ var repo = 'open-life-science.github.io',
     owner = 'open-life-science',
     octokit;
 
-const maxPerPage = 100;
+const maxPerPage = 100,
+ghDefaultLabels = ["bug","documentation", "duplicate", "enhancement", "good first issue", "help wanted", "invalid", "question","wontfix"],
+mentorshipLabels = ["good first issue", "first-timers-only", "hacktoberfest","outreachy", "gsoc", "help wanted", "help needed"];
 
 const init = function() {
   const MyOctokit = Octokit.defaults({
@@ -36,7 +38,7 @@ const checkCoC = async function() {
 //   # * see how many items are on it
 //   # * multiply the number of pages - 1 by the page size
 //   # * and add the two together. Boom. Commit count in 2 api calls
-const checkNoOfResults = async function(endpoint, state) {
+const checkNoOfResults = async function(endpoint, state, label) {
   try {
     const url = 'GET /repos/{owner}/{repo}/' + endpoint,
 
@@ -44,7 +46,8 @@ const checkNoOfResults = async function(endpoint, state) {
       "owner": owner,
       "repo": repo,
       "per_page" : maxPerPage,
-      "state" : state
+      "state" : state,
+      "labels": label
     });
 
     return result;
@@ -54,11 +57,11 @@ const checkNoOfResults = async function(endpoint, state) {
   }
 }
 
-const countPaginatedResults = async function (result, endpoint, state) {
+const countPaginatedResults = async function (result, endpoint, state, label) {
     const numOnFirstPage =  result.data.length,
     links = parse(result.headers.link);
     var lastPage = 1,  // We'll always have at least one page of results
-    lastPageCount = 0; // this is only used if we get higher than one page
+    lastPageCount = numOnFirstPage;
 
     //if there's more than one page, we'll need to count how many
     // results are on the last page as it may be less than the maxPerPage
@@ -69,7 +72,8 @@ const countPaginatedResults = async function (result, endpoint, state) {
         "repo": repo,
         "per_page" : maxPerPage,
         "page" : lastPage,
-        "state" : state
+        "state" : state,
+        "labels" : label
       });
       lastPageCount = lastPageResult.data.length
     }
@@ -131,30 +135,38 @@ const processRepoInfo = function(repoInfo) {
   }
 }
 
-const processIssuesAndPRAggregates = async function(state) {
-
+const processIssuesAndPRAggregates = async function(state, label) {
   //first page results for each of the counts
-  let intIssueCount = checkNoOfResults("issues", state),
+  let intIssueCount = checkNoOfResults("issues", state, label),
   intprCount = checkNoOfResults("pulls", state),
   interimResponse = await Promise.all([intIssueCount, intprCount]);
 
   //this request set depends on the previous two
-  let issueCount = countPaginatedResults(interimResponse[0], "issues", state),
+  let issueCount = countPaginatedResults(interimResponse[0], "issues", state, label),
   prCount = countPaginatedResults(interimResponse[1], "pulls", state),
   results = await Promise.all([prCount, issueCount]);
   // github returns pulls and issuess when you ask for issues so we have to calculate
   // real issues by subtracting the prs!
-  return {
-    prs : results[0],
-    issues : results[1] - results[0]
-  };
+
+  //the PR endpoint doesn't filter by label.
+  var returnObj;
+  if (label) {
+    returnObj = results[1];
+  } else {
+    returnObj = {
+      prs : results[0],
+      issues : results[1] - results[0]
+    };
+  }
+  return returnObj;
 }
 
 const getCommunityStats = async function() {
-  return await octokit.request('GET /repos/{owner}/{repo}/community/profile', {
+  const community = await octokit.request('GET /repos/{owner}/{repo}/community/profile', {
     "owner": owner,
     "repo": repo
   });
+  return community.data;
 }
 
 const getContributors = async function() {
@@ -173,6 +185,44 @@ const processContributors = function(response) {
   });
 }
 
+
+const checkLabels = async function() {
+  return await octokit.request('GET /repos/{owner}/{repo}/labels', {
+    "owner": owner,
+    "repo": repo
+  });
+}
+
+const processLabels = async function(response) {
+  const labelList = response.data.map(function(label) {
+    return label.name;
+  });
+
+  //from label list, we want to count only open mentorship labels
+  const mentorshipLabelList = labelList.filter(label =>
+    mentorshipLabels.indexOf(label) >= 0),
+  labelsToCheck = [],
+  labelsToStore = labelList.filter(label =>
+     ghDefaultLabels.indexOf(label) >= 0);
+
+  mentorshipLabelList.forEach(function(label) {
+    labelsToCheck.push(processIssuesAndPRAggregates("open", label));
+  });
+
+  response = await Promise.all(labelsToCheck);
+
+  theGoodStuff = {}
+
+  response.map(function(count, i) {
+    theGoodStuff[mentorshipLabelList[i]] = count;
+  });
+
+  return {
+    open_mentorship_labels : theGoodStuff,
+    all_labels : labelsToStore
+  };
+}
+
 async function fullRun() {
   try {
     let repoInfo = checkRepoInfo(),
@@ -182,6 +232,7 @@ async function fullRun() {
     closedPrsAndIssues =  processIssuesAndPRAggregates("closed"),
     community = getCommunityStats(),
     contributors = getContributors(),
+    labels = checkLabels(),
     interimResponse = await Promise.all([
       repoInfo,     //0
       commitNumber, //1
@@ -189,7 +240,8 @@ async function fullRun() {
       allPrsAndIssues,  //3
       closedPrsAndIssues, //4
       community,    //5
-      contributors  //6
+      contributors,  //6
+      labels         //7
     ]),
     resultStore = {
       repoInfo : processRepoInfo(interimResponse[0]),
@@ -207,6 +259,7 @@ async function fullRun() {
       },
       community : interimResponse[5],
       contributors: processContributors(interimResponse[6]),
+      labels : await processLabels(interimResponse[7]),
       dateSnapshotTaken : new Date().toISOString()
     };
     return resultStore;
@@ -217,7 +270,7 @@ async function fullRun() {
 }
 
 fullRun().then(function(result){
-  console.log(result)
+  console.log(JSON.stringify(result));
 });
 
 // checkIssues().then(function(x){
