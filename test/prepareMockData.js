@@ -1,5 +1,6 @@
 //this transform uses the interimResponse data from app.js
 // there is currently no pipeline to serialise to mockData.json.
+// you\ll just have to print it to console or similar. 
 
 //https://melvingeorge.me/blog/get-all-the-contents-from-file-as-string-nodejs
 // Thanks, MelvinGeorge for helping me remember how to read files
@@ -27,7 +28,7 @@ for (author in authors) {
   authors[author].author = {"login" : randAuthor()};
 }
 
-// delete most of the http headers as we don't use them. 
+// delete most of the http headers as we don't use them.
 for (m in mock) {
   delete mock[m].headers;
 }
