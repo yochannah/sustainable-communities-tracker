@@ -3,9 +3,7 @@ const parse = require('parse-link-header');
 
 
 
-var repo = 'open-life-science.github.io',
-    owner = 'open-life-science',
-    octokit;
+var octokit, repo, owner;
 
 const maxPerPage = 100,
 ghDefaultLabels = ["bug","documentation", "duplicate", "enhancement", "good first issue", "help wanted", "invalid", "question","wontfix"],
@@ -223,7 +221,9 @@ const processLabels = async function(response) {
   };
 }
 
-async function fullRun() {
+async function fullRun(repository, org) {
+  repo = repository;
+  owner = org;
   try {
     let repoInfo = checkRepoInfo(),
     commitNumber = checkNoOfResults("commits"),
@@ -269,12 +269,6 @@ async function fullRun() {
   }
 }
 
-fullRun().then(function(result){
+fullRun('open-life-science.github.io', 'open-life-science').then(function(result){
   console.log(JSON.stringify(result));
 });
-
-// checkIssues().then(function(x){
-//     checkPulls().then(function(y){
-//           console.log("\n --> done");
-//     });
-// });
