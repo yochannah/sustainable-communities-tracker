@@ -14,8 +14,8 @@ const init = function() {
     "auth": process.env.github_sustain_sw_token,
     "mediaType": {'previews': ['scarlet-witch']}
   });
-  octokit = new MyOctokit();
-}();
+  return octokit = new MyOctokit();
+};
 
 
 // with thanks to orelsanpls for helping me remember how to do async es6 functions
@@ -221,9 +221,10 @@ const processLabels = async function(response) {
   };
 }
 
-async function fullRun(repository, org) {
+async function fullRun(repository, org, anOctokit) {
   repo = repository;
   owner = org;
+  octokit = anOctokit || init();
   try {
     let repoInfo = checkRepoInfo(),
     commitNumber = checkNoOfResults("commits"),
@@ -262,6 +263,10 @@ async function fullRun(repository, org) {
       labels : await processLabels(interimResponse[7]),
       dateSnapshotTaken : new Date().toISOString()
     };
+
+    console.log(JSON.stringify(interimResponse));
+
+
     return resultStore;
   } catch (e) {
     console.error(e);

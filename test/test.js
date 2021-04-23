@@ -1,4 +1,5 @@
-var ghGetter = require("../src/app.js");
+var ghGetter = require("../src/app.js"),
+mocktokit = require("./mocktokit");
 
 var assert = require('assert');
 describe('Array', function() {
@@ -9,6 +10,8 @@ describe('Array', function() {
   });
 });
 
-ghGetter.fullRun('open-life-science.github.io', 'open-life-science').then(function(result){
+const myMocktokit = mocktokit.init();
+
+ghGetter.fullRun('open-life-science.github.io', 'open-life-science', myMocktokit).then(function(result){
   console.log(JSON.stringify(result));
 });
