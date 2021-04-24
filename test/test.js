@@ -2,16 +2,19 @@ var ghGetter = require("../src/app.js"),
 mocktokit = require("./mocktokit");
 
 var assert = require('assert');
-describe('Array', function() {
-  describe('#indexOf()', function() {
-    it('should return -1 when the value is not present', function() {
-      assert.equal([1, 2, 3].indexOf(4), -1);
-    });
-  });
-});
 
+//setup environment to get the expected results.
+
+//don't use octokit because that would query live github. this is a fake stub
 const myMocktokit = mocktokit.init();
 
-ghGetter.fullRun('open-life-science.github.io', 'open-life-science', myMocktokit).then(function(result){
-  console.log(JSON.stringify(result));
+//generate data based on our fake results
+ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result){
+
+  describe('Paginated commit counter: ', function() {
+      it('should return correctly for paged results', function() {
+        assert.equal(result.commitCount,858);
+      });
+  });
+
 });

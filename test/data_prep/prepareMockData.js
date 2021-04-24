@@ -6,6 +6,7 @@
 // Thanks, MelvinGeorge for helping me remember how to read files
 const fs = require("fs"),
 fileName = "mockData.json",
+saveFileName = ("../processed" + fileName),
 buffer = fs.readFileSync(fileName),
 mock = JSON.parse(buffer.toString());
 
@@ -16,12 +17,17 @@ function randAuthor(){
   return "author" + Math.floor(Math.random() * 5);
 }
 
-//make a sparse array for commit counts - no need to have real commit ids or usernames
-sparseCommits = [];
-for (var i=1; i <=100; i++) {
-  sparseCommits.push({});
+function makeSparseArray(howManyThings) {
+  let sparseCommits = [];
+  for (var i=1; i <=howManyThings; i++) {
+    sparseCommits.push({});
+  }
+  return sparseCommits;
 }
-mock[1].data = sparseCommits;
+
+//make a sparse array for commit counts - no need to have real commit ids or usernames
+
+mock[1].data = makeSparseArray(100);
 
 // anonymise authors from sample real data and remove un-needed fields
 var authors = mock[6].data;
@@ -40,6 +46,14 @@ for (user in moreUsers) {
   moreUsers[user].user = {"login" : randAuthor()};
 }
 
+//  we also need to make paginated data for some of these  results
+const paginatedData = {
+  issues :{},
+  commits :{ data : makeSparseArray(58)},
+  pulls : {}
+}
+mock.push(paginatedData) //this is mock[10]
+
 // delete most of the http headers as we don't use them.
 for (m in mock) {
   if (mock[m].headers) {
@@ -54,10 +68,10 @@ for (m in mock) {
 }
 
 
-fs.writeFile("../processed" + fileName, JSON.stringify(mock), (err) => {
+fs.writeFile(saveFileName, JSON.stringify(mock), (err) => {
     if (err) {
       console.error(err);
         throw err;
     }
-    console.log("Data saved to " + fileName);
+    console.log("Data saved to " + saveFileName );
 });

@@ -9,8 +9,8 @@ var octokit, repo, owner;
 //// e.g. perhaps if the github api changes.
 
 const maxPerPage = 100,
-generateTestData = false,
-testDataFileName = "mockData.json",
+generateTestData = true,
+testDataFileName = "test/data_prep/mockData.json",
 ghDefaultLabels = ["bug","documentation", "duplicate", "enhancement", "good first issue", "help wanted", "invalid", "question","wontfix"],
 mentorshipLabels = ["good first issue", "first-timers-only", "hacktoberfest","outreachy", "gsoc", "help wanted", "help needed"];
 

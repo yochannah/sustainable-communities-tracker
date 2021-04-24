@@ -13,7 +13,12 @@ var responses = {
   "/stats/contributors" : mockData[6],
   "/labels" :  mockData[7],
   "/issues" :  mockData[8],
-  "/pulls" :  mockData[9]
+  "/pulls" :  mockData[9],
+  "paginated" :  {
+    "/commits" : mockData[10].commits,
+    "/issues" :  mockData[10].issues,
+    "/pulls" :  mockData[9].pulls
+  }
   // repoInfo,     //0
   // commitNumber, //1
   // locCount,     //2
@@ -31,7 +36,15 @@ const request = function(url, params) {
     + JSON.stringify(params));
   //strip out the repeated bit of the URL
   let urlSnippet = url.split("GET /repos/{owner}/{repo}")[1];
-  return responses[urlSnippet];
+
+  //some edge cases where we need alternate results. There's probably a tidier
+  // way to do this.
+  let response = responses[urlSnippet];
+  if(params.page) {
+    response = responses.paginated[urlSnippet]
+  }
+
+  return response;
 }
 
 
