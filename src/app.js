@@ -1,13 +1,20 @@
 const { Octokit } = require("@octokit/core");
 const parse = require('parse-link-header');
-
-
+const fs = require('fs');
 
 var octokit, repo, owner;
 
+//// These settings can be edited if you wish, especially generateTestData
+//// which is useful when you want to generate files to run tests on anew
+//// e.g. perhaps if the github api changes.
+
 const maxPerPage = 100,
+generateTestData = false,
+testDataFileName = "mockData.json",
 ghDefaultLabels = ["bug","documentation", "duplicate", "enhancement", "good first issue", "help wanted", "invalid", "question","wontfix"],
 mentorshipLabels = ["good first issue", "first-timers-only", "hacktoberfest","outreachy", "gsoc", "help wanted", "help needed"];
+
+////// Don't edit from here on, thanks!
 
 const init = function() {
   const MyOctokit = Octokit.defaults({
@@ -37,9 +44,9 @@ const checkCoC = async function() {
 //   # * multiply the number of pages - 1 by the page size
 //   # * and add the two together. Boom. Commit count in 2 api calls
 const checkNoOfResults = async function(endpoint, state, label) {
+
   try {
     const url = 'GET /repos/{owner}/{repo}/' + endpoint,
-
     result = await octokit.request(url, {
       "owner": owner,
       "repo": repo,
@@ -47,6 +54,20 @@ const checkNoOfResults = async function(endpoint, state, label) {
       "state" : state,
       "labels": label
     });
+
+    if (generateTestData)  {
+      //this serialises a real-world response which we can process to create
+      //test data. Usually we won't need this as test data shouldn't  change
+      // unless  we add more methods or the API changes and we need to match
+      // the changed github api
+      if(endpoint ==  "issues")  {
+        testIssues = result;
+      }
+      if(endpoint ==  "pulls")  {
+        testPulls = result;
+      }
+  }
+
 
     return result;
   } catch (e) {
@@ -264,7 +285,17 @@ async function fullRun(repository, org, anOctokit) {
       dateSnapshotTaken : new Date().toISOString()
     };
 
-    console.log(JSON.stringify(interimResponse));
+    if(generateTestData) {
+      var testData = interimResponse;
+      testData.push(testIssues);
+      testData.push(testPulls);
+      testData = JSON.stringify(testData);
+
+      fs.writeFile(testDataFileName, testData, function (err) {
+        if (err) return console.log(err);
+        console.log('saved test data to ' + testDataFileName);
+      });
+    }
 
 
     return resultStore;
