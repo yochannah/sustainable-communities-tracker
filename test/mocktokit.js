@@ -18,6 +18,27 @@ var responses = {
     "/commits" : mockData[10].commits,
     "/issues" :  mockData[10].issues,
     "/pulls" :  mockData[9].pulls
+  },
+  "state" : {
+      "closed" : {
+        "/pulls" : mockData[9],
+        "/issues" :mockData[8]
+      },
+      "all" : {
+        "/pulls" :  mockData[10].pulls,
+        "/issues" : mockData[10].issues
+      },
+      "open" : {
+        "" : mockData[0],
+        "/commits" : mockData[1],
+        "/languages":mockData[2],
+        //3 and 4 are aggregate results and are not drawn on as mock test data
+        "/community/profile" : mockData[5],
+        "/stats/contributors" : mockData[6],
+        "/labels" :  mockData[7],
+        "/issues" :  mockData[8],
+        "/pulls" :  mockData[9]
+      }
   }
   // repoInfo,     //0
   // commitNumber, //1
@@ -41,9 +62,13 @@ const request = function(url, params) {
   // way to do this.
   let response = responses[urlSnippet];
   if(params.page) {
-    response = responses.paginated[urlSnippet]
+    response = responses.paginated[urlSnippet];
   }
-
+  if(params.state && params.state !== "open") {
+   console.log("~~~~~~~~~~~~>>>>> responses.state[",params.state, "]", urlSnippet);
+    response = responses.state[params.state][urlSnippet];
+  }
+//  console.log(response);
   return response;
 }
 

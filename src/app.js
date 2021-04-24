@@ -77,10 +77,15 @@ const checkNoOfResults = async function(endpoint, state, label) {
 }
 
 const countPaginatedResults = async function (result, endpoint, state, label) {
+
+    // console.log(">>>>>> we're counting results.")
+    // console.log(result.data.length);
+
     const numOnFirstPage =  result.data.length,
     links = parse(result.headers.link);
     var lastPage = 1,  // We'll always have at least one page of results
     lastPageCount = numOnFirstPage;
+
 
     //if there's more than one page, we'll need to count how many
     // results are on the last page as it may be less than the maxPerPage
@@ -148,7 +153,7 @@ const processRepoInfo = function(repoInfo) {
     forks_count: data.forks_count,
     archived: data.archived,
     disabled: data.disabled,
-    issues : {
+    issues_and_prs : {
       currently_open : data.open_issues_count
     }
   }

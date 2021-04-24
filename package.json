@@ -4,7 +4,8 @@
   "description": "sustainable open source and open science project study ",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "run" : "node index.js"
   },
   "repository": {
     "type": "git",

@@ -1,0 +1,157 @@
+{
+  "repoInfo": {
+    "code_of_conduct": {
+      "key": "other",
+      "name": "Other",
+      "html_url": "https://github.com/open-life-science/open-life-science.github.io/blob/main/code-of-conduct.md",
+      "url": "https://api.github.com/repos/open-life-science/open-life-science.github.io/community/code_of_conduct"
+    },
+    "license": {
+      "key": "cc-by-sa-4.0",
+      "name": "Creative Commons Attribution Share Alike 4.0 International",
+      "spdx_id": "CC-BY-SA-4.0",
+      "url": "https://api.github.com/licenses/cc-by-sa-4.0",
+      "node_id": "MDc6TGljZW5zZTI2"
+    },
+    "created_at": "2019-09-11T09:45:50Z",
+    "updated_at": "2021-04-16T16:20:16Z",
+    "stargazers_count": 28,
+    "watchers_count": 28,
+    "forks_count": 34,
+    "archived": false,
+    "disabled": false,
+    "issues_and_prs": {
+      "currently_open": 29
+    }
+  },
+  "commitCount": 858,
+  "locCount": {
+    "breakdown": {
+      "Sass": 120340,
+      "HTML": 19938,
+      "Python": 16969,
+      "SCSS": 4741,
+      "JavaScript": 1786,
+      "Makefile": 1401,
+      "Ruby": 298
+    },
+    "totalBytes": 165473
+  },
+  "prs": {
+    "all": 196,
+    "closed": 195,
+    "open": 1
+  },
+  "issues": {
+    "all": 87,
+    "closed": 59,
+    "open": 28
+  },
+  "community": {
+    "health_percentage": 85,
+    "description": "A mentoring program for Open Life Science",
+    "documentation": "https://openlifesci.org/",
+    "files": {
+      "code_of_conduct": {
+        "key": "other",
+        "name": "Other",
+        "html_url": "https://github.com/open-life-science/open-life-science.github.io/blob/main/code-of-conduct.md",
+        "url": "https://api.github.com/repos/open-life-science/open-life-science.github.io/community/code_of_conduct"
+      },
+      "contributing": {
+        "url": "https://api.github.com/repos/open-life-science/open-life-science.github.io/contents/CONTRIBUTING.md",
+        "html_url": "https://github.com/open-life-science/open-life-science.github.io/blob/main/CONTRIBUTING.md"
+      },
+      "issue_template": null,
+      "pull_request_template": null,
+      "license": {
+        "key": "cc-by-sa-4.0",
+        "name": "Creative Commons Attribution Share Alike 4.0 International",
+        "spdx_id": "CC-BY-SA-4.0",
+        "url": "https://api.github.com/licenses/cc-by-sa-4.0",
+        "node_id": "MDc6TGljZW5zZTI2",
+        "html_url": "https://github.com/open-life-science/open-life-science.github.io/blob/main/LICENSE.md"
+      },
+      "readme": {
+        "url": "https://api.github.com/repos/open-life-science/open-life-science.github.io/contents/README.md",
+        "html_url": "https://github.com/open-life-science/open-life-science.github.io/blob/main/README.md"
+      }
+    },
+    "updated_at": "2020-09-28T22:10:22Z",
+    "content_reports_enabled": false
+  },
+  "contributors": [{
+    "commits": 4,
+    "github_id": "htmluke"
+  }, {
+    "commits": 2,
+    "github_id": "da5nsy"
+  }, {
+    "commits": 1,
+    "github_id": "aidanbudd"
+  }, {
+    "commits": 1,
+    "github_id": "ajstewartlang"
+  }, {
+    "commits": 1,
+    "github_id": "willdurand"
+  }, {
+    "commits": 1,
+    "github_id": "lauracion"
+  }, {
+    "commits": 1,
+    "github_id": "agbeltran"
+  }, {
+    "commits": 209,
+    "github_id": "bebatut"
+  }, {
+    "commits": 1,
+    "github_id": "vcheplygina"
+  }, {
+    "commits": 311,
+    "github_id": "malvikasharan"
+  }, {
+    "commits": 2,
+    "github_id": "jezcope"
+  }, {
+    "commits": 1,
+    "github_id": "thessaly"
+  }, {
+    "commits": 1,
+    "github_id": "lwinfree"
+  }, {
+    "commits": 1,
+    "github_id": "NPalopoli"
+  }, {
+    "commits": 3,
+    "github_id": "SamGuay"
+  }, {
+    "commits": 1,
+    "github_id": "DDuplinszki"
+  }, {
+    "commits": 70,
+    "github_id": "yochannah"
+  }, {
+    "commits": 1,
+    "github_id": "malloryfreeberg"
+  }, {
+    "commits": 8,
+    "github_id": "emmyft"
+  }, {
+    "commits": 1,
+    "github_id": "peranti"
+  }, {
+    "commits": 1,
+    "github_id": "katrinleinweber"
+  }],
+  "labels": {
+    "open_mentorship_labels": {
+      "good first issue": 0,
+      "hacktoberfest": 3,
+      "help wanted": 0
+    },
+    "all_labels": ["bug", "documentation", "duplicate", "enhancement", "good first issue", "help wanted", "invalid", "question", "wontfix"]
+  },
+  "dateSnapshotTaken": "2021-04-24T15:33:12.602Z"
+}
+saved test data to test / data_prep / mockData.json

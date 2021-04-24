@@ -9,12 +9,42 @@ var assert = require('assert');
 const myMocktokit = mocktokit.init();
 
 //generate data based on our fake results
-ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result){
+ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result){//
+//  console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%",result);
 
-  describe('Paginated commit counter: ', function() {
-      it('should return correctly for paged results', function() {
+  describe('Paginated results: ', function() {
+      it('should return commits correctly', function() {
         assert.equal(result.commitCount,858);
       });
+      it('should return issues+PRs correctly', function() {
+        assert.equal(result.repoInfo.issues_and_prs.currently_open,29);
+        //tbd, define data for this
+      });
+      it('should separate PRs from issues as expected', function() {
+       console.log("prs",result.prs)
+       console.log("issues",result.issues);
+        assert.equal(result.prs.open,1);
+        assert.equal(result.prs.closed,196);
+        assert.equal(result.prs.open,
+          result.prs.closed + result.prs.open);
+        // assert.equal(result.issues.open,28);
+        // assert.equal(result.issues.closed,59);
+        // assert.equal(result.issues.all,
+        //   result.issues.closed + result.issues.open);
+
+      });
   });
+
+
+
+  // assert.equal(result.prs.open,1);
+  // assert.equal(result.prs.closed,196);
+  // assert.equal(result.prs.open,
+  //   result.prs.closed + result.prs.open);
+  // assert.equal(result.issues.open,28);
+  // assert.equal(result.issues.closed,59);
+  // assert.equal(result.issues.all,
+  //   result.issues.closed + result.issues.open);
+
 
 });
