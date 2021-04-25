@@ -10,12 +10,10 @@ const myMocktokit = mocktokit.init();
 
 //generate data based on our fake results
 ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result){//
-  console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%",result);
 
   describe('Paginated results: ', function() {
-    console.log("DDDD",results);
     it('should return commits correctly', function() {
-      assert.equal(result.commitCount,858);
+      assert.equal(result.commitCount,334);
     });
       it('should return commits correctly', function() {
         assert.equal(result.commitCount,858);
@@ -50,4 +48,7 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result){//
   //   result.issues.closed + result.issues.open);
 
 
+}).catch(function(whyItMessedUp){
+  console.error("😭 It went wrong y'all");
+  console.error(whyItMessedUp);
 });

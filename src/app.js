@@ -50,17 +50,34 @@ const checkCoC = async function() {
 //   # * see how many items are on it
 //   # * multiply the number of pages - 1 by the page size
 //   # * and add the two together. Boom. Commit count in 2 api calls
+
+var halp =  0;
+
 const checkNoOfResults = async function(endpoint, state, label) {
+
+  console.log("Counting results for ....");
+  console.log("   ......... ", endpoint, state, label);
 
   try {
     const url = 'GET /repos/{owner}/{repo}/' + endpoint,
-      result = await octokit.request(url, {
+      params = {
         "owner": owner,
         "repo": repo,
         "per_page": maxPerPage,
         "state": state,
         "labels": label
-      });
+      },
+      result = await octokit.request(url, params);
+
+      if (!result) {
+        halp++;
+        console.log();
+        console.log("🌹🌹🌹🌹 something's fishy with ", url, params);
+        console.log("🌹",result);
+        console.log("HALP ME", halp);
+      }
+
+
 
     if (generateTestData) {
       //this serialises a real-world response which we can process to create
@@ -86,7 +103,7 @@ const checkNoOfResults = async function(endpoint, state, label) {
 const countPaginatedResults = async function(result, endpoint, state, label) {
 
   try {
-    if (!result.data) {
+    if (!result) {
       console.error("~~~~~~~~~~~~~there's no result! ", result)
     }
     const numOnFirstPage = result.data.length,
@@ -115,6 +132,7 @@ const countPaginatedResults = async function(result, endpoint, state, label) {
     return noOfResults = fullPages + lastPageCount;
   } catch (e) {
     console.error("Gvald! {", endpoint, "}", state, label, "\n", e);
+    console.log(result);
   }
 }
 

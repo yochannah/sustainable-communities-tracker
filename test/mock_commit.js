@@ -1,7 +1,6 @@
 const headers = require("./data_prep/fake_header")
 
 module.exports = {
-
     page: {
       data: new Array(34)
     },
