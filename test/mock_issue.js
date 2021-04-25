@@ -12,6 +12,18 @@ module.exports = {
       data: new Array(10)
     } //10.
   },
+  "open": {
+    data: new Array(100),
+    headers: headers(3)
+  },
+  "closed": {
+    data: new Array(100),
+    headers: headers(55)
+  },
+  "all": {
+    data: new Array(100),
+    headers: headers(88)
+  },
   labels: {
     'hacktoberfest': {
       data: new Array(2)
@@ -22,17 +34,5 @@ module.exports = {
     'help wanted': {
       data: new Array(11)
     } //11.
-  },
-  "open": {
-    data: new Array(100),
-    headers: headers(9)
-  },
-  "closed": {
-    data: new Array(100),
-    headers: headers(8)
-  },
-  "all": {
-    data: new Array(100),
-    headers: headers(7)
   }
 }

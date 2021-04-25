@@ -17,17 +17,8 @@ function randAuthor(){
   return "author" + Math.floor(Math.random() * 5);
 }
 
-function makeSparseArray(howManyThings) {
-  let sparseCommits = [];
-  for (var i=1; i <=howManyThings; i++) {
-    sparseCommits.push({});
-  }
-  return sparseCommits;
-}
-
 //make a sparse array for commit counts - no need to have real commit ids or usernames
-
-mock[1].data = makeSparseArray(100);
+mock[1].data = new Array(100);
 
 // anonymise authors from sample real data and remove un-needed fields
 var authors = mock[6].data;
@@ -46,14 +37,6 @@ for (user in moreUsers) {
   moreUsers[user].user = {"login" : randAuthor()};
 }
 
-//  we also need to make paginated data for some of these  results
-const paginatedData = {
-  issues :{},
-  commits :{ data : makeSparseArray(58)},
-  pulls : {}
-}
-mock.push(paginatedData) //this is mock[10]
-
 // delete most of the http headers as we don't use them.
 for (m in mock) {
   if (mock[m].headers) {
@@ -66,6 +49,8 @@ for (m in mock) {
     delete mock[m].headers;
   }
 }
+
+//delete keys we don't use
 
 
 fs.writeFile(saveFileName, JSON.stringify(mock), (err) => {
