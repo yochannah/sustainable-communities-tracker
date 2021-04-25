@@ -1,22 +1,21 @@
 //I'm so proud of this file name. Let's fake Octokit responses for our tests.
 
 const mockData = require("./processedmockData.json"),
-  mock_issue = require("./mock_issue.js"),
-  mock_pull = require("./mock_pr.js"),
-  mock_commit = require("./mock_commit.js"),
-  mock_labels = require("./mock_labels.js");
+  mock_issue = require("./data_prep/mock_issue.js"),
+  mock_pull = require("./data_prep/mock_pr.js"),
+  mock_commit = require("./data_prep/mock_commit.js"),
+  mock_labels = require("./data_prep/mock_labels.js");
 
 //this response object  maps the serialised object (which is a modified real
 // http response) to our mock octokit.
 
-
 var responses = {
-  "": mockData[0],
+  "": mockData.repoInfo,
   "/commits": mock_commit,
-  "/languages": mockData[2],
+  "/languages": mockData.languages,
   //3 and 4 are aggregate results and are not drawn on as mock test data
-  "/community/profile": mockData[5],
-  "/stats/contributors": mockData[6],
+  "/community/profile": mockData.community,
+  "/stats/contributors": mockData.contributors,
   "/labels": mock_labels,
   "/issues": mock_issue,
   "/pulls": mock_pull,
@@ -35,16 +34,7 @@ var responses = {
     "/pulls": mock_pull,
     "/commit": mock_commit
   }
-  // repoInfo,     //0
-  // commitNumber, //1
-  // locCount,     //2
-  // allPrsAndIssues,  //3
-  // closedPrsAndIssues, //4
-  // community,    //5
-  // contributors,  //6
-  // labels         //7
-  // issues         //8
-  // pulls          //9
+
 }
 
 const request = function(url, params) {
@@ -68,7 +58,6 @@ const request = function(url, params) {
     } else if (params.state) {
       response = responses[urlSnippet][params.state];
     }
-
 
     return response;
   } catch (error) {
