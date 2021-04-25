@@ -51,12 +51,7 @@ const checkCoC = async function() {
 //   # * multiply the number of pages - 1 by the page size
 //   # * and add the two together. Boom. Commit count in 2 api calls
 
-var halp =  0;
-
 const checkNoOfResults = async function(endpoint, state, label) {
-
-  console.log("Counting results for ....");
-  console.log("   ......... ", endpoint, state, label);
 
   try {
     const url = 'GET /repos/{owner}/{repo}/' + endpoint,
@@ -70,14 +65,10 @@ const checkNoOfResults = async function(endpoint, state, label) {
       result = await octokit.request(url, params);
 
       if (!result) {
-        halp++;
-        console.log();
-        console.log("🌹🌹🌹🌹 something's fishy with ", url, params);
-        console.log("🌹",result);
-        console.log("HALP ME", halp);
+        console.error("🤖🤖🤖🤖🤖🤖");
+        console.error("I'm sorry dave, I'm afraid I can't do that");
+        console.error("no result for Url: \n", url, "|--\nparams: " params);
       }
-
-
 
     if (generateTestData) {
       //this serialises a real-world response which we can process to create
@@ -110,8 +101,6 @@ const countPaginatedResults = async function(result, endpoint, state, label) {
       links = parse(result.headers.link);
     var lastPage = 1, // We'll always have at least one page of results
       lastPageCount = numOnFirstPage;
-
-
 
     //if there's more than one page, we'll need to count how many
     // results are on the last page as it may be less than the maxPerPage
