@@ -23,8 +23,8 @@ var responses = {
   "page": {
     "/pulls": mock_pull.page,
     "/issues": mock_issue.page,
-    "/commits":  {
-      data : mock_commit.page.data,
+    "/commits": {
+      data: mock_commit.page.data,
       open: mock_commit.page.data,
       closed: mock_commit.page.data,
       all: mock_commit.page.data
@@ -63,29 +63,11 @@ const request = function(url, params) {
       response = responses.page[urlSnippet][params.state];
       //commits are neither open nor closed
       if (urlSnippet === "/commits") {
-        console.log("JFC");
         response = responses.page[urlSnippet];
       }
     } else if (params.state) {
-  //    console.log("🎖", params.state, "🎖🎖🎖");
-  //    console.log("🎖", params.state, ", ", responses.state[urlSnippet]);
       response = responses[urlSnippet][params.state];
-
-      //  console.log("Blergh?", responses.state[urlSnippet]);
-    } else {
-      //console.log("waaaaaaaaaaaaaaaa");
-      console.log(response);
     }
-
-    if(urlSnippet == "/commits") {
-      console.log("⬇️⬇️⬇️⬇️");
-      console.log(url, params, params.state);
-      console.log("snip", responses.page[urlSnippet]);
-console.log("snipstate", responses.page[urlSnippet][params.state]);
-      console.log("⬆️⬆️⬆️⬆️");
-
-    }
-
 
 
     return response;
