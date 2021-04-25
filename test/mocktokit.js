@@ -24,10 +24,10 @@ var responses = {
     "/pulls": mock_pull.page,
     "/issues": mock_issue.page,
     "/commits":  {
-      data : mock_commit.data,
-      open: mock_commit.data,
-      closed: mock_commit.data,
-      all: mock_commit.data
+      data : mock_commit.page.data,
+      open: mock_commit.page.data,
+      closed: mock_commit.page.data,
+      all: mock_commit.page.data
     }
   },
   "state": {

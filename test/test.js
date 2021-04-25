@@ -15,9 +15,6 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result){//
     it('should return commits correctly', function() {
       assert.equal(result.commitCount,334);
     });
-      it('should return commits correctly', function() {
-        assert.equal(result.commitCount,858);
-      });
       it('should return issues+PRs correctly', function() {
         assert.equal(result.repoInfo.issues.currently_open,29);
       });
