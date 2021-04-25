@@ -1,7 +1,7 @@
 const {
   Octokit
 } = require("@octokit/core");
-const parse = require('parse-link-header');
+const parse_headers = require('parse-link-header');
 const fs = require('fs');
 
 var octokit, repo, owner;
@@ -64,11 +64,11 @@ const checkNoOfResults = async function(endpoint, state, label) {
       },
       result = await octokit.request(url, params);
 
-      if (!result) {
-        console.error("🤖🤖🤖🤖🤖🤖");
-        console.error("I'm sorry dave, I'm afraid I can't do that");
-        console.error("no result for Url: \n", url, "|--\nparams: " params);
-      }
+    if (!result) {
+      console.error("🤖🤖🤖🤖🤖🤖");
+      console.error("I'm sorry dave, I'm afraid I can't do that");
+      console.error("no result for Url: \n", url, "|--\nparams: ", params);
+    }
 
     if (generateTestData) {
       //this serialises a real-world response which we can process to create
@@ -98,7 +98,7 @@ const countPaginatedResults = async function(result, endpoint, state, label) {
       console.error("~~~~~~~~~~~~~there's no result! ", result)
     }
     const numOnFirstPage = result.data.length,
-      links = parse(result.headers.link);
+      links = parse_headers(result.headers.link);
     var lastPage = 1, // We'll always have at least one page of results
       lastPageCount = numOnFirstPage;
 
@@ -268,11 +268,92 @@ const processLabels = async function(response) {
   };
 }
 
+//function authored by Nofi, CC-BY-SA 4.0
+// Thanks Nofi https://stackoverflow.com/a/32180863
+function msToTime(ms) {
+  let seconds = (ms / 1000).toFixed(1);
+  let minutes = (ms / (1000 * 60)).toFixed(1);
+  let hours = (ms / (1000 * 60 * 60)).toFixed(1);
+  let days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
+  if (seconds < 60) return seconds + " Sec";
+  else if (minutes < 60) return minutes + " Min";
+  else if (hours < 24) return hours + " Hrs";
+  else return days + " Days"
+}
+
+
+async function timeToMergePr() {
+  console.log("ladida da da");
+  var prs = await octokit.request('GET /repos/{owner}/{repo}/pulls', {
+    "owner": owner,
+    "repo": repo,
+    "per_page": maxPerPage,
+    "state": "closed"
+  }), lastPage;
+
+  //we probably have  more pages
+  if (prs.data.length === maxPerPage) {
+    let links = parse_headers(prs.headers.link);
+    lastPage = links.last.page;
+  }
+
+  var allPageRequests = [],
+    allPrs = prs.data;
+
+  if (lastPage) {
+    for (var i = 2; i <= lastPage; i++) {
+      let subsequent = await octokit.request('GET /repos/{owner}/{repo}/pulls', {
+        "owner": owner,
+        "repo": repo,
+        "per_page": maxPerPage,
+        "state": "all",
+        "page": i
+      });
+      allPageRequests.push(subsequent);
+    }
+    prInfo = await Promise.all(allPageRequests);
+    //now we only want one array of pr data
+    prInfo.map(function(thePage) {
+      allPrs.concat(thePage.data);
+    });
+  }
+
+  prSubset = allPrs.map(function(pr) {
+    let response = {
+      created_at: pr.created_at,
+      closed: false
+    };
+    //may not be closed or merged...
+    if (pr.closed_at) {
+      response.closed_at = pr.closed_at;
+      response.closed = true;
+    }
+    if (pr.merged_at) {
+      response.merged_at= pr.merged_at;
+      response.closed = true;
+    }
+
+    //calculate closed/merged time if known
+    let createdTime = new Date(response.created_at);
+
+    if (response.closed) {
+      let closedTime = new Date(response.merged_at || response.closed_at);
+      response.timeToClose = closedTime-createdTime;
+      response.humanReadableTimeToClose = msToTime(response.timeToClose);
+    }
+    return response;
+  });
+
+  console.log(prSubset);
+
+
+  return prInfo;
+}
+
 async function fullRun(repository, org, anOctokit) {
   repo = repository;
   owner = org;
   octokit = anOctokit || init();
-
 
   try {
     let repoInfo = checkRepoInfo(),
@@ -283,6 +364,7 @@ async function fullRun(repository, org, anOctokit) {
       community = getCommunityStats(),
       contributors = getContributors(),
       labels = checkLabels(),
+      timeToMerge = timeToMergePr(),
       interimResponse = await Promise.all([
         repoInfo, //0
         commitNumber, //1
@@ -291,27 +373,28 @@ async function fullRun(repository, org, anOctokit) {
         closedPrsAndIssues, //4
         community, //5
         contributors, //6
-        labels //7
-      ]),
-      resultStore = {
-        repoInfo: processRepoInfo(interimResponse[0]),
-        commitCount: await countPaginatedResults(interimResponse[1], "commits"),
-        locCount: await processLocCount(interimResponse[2]),
-        prs: {
-          all: interimResponse[3].prs,
-          closed: interimResponse[4].prs,
-          open: interimResponse[3].prs - interimResponse[4].prs
-        },
-        issues: {
-          all: interimResponse[3].issues,
-          closed: interimResponse[4].issues,
-          open: interimResponse[3].issues - interimResponse[4].issues
-        },
-        community: interimResponse[5],
-        contributors: processContributors(interimResponse[6]),
-        labels: await processLabels(interimResponse[7]),
-        dateSnapshotTaken: new Date().toISOString()
-      };
+        labels, //7
+        timeToMerge //
+      ]);
+    const resultStore = {
+      repoInfo: processRepoInfo(interimResponse[0]),
+      commitCount: await countPaginatedResults(interimResponse[1], "commits"),
+      locCount: await processLocCount(interimResponse[2]),
+      prs: {
+        all: interimResponse[3].prs,
+        closed: interimResponse[4].prs,
+        open: interimResponse[3].prs - interimResponse[4].prs
+      },
+      issues: {
+        all: interimResponse[3].issues,
+        closed: interimResponse[4].issues,
+        open: interimResponse[3].issues - interimResponse[4].issues
+      },
+      community: interimResponse[5],
+      contributors: processContributors(interimResponse[6]),
+      labels: await processLabels(interimResponse[7]),
+      dateSnapshotTaken: new Date().toISOString()
+    };
 
     if (generateTestData) {
       var testData = interimResponse;
@@ -333,4 +416,7 @@ async function fullRun(repository, org, anOctokit) {
   }
 }
 
-exports.fullRun = fullRun;
+module.exports = {
+  fullRun: fullRun,
+  timeToMergePr: timeToMergePr
+};
