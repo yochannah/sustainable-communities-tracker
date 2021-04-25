@@ -282,14 +282,18 @@ function msToTime(ms) {
 }
 
 
-async function timeToMergePr() {
-  console.log("ladida da da");
-  var prs = await octokit.request('GET /repos/{owner}/{repo}/pulls', {
+async function timeToMergePrOrIssue() {
+  //we use "prs" here but it equally could be issues
+  //theyre nearly identical.
+  var params = {
     "owner": owner,
     "repo": repo,
     "per_page": maxPerPage,
-    "state": "closed"
-  }), lastPage;
+    "state": "all"
+  },
+  url = 'GET /repos/{owner}/{repo}/issues',
+  prs = await octokit.request(url, params),
+  lastPage;
 
   //we probably have  more pages
   if (prs.data.length === maxPerPage) {
@@ -302,26 +306,39 @@ async function timeToMergePr() {
 
   if (lastPage) {
     for (var i = 2; i <= lastPage; i++) {
-      let subsequent = await octokit.request('GET /repos/{owner}/{repo}/pulls', {
-        "owner": owner,
-        "repo": repo,
-        "per_page": maxPerPage,
-        "state": "all",
-        "page": i
-      });
+      params.page = i;
+      let subsequent = await octokit.request(url, params);
       allPageRequests.push(subsequent);
     }
-    prInfo = await Promise.all(allPageRequests);
+    let prInfo = await Promise.all(allPageRequests);
+
     //now we only want one array of pr data
     prInfo.map(function(thePage) {
-      allPrs.concat(thePage.data);
+      allPrs = allPrs.concat(thePage.data);
     });
   }
 
-  prSubset = allPrs.map(function(pr) {
+  console.log(allPrs.length);
+
+  function isPr(prOrIssue){
+    if (prOrIssue.pull_request) {return "pr";} else {return "issue";}
+  }
+
+  let resolutionInfo = {
+    pr : [],
+    issue : [],
+    medians : {
+      pr : [],
+      issue : []
+    }
+  }
+  allPrs.map(function(pr) {
+    let isPrOrIssue = isPr(pr);
     let response = {
+      id : pr.id,
       created_at: pr.created_at,
-      closed: false
+      closed: false,
+      pr_or_issue : isPrOrIssue
     };
     //may not be closed or merged...
     if (pr.closed_at) {
@@ -340,14 +357,36 @@ async function timeToMergePr() {
       let closedTime = new Date(response.merged_at || response.closed_at);
       response.timeToClose = closedTime-createdTime;
       response.humanReadableTimeToClose = msToTime(response.timeToClose);
+      //store it up so we can calculate the median
+      resolutionInfo.medians[isPrOrIssue].push(response.timeToClose);
     }
-    return response;
+    resolutionInfo[isPrOrIssue].push(response);
   });
 
-  console.log(prSubset);
 
+  console.log(resolutionInfo.medians);
 
-  return prInfo;
+  function calculateMedian(anArray) {
+    //needs to be sorted if we want to get the middlest  (median) value
+    anArray.sort();
+    let middlestValue = Math.round(anArray.length/2);
+    return anArray[middlestValue];
+  }
+
+  prMedian =calculateMedian(resolutionInfo.medians.pr);
+  issueMedian = calculateMedian(resolutionInfo.medians.issue);
+
+  resolutionInfo.medians.pr = {
+    ms: prMedian,
+    humanReadable : msToTime(prMedian)
+  };
+  resolutionInfo.medians.issue = {
+    ms: issueMedian,
+    humanReadable : msToTime(issueMedian)
+
+  };
+  console.log(resolutionInfo.medians);
+  return resolutionInfo;
 }
 
 async function fullRun(repository, org, anOctokit) {
@@ -364,7 +403,7 @@ async function fullRun(repository, org, anOctokit) {
       community = getCommunityStats(),
       contributors = getContributors(),
       labels = checkLabels(),
-      timeToMerge = timeToMergePr(),
+      timeToMerge = timeToMergePrOrIssue(),
       interimResponse = await Promise.all([
         repoInfo, //0
         commitNumber, //1
@@ -375,8 +414,8 @@ async function fullRun(repository, org, anOctokit) {
         contributors, //6
         labels, //7
         timeToMerge //
-      ]);
-    const resultStore = {
+      ]),
+    resultStore = {
       repoInfo: processRepoInfo(interimResponse[0]),
       commitCount: await countPaginatedResults(interimResponse[1], "commits"),
       locCount: await processLocCount(interimResponse[2]),
@@ -417,6 +456,5 @@ async function fullRun(repository, org, anOctokit) {
 }
 
 module.exports = {
-  fullRun: fullRun,
-  timeToMergePr: timeToMergePr
+  fullRun: fullRun
 };
