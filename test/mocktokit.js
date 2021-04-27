@@ -6,6 +6,10 @@ const mockData = require("./processedmockData.json"),
   mock_commit = require("./data_prep/mock_commit.js"),
   mock_labels = require("./data_prep/mock_labels.js");
 
+// console.log("<<🥕MOCK ISSUE");
+// console.log(mock_issue);
+// console.log("🥕>>");
+
 //this response object  maps the serialised object (which is a modified real
 // http response) to our mock octokit.
 
@@ -39,16 +43,14 @@ var responses = {
 
 const request = function(url, params) {
   try {
-    console.log("-- Testing " + url + "\n |--- with params: " +
+    console.log("=== 🐙 === Testing " + url + "\n |--- with params: " +
       JSON.stringify(params));
     //strip out the repeated bit of the URL
-    let urlSnippet = url.split("GET /repos/{owner}/{repo}")[1];
+    let urlSnippet = url.split("GET /repos/{owner}/{repo}")[1],
+    response = responses[urlSnippet];
 
     //some edge cases where we need alternate results. There's probably a tidier
     // way to do this.
-
-    let response = responses[urlSnippet];
-
     if (params.page) {
       response = responses.page[urlSnippet][params.state];
       //commits are neither open nor closed
@@ -58,17 +60,17 @@ const request = function(url, params) {
     } else if (params.state) {
       response = responses[urlSnippet][params.state];
     }
-
     return response;
+
   } catch (error) {
-    console.error("OY VEY", url, ", snip: ", "\n\n", error);
+    console.error("=== 🐙 === OY VEY", url, ", snip: ", "\n\n", error);
   }
 }
 
 
 
 exports.init = function() {
-  console.log("Mock Octokit activated ====== 🐙");
+  console.log("=== 🐙 === Mock Octokit activated: we're using fake data and not the GitHub API");
   return {
     request: request
   };

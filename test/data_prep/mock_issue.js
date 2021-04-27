@@ -1,38 +1,39 @@
-const headers = require("./fake_header")
+const headers = require("./fake_header"),
+ fakeIssues = require("./generate_fake_pr_or_issue");
 
 module.exports = {
   page: {
     "open": {
-      data: new Array(3)
+      data: fakeIssues(3, "issue", "open")
     }, //3
     "closed": {
-      data: new Array(7)
+      data: fakeIssues(7, "issue", "closed")
     }, //7
     "all": {
-      data: new Array(10)
+      data: fakeIssues(10, "issue", "all")
     } //10.
   },
   "open": {
-    data: new Array(100),
+    data: fakeIssues(100, "issue", "open"),
     headers: headers(3)
   },
   "closed": {
-    data: new Array(100),
+    data: fakeIssues(100, "issue", "closed"),
     headers: headers(55)
   },
   "all": {
-    data: new Array(100),
+    data: fakeIssues(100, "issue", "all"),
     headers: headers(88)
   },
   labels: {
     'hacktoberfest': {
-      data: new Array(2)
+      data: fakeIssues(2, "issue", "open")
     }, //2
     'good first bug': {
-      data: new Array(9)
+      data: fakeIssues(9, "issue", "open")
     }, //9
     'help wanted': {
-      data: new Array(11)
+      data: fakeIssues(11, "issue", "open")
     } //11.
   }
 }

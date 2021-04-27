@@ -286,14 +286,14 @@ async function timeToMergePrOrIssue() {
   //we use "prs" here but it equally could be issues
   //theyre nearly identical.
   var params = {
-    "owner": owner,
-    "repo": repo,
-    "per_page": maxPerPage,
-    "state": "all"
-  },
-  url = 'GET /repos/{owner}/{repo}/issues',
-  prs = await octokit.request(url, params),
-  lastPage;
+      "owner": owner,
+      "repo": repo,
+      "per_page": maxPerPage,
+      "state": "all"
+    },
+    url = 'GET /repos/{owner}/{repo}/issues',
+    prs = await octokit.request(url, params),
+    lastPage;
 
   //we probably have  more pages
   if (prs.data.length === maxPerPage) {
@@ -318,27 +318,30 @@ async function timeToMergePrOrIssue() {
     });
   }
 
-  console.log(allPrs.length);
 
-  function isPr(prOrIssue){
-    if (prOrIssue.pull_request) {return "pr";} else {return "issue";}
+  function isPr(prOrIssue) {
+    if (prOrIssue.pull_request) {
+      return "pr";
+    } else {
+      return "issue";
+    }
   }
 
   let resolutionInfo = {
-    pr : [],
-    issue : [],
-    medians : {
-      pr : [],
-      issue : []
+    pr: [],
+    issue: [],
+    timeToClose: {
+      pr: [],
+      issue: []
     }
   }
   allPrs.map(function(pr) {
     let isPrOrIssue = isPr(pr);
     let response = {
-      id : pr.id,
+      id: pr.id,
       created_at: pr.created_at,
       closed: false,
-      pr_or_issue : isPrOrIssue
+      pr_or_issue: isPrOrIssue
     };
     //may not be closed or merged...
     if (pr.closed_at) {
@@ -346,7 +349,7 @@ async function timeToMergePrOrIssue() {
       response.closed = true;
     }
     if (pr.merged_at) {
-      response.merged_at= pr.merged_at;
+      response.merged_at = pr.merged_at;
       response.closed = true;
     }
 
@@ -355,38 +358,77 @@ async function timeToMergePrOrIssue() {
 
     if (response.closed) {
       let closedTime = new Date(response.merged_at || response.closed_at);
-      response.timeToClose = closedTime-createdTime;
+      response.timeToClose = closedTime - createdTime;
       response.humanReadableTimeToClose = msToTime(response.timeToClose);
       //store it up so we can calculate the median
-      resolutionInfo.medians[isPrOrIssue].push(response.timeToClose);
+      resolutionInfo.timeToClose[isPrOrIssue].push(response.timeToClose);
     }
     resolutionInfo[isPrOrIssue].push(response);
   });
 
+  //console.log(resolutionInfo);
 
-  console.log(resolutionInfo.medians);
+  prMedian = calculateMedian(resolutionInfo.timeToClose.pr);
+  issueMedian = calculateMedian(resolutionInfo.timeToClose.issue);
 
-  function calculateMedian(anArray) {
-    //needs to be sorted if we want to get the middlest  (median) value
-    anArray.sort();
-    let middlestValue = Math.round(anArray.length/2);
-    return anArray[middlestValue];
+  prMean = calculateMean(resolutionInfo.timeToClose.pr);
+  issueMean = calculateMean(resolutionInfo.timeToClose.issue);
+
+  resolutionInfo.timeToClose.pr = {
+    median: {
+      ms: prMedian,
+      humanReadable: msToTime(prMedian)
+    },
+    mean: {
+      ms : prMean,
+      humanReadable: msToTime(prMean)
+    }
+  };
+  resolutionInfo.timeToClose.issue = {
+    median: {
+      ms: issueMedian,
+      humanReadable: msToTime(issueMedian)
+    },
+    mean: {
+      ms : issueMean,
+      humanReadable: msToTime(issueMean)
+    }
+
+  };
+  return resolutionInfo;
+}
+
+function calculateMedian(anArray) {
+  //needs to be sorted if we want to get the middlest  (median) value
+  anArray.sort();
+
+  let len = anArray.length,
+    middlePosition = len / 2,
+    middlestValue;
+  if ((len % 2) === 0) {
+    //it's even
+    let higherMiddleValue = anArray[middlePosition],
+      lowerMiddleValue = anArray[middlePosition - 1];
+
+    middlestValue = (higherMiddleValue + lowerMiddleValue) / 2;
+
+    // it's odd
+  } else {
+    //always round down the position, since arrays are 0 indexed.
+    middlestValue = anArray[Math.floor(len / 2)];
   }
 
-  prMedian =calculateMedian(resolutionInfo.medians.pr);
-  issueMedian = calculateMedian(resolutionInfo.medians.issue);
+  return middlestValue;
+}
 
-  resolutionInfo.medians.pr = {
-    ms: prMedian,
-    humanReadable : msToTime(prMedian)
-  };
-  resolutionInfo.medians.issue = {
-    ms: issueMedian,
-    humanReadable : msToTime(issueMedian)
-
-  };
-  console.log(resolutionInfo.medians);
-  return resolutionInfo;
+function calculateMean(anArray) {
+  //this is the mean aka average of an array
+  //seriously I don't need hundred precision decimalss of ms though
+  // so we round it.
+  let sum = anArray.reduce(function(a, b) {
+    return a + b;
+  });
+  return Math.round(sum / anArray.length);
 }
 
 async function fullRun(repository, org, anOctokit) {
@@ -415,25 +457,26 @@ async function fullRun(repository, org, anOctokit) {
         labels, //7
         timeToMerge //
       ]),
-    resultStore = {
-      repoInfo: processRepoInfo(interimResponse[0]),
-      commitCount: await countPaginatedResults(interimResponse[1], "commits"),
-      locCount: await processLocCount(interimResponse[2]),
-      prs: {
-        all: interimResponse[3].prs,
-        closed: interimResponse[4].prs,
-        open: interimResponse[3].prs - interimResponse[4].prs
-      },
-      issues: {
-        all: interimResponse[3].issues,
-        closed: interimResponse[4].issues,
-        open: interimResponse[3].issues - interimResponse[4].issues
-      },
-      community: interimResponse[5],
-      contributors: processContributors(interimResponse[6]),
-      labels: await processLabels(interimResponse[7]),
-      dateSnapshotTaken: new Date().toISOString()
-    };
+      resultStore = {
+        repoInfo: processRepoInfo(interimResponse[0]),
+        commitCount: await countPaginatedResults(interimResponse[1], "commits"),
+        locCount: await processLocCount(interimResponse[2]),
+        prs: {
+          all: interimResponse[3].prs,
+          closed: interimResponse[4].prs,
+          open: interimResponse[3].prs - interimResponse[4].prs
+        },
+        issues: {
+          all: interimResponse[3].issues,
+          closed: interimResponse[4].issues,
+          open: interimResponse[3].issues - interimResponse[4].issues
+        },
+        community: interimResponse[5],
+        contributors: processContributors(interimResponse[6]),
+        labels: await processLabels(interimResponse[7]),
+        dateSnapshotTaken: new Date().toISOString(),
+        timeToMerge: await timeToMerge
+      };
 
     if (generateTestData) {
       var testData = interimResponse;
@@ -456,5 +499,7 @@ async function fullRun(repository, org, anOctokit) {
 }
 
 module.exports = {
-  fullRun: fullRun
+  fullRun: fullRun,
+  calculateMedian: calculateMedian,
+  calculateMean: calculateMean
 };

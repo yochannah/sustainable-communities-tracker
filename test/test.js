@@ -39,19 +39,51 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
 
       });
     });
+
+    describe('Time to close: ', function() {
+      let hammerTime = result.timeToMerge.timeToClose;
+      describe('should return mean time to close correctly', function() {
+        it('for PRs', function(){
+          assert.equal(hammerTime.pr.mean.ms,37195311);
+        });
+        it('for issues', function(){
+          assert.equal(hammerTime.issue.mean.ms,104784230);
+        });
+      });
+      describe('should return median time to close correctly', function() {
+        it('for PRs', function(){
+          assert.equal(hammerTime.pr.median.ms,2295000);
+        });
+        it('for issues', function(){
+          assert.equal(hammerTime.issue.median.ms,176219000);
+        });
+      });
+    });
   });
 
 
 
-  // assert.equal(result.prs.open,1);
-  // assert.equal(result.prs.closed,196);
-  // assert.equal(result.prs.open,
-  //   result.prs.closed + result.prs.open);
-  // assert.equal(result.issues.open,28);
-  // assert.equal(result.issues.closed,59);
-  // assert.equal(result.issues.all,
-  //   result.issues.closed + result.issues.open);
-
+  describe('Generic Functions', function() {
+    describe('Calculate median', function() {
+      it('Should return a middle value with an odd number of entries', function() {
+        var testArr = [5, 2, 1, 3, 4],
+          median = ghGetter.calculateMedian(testArr);
+        assert.equal(median, 3);
+      })
+      it('Should return a mean of the middle two value with an even number of entries', function() {
+        var testArr = [6, 1, 5, 4, 2, 3],
+          median = ghGetter.calculateMedian(testArr);
+        assert.equal(median, 3.5);
+      })
+    });
+    describe('Calculate mean', function() {
+      it('Should correctly calculate the mean of an array', function() {
+        var testArr = [5, 2, 1, 3, 4, 6, 7, 8, 9, 10, 13, 22, 55],
+          mean = ghGetter.calculateMean(testArr);
+        assert.equal(mean, 11);
+      })
+    });
+  });
 
 }).catch(function(whyItMessedUp) {
   console.error("😭 It went wrong y'all");
