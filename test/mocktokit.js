@@ -67,8 +67,6 @@ const request = function(url, params) {
   }
 }
 
-
-
 exports.init = function() {
   console.log("=== 🐙 === Mock Octokit activated: we're using fake data and not the GitHub API");
   return {

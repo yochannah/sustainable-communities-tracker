@@ -11,7 +11,7 @@ var octokit, repo, owner;
 //// e.g. perhaps if the github api changes.
 
 const maxPerPage = 100,
-  generateTestData = true,
+  generateTestData = false,
   testDataFileName = "test/data_prep/mockData.json",
   ghDefaultLabels = ["bug", "documentation", "duplicate", "enhancement", "good first issue", "help wanted", "invalid", "question", "wontfix"],
   mentorshipLabels = ["good first issue", "first-timers-only", "hacktoberfest", "outreachy", "gsoc", "help wanted", "help needed"];
@@ -215,13 +215,15 @@ const getCommunityStats = async function() {
 }
 
 const getContributors = async function() {
-  return await octokit.request('GET /repos/{owner}/{repo}/stats/contributors', {
+  const conts = await octokit.request('GET /repos/{owner}/{repo}/stats/contributors', {
     "owner": owner,
     "repo": repo
   });
+  return conts;
 }
 
 const processContributors = function(response) {
+  
   return response.data.map(function(contributor) {
     return {
       commits: contributor.total,
