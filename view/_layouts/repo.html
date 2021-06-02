@@ -9,12 +9,23 @@
 
   <main class="page-content" aria-label="Content">
     <div class="wrapper">
+
+      <ul class="contents">
+        {% for repo in site.data %}
+        <li>
+          <a href="#{{repo[0]}}">
+          {{repo[0]}}
+          </a>
+        </li>
+        {%endfor%}
+      </ul>
       <div class="community">
         {% for repo in site.data %}
         {% assign reponame = repo[0] %}
         {% assign info = repo[1] %}
 
-        <div class="card people-card">
+
+        <div class="card people-card" id="{{reponame}}">
           <h2>{{reponame}}</h2>
           <h3>Repo info</h3>
           <dl>
