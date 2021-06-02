@@ -74,13 +74,23 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
         var testArr = [6, 1, 5, 4, 2, 3],
           median = ghGetter.calculateMedian(testArr);
         assert.equal(median, 3.5);
-      })
+      });
+      it('Should handle empty arrays', function() {
+        var emptyArr = [],
+          emptyMedian = ghGetter.calculateMedian(emptyArr);
+        assert.equal(emptyMedian, null);
+      });
     });
     describe('Calculate mean', function() {
       it('Should correctly calculate the mean of an array', function() {
         var testArr = [5, 2, 1, 3, 4, 6, 7, 8, 9, 10, 13, 22, 55],
           mean = ghGetter.calculateMean(testArr);
         assert.equal(mean, 11);
+      });
+      it('Should handle empty arrays', function() {
+        let newArr = [],
+          emptyMean = ghGetter.calculateMean(newArr);
+        assert.equal(emptyMean, null);
       })
     });
   });

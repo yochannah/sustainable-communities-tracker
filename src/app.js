@@ -382,7 +382,7 @@ async function timeToMergePrOrIssue() {
       humanReadable: msToTime(prMedian)
     },
     mean: {
-      ms : prMean,
+      ms: prMean,
       humanReadable: msToTime(prMean)
     }
   };
@@ -392,7 +392,7 @@ async function timeToMergePrOrIssue() {
       humanReadable: msToTime(issueMedian)
     },
     mean: {
-      ms : issueMean,
+      ms: issueMean,
       humanReadable: msToTime(issueMean)
     }
 
@@ -402,35 +402,44 @@ async function timeToMergePrOrIssue() {
 
 function calculateMedian(anArray) {
   //needs to be sorted if we want to get the middlest  (median) value
-  anArray.sort();
+  if (anArray.length) {
+    anArray.sort();
 
-  let len = anArray.length,
-    middlePosition = len / 2,
-    middlestValue;
-  if ((len % 2) === 0) {
-    //it's even
-    let higherMiddleValue = anArray[middlePosition],
-      lowerMiddleValue = anArray[middlePosition - 1];
+    let len = anArray.length,
+      middlePosition = len / 2,
+      middlestValue;
+    if ((len % 2) === 0) {
+      //it's even
+      let higherMiddleValue = anArray[middlePosition],
+        lowerMiddleValue = anArray[middlePosition - 1];
 
-    middlestValue = (higherMiddleValue + lowerMiddleValue) / 2;
+      middlestValue = (higherMiddleValue + lowerMiddleValue) / 2;
 
-    // it's odd
+      // it's odd
+    } else {
+      //always round down the position, since arrays are 0 indexed.
+      middlestValue = anArray[Math.floor(len / 2)];
+    }
+
+    return middlestValue;
   } else {
-    //always round down the position, since arrays are 0 indexed.
-    middlestValue = anArray[Math.floor(len / 2)];
+    return null;
   }
 
-  return middlestValue;
 }
 
 function calculateMean(anArray) {
   //this is the mean aka average of an array
   //seriously I don't need hundred precision decimalss of ms though
   // so we round it.
-  let sum = anArray.reduce(function(a, b) {
-    return a + b;
-  });
-  return Math.round(sum / anArray.length);
+  if (anArray.length) {
+    let sum = anArray.reduce(function(a, b) {
+      return a + b;
+    });
+    return Math.round(sum / anArray.length);
+  } else {
+    return null;
+  }
 }
 
 async function fullRun(repository, org, anOctokit) {
