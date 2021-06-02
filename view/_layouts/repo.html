@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+
+{%- include head.html -%}
+
+<body>
+
+  {%- include header.html -%}
+
+  <main class="page-content" aria-label="Content">
+    <div class="wrapper">
+      <div class="community">
+        {% for repo in site.data %}
+        {% assign reponame = repo[0] %}
+        {% assign info = repo[1] %}
+
+        <div class="card people-card">
+          <h2>{{reponame}}</h2>
+          <h3>Repo info</h3>
+          <dl>
+            <dt>Date taken:</dt>
+            <dd>{{info.dateSnapshotTaken}}</dd>
+            <dt>
+              License
+            </dt>
+            <dd>
+              {%if info.repoInfo.license.url %}
+              <a href="{{info.repoInfo.license.url}}">
+                {{info.repoInfo.license.name}}
+              </a>
+              {%else%}
+              None
+              {%endif%}
+            </dd>
+            <dt>
+              Code of Conduct
+            </dt>
+            <dd>
+              {%if info.repoInfo.code_of_conduct.url %}
+              <a href="{{info.repoInfo.code_of_conduct.url}}">
+                {{info.repoInfo.code_of_conduct.url}}
+              </a>
+              {%else%}
+              None
+              {%endif%}
+            </dd>
+            <dt>
+              Stars
+            </dt>
+            <dd>{{info.repoInfo.stargazers_count | default : "None"}}</dd>
+            <dt>Forks</dt>
+            <dd>{{info.repoInfo.forks_count | default : "None"}}</dd>
+            <dt>Commits</dt>
+            <dd>{{info.commitCount}}</dd>
+            <dt>totalBytes</dt>
+            <dd>{{info.locCount.totalBytes}}</dd>
+            <dt>contributors</dt>
+            <dd>{{info.contributors.size}}</dd>
+          </dl>
+          <h3>Issues</h3>
+          <dl>
+            <dt>All</dt>
+            <dd>{{info.issues.all}}</dd>
+            <dt>Open</dt>
+            <dd>{{info.issues.open}}</dd>
+            <dt>Closed</dt>
+            <dd>{{info.issues.closed}}</dd>
+          </dl>
+          <h3>Labels</h3>
+          <h4>Mentorship labels</h4>
+
+                {%for label in info.labels.open_mentorship_labels %}
+                <dt>{{label[0]}}</dt>
+                <dd>{{label[1]}}</dd>
+                {%endfor%}
+            <dt><h4>All labels</h4></dt>
+            <dd>{{info.labels.all_labels | join: ", "}}</dd>
+
+          <h3>Time to close</h3>
+          <dl>
+            {% assign closeTime = info.timeToMerge.timeToClose%}
+            <dt>PR</dt>
+            <dd>Mean: {{closeTime.pr.mean.humanReadable}}, Median: {{closeTime.pr.median.humanReadable}}</dd>
+            <dt>Issue</dt>
+            <dd>Mean: {{closeTime.issue.mean.humanReadable}}, Median: {{closeTime.issue.median.humanReadable}}</dd>
+          </dl>
+          <h3>Community</h3>
+          <div>
+            {%for comm in info.community%}
+            <dt>{{comm[0]}}</dt>
+            <dd>
+              {% if comm[0] == "files"%}
+              <dl>
+                {% for file in comm[1]%}
+                <dt>{{file[0]}}</dt>
+                <dd>{{file[1]}}</dd>
+                {%endfor%}
+                </dl>
+              {% else %}
+                {{comm[1]}}
+              {%endif %}
+            </dd>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </main>
+
+  {%- include footer.html -%}
+
+</body>
+
+</html>

@@ -223,7 +223,7 @@ const getContributors = async function() {
 }
 
 const processContributors = function(response) {
-  
+
   return response.data.map(function(contributor) {
     return {
       commits: contributor.total,
