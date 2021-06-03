@@ -223,13 +223,21 @@ const getContributors = async function() {
 }
 
 const processContributors = function(response) {
-
-  return response.data.map(function(contributor) {
-    return {
-      commits: contributor.total,
-      github_id: contributor.author.login
+  try {
+    return response.data.map(function(contributor) {
+      return {
+        commits: contributor.total,
+        github_id: contributor.author.login
+      }
+    });
+  } catch (e) {
+    if (response.status === 202) {
+      console.log("Status 202 - request accepted (but not completed). Please try re-running in a few seconds");
+    } else {
+      console.error("Problem processing data. Data was: ", response.data, response);
+      console.error("---> error: ", e);
     }
-  });
+  }
 }
 
 
