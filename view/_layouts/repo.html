@@ -11,10 +11,21 @@
     <div class="wrapper">
 
       <ul class="contents">
-        {% for repo in site.data %}
+
+        {% capture repo_list %}
+          {% for repo in site.data%}
+            {{repo[0]}}
+            {% if forloop.last == false %}::{% endif%}
+          {% endfor %}
+        {% endcapture %}
+
+        {% assign repo_array = repo_list | split: '::' | sort_natural  %}
+
+        {% for repo in repo_array  %}
+        
         <li>
           <a href="#{{repo[0]}}">
-          {{repo[0]}}
+          {{repo}}
           </a>
         </li>
         {%endfor%}
