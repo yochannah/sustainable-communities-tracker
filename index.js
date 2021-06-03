@@ -3,9 +3,17 @@ const ghGetter = require("./src/app.js"),
   args = process.argv.slice(2), // the first two arguments are built in to nodejs
   filePath = process.env.github_sustain_filepath;
 
-var repo = args[0],
-  org = args[1],
-  month = args[2];
+var url = args[0],
+  month = args[1],
+  repo, org;
+
+try {
+  let urlBits = url.split("https://github.com/")[1].split("/");
+  org = urlBits[0];
+  repo = urlBits[1];
+} catch (e) {
+  console.error("Oy vey, we can't parse this url. Error text: ", e);
+}
 
 if (!filePath) {
   console.error("🤕 Oops, there's no filepath specified. Please set 'process.env.github_sustain_filepath' or reload your terminal")
