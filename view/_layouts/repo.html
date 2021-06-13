@@ -22,9 +22,9 @@
         {% assign repo_array = repo_list | split: '::' | sort_natural  %}
 
         {% for repo in repo_array  %}
-        
+
         <li>
-          <a href="#{{repo[0]}}">
+          <a href="#{{repo | strip}}">
           {{repo}}
           </a>
         </li>
