@@ -1,7 +1,7 @@
 //to generate:
 //Project ID		Name	Month 0 - survey	Month 0 - auto	month 0 - manual	Repo notice	CoC enforcement	Mentorship	Month 6 - auto	month 6 - manual	Month 12 - auto	gh repos used
 
-const csvLib = require('objects-to-csv'),
+const ObjectsToCsv = require('objects-to-csv'),
   inFilePath = process.env.github_sustain_filepath + "month0/auto/",
   fs = require('fs'),
   fsPromises = require('fs').promises;
@@ -24,9 +24,9 @@ async function readAllFiles() {
           // this is so hacky... I wish I'd saved the URLs in the first place
           try {
             repoUrl = ourJson.community.files.readme.html_url.split("/blob")[0];
-            results.push(repoUrl);
+            results.push({url: repoUrl});
           } catch (err) {
-            errorRepos.push(f);
+            errorRepos.push([f]);
           }
         }).catch(function() {
           console.log("Error", errorRepos);
@@ -36,9 +36,17 @@ async function readAllFiles() {
       }
     }
 
+    //once it's all done we need to save our work!
     Promise.all(promises).then(function(x,y){
       if(errorRepos.length) {
-        console.error("===========", errorRepos);
+        console.error("==== there were some errors. Saved to report-errors.csv");
+        console.log(errorRepos);
+        let errorCsv = new ObjectsToCsv(errorRepos);
+        errorCsv.toDisk('./report-errors.csv');
+      }
+      if (results.length) {
+        let goodCsv = new ObjectsToCsv(results);
+        goodCsv.toDisk('./report.csv');
       }
       console.log(results);
     })
