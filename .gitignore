@@ -1,4 +1,6 @@
 node_modules
 test/data_prep/mockData.json
 view/_data
+view/0_data
+view/6_data
 .DS_Store
