@@ -18,6 +18,7 @@ const ghGetter = require("./src/app.js"),
     }
 
     if (repo && org && filePath) {
+      console.log("\n");
       console.log(repo, org);
       console.log("=== 🌺 Running sustainability report for: ");
       console.log("   |====================================|");

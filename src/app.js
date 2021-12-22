@@ -14,7 +14,9 @@ const maxPerPage = 100,
   generateTestData = false,
   testDataFileName = "test/data_prep/mockData.json",
   ghDefaultLabels = ["bug", "documentation", "duplicate", "enhancement", "good first issue", "help wanted", "invalid", "question", "wontfix"],
-  mentorshipLabels = ["good first issue", "first-timers-only", "hacktoberfest", "outreachy", "gsoc", "help wanted", "help needed"];
+  mentorshipLabels = ["good first issue", "first-timers-only", "hacktoberfest", "outreachy", "gsoc", "help wanted", "help needed"],
+  communityFailMsg = "No community endpoint, probably because this is a fork";
+
 
 ////// Don't edit from here on, thanks!
 
@@ -23,10 +25,40 @@ const init = function() {
     "auth": process.env.github_sustain_sw_token,
     "mediaType": {
       'previews': ['scarlet-witch']
+    },
+    "throttle": {
+      onRateLimit: (retryAfter, options, octokit) => {
+        octokit.log.warn(
+          `Request quota exhausted for request ${options.method} ${options.url}`
+        );
+
+        if (options.request.retryCount === 0) {
+          // only retries once
+          octokit.log.info(`Retrying after ${retryAfter} seconds!`);
+          return true;
+        }
+      },
+      onAbuseLimit: (retryAfter, options, octokit) => {
+        octokit.log.warn(
+          `Abuse detected for request ${options.method} ${options.url}`
+        );
+
+        if (options.request.retryCount === 0) {
+          // only retries once
+          octokit.log.info(`Retrying after ${retryAfter} seconds!`);
+          return true;
+        }
+      },
     }
   });
   return octokit = new MyOctokit();
 };
+
+// General error handler method to re-use as much as possible please
+const handleError = function(httpError, freeText) {
+  console.log("🙈🙈", freeText);
+  console.log("|--> ",httpError.status, "for", httpError.request.url);
+}
 
 
 // with thanks to orelsanpls for helping me remember how to do async es6 functions
@@ -181,45 +213,61 @@ const processRepoInfo = function(repoInfo) {
 }
 
 const processIssuesAndPRAggregates = async function(state, label) {
-  //first page results for each of the counts
-  let intIssueCount = checkNoOfResults("issues", state, label),
-    intprCount = checkNoOfResults("pulls", state),
-    interimResponse = await Promise.all([intIssueCount, intprCount]);
+  let returnObj;
+  try {
+    //first page results for each of the counts
+    let intIssueCount = checkNoOfResults("issues", state, label),
+      intprCount = checkNoOfResults("pulls", state),
+      interimResponse = await Promise.all([intIssueCount, intprCount]);
 
-  //this request set depends on the previous two
-  let issueCount = countPaginatedResults(interimResponse[0], "issues", state, label),
-    prCount = countPaginatedResults(interimResponse[1], "pulls", state),
-    results = await Promise.all([prCount, issueCount]);
-  // github returns pulls and issuess when you ask for issues so we have to calculate
-  // real issues by subtracting the prs!
+    //this request set depends on the previous two
+    let issueCount = countPaginatedResults(interimResponse[0], "issues", state, label),
+      prCount = countPaginatedResults(interimResponse[1], "pulls", state),
+      results = await Promise.all([prCount, issueCount]);
+    // github returns pulls and issuess when you ask for issues so we have to calculate
+    // real issues by subtracting the prs!
 
-  //the PR endpoint doesn't filter by label.
-  var returnObj;
-  if (label) {
-    returnObj = results[1];
-  } else {
-    returnObj = {
-      prs: results[0],
-      issues: results[1] - results[0]
-    };
+    //the PR endpoint doesn't filter by label.
+    if (label) {
+      returnObj = results[1];
+    } else {
+      returnObj = {
+        prs: results[0],
+        issues: results[1] - results[0]
+      };
+    }
+  } catch (e) {
+    handleError(e,"issue and pr endpoint had a problemo");
   }
   return returnObj;
 }
 
 const getCommunityStats = async function() {
-  const community = await octokit.request('GET /repos/{owner}/{repo}/community/profile', {
-    "owner": owner,
-    "repo": repo
-  });
-  return community.data;
+  let response;
+  try {
+    const community = await octokit.request('GET /repos/{owner}/{repo}/community/profile', {
+      "owner": owner,
+      "repo": repo
+    });
+    response = community.data;
+  } catch (e) {
+    handleError(e, communityFailMsg);
+    response = communityFailMsg;
+  }
+  return response;
 }
 
 const getContributors = async function() {
-  const conts = await octokit.request('GET /repos/{owner}/{repo}/stats/contributors', {
-    "owner": owner,
-    "repo": repo
-  });
-  return conts;
+  let response;
+  try {
+    const conts = await octokit.request('GET /repos/{owner}/{repo}/stats/contributors', {
+      "owner": owner,
+      "repo": repo
+    });
+    return conts;
+  } catch (e) {
+    handleError(e, "contributors error");
+  };
 }
 
 const processContributors = function(response) {
