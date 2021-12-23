@@ -114,13 +114,10 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
       fm.saveFile("Booya", fileName);
       assert.ok(fs.existsSync(fileName));
     });
-    after('tidy up files', function(){
-      //okay this is nasty: I can't seem to get the tests to pass when I
-      // delete the temp files. SO OF COURSE I gave up and don't delete them
-      // what I did instead was put the temp dir in .gitignore so
-      // you'll never check it in.
-      // please don't think less of me, my time is limited.
-      return true;
+    after('tidy up files', function() {
+      fs.rmSync(newPath, {recursive:true}, function(e) {
+        console.error(e);
+      });
     });
   });
 }).catch(function(whyItMessedUp) {
