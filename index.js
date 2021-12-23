@@ -19,14 +19,11 @@ const ghGetter = require("./src/app.js"),
 
     if (repo && org && filePath) {
       console.log("\n");
-      console.log(repo, org);
       console.log("=== 🌺 Running sustainability report for: ");
-      console.log("   |====================================|");
       console.log("   | REPO: ", repo);
       console.log("   |  ORG: ", org);
       console.log("   | -------------------- ");
       console.log("   | saving to: ", filePath);
-      console.log("   |====================================|");
 
       try {
         const fileName = filePath + "/" + month + "/auto/"
@@ -88,7 +85,6 @@ else if (argv.url) {
     } else {
       urls = data.split("\n");
       urls.map(function(repo) {
-        console.log(">>" + repo + "<<");
         singleRepo(repo, month);
       });
     }

@@ -1,6 +1,9 @@
 const {
   Octokit
 } = require("@octokit/core");
+const {
+  throttling
+} = require("@octokit/plugin-throttling");
 const parse_headers = require('parse-link-header');
 const fs = require('fs');
 
@@ -13,6 +16,7 @@ var octokit, repo, owner;
 const maxPerPage = 100,
   generateTestData = false,
   testDataFileName = "test/data_prep/mockData.json",
+  errorFilePath = "errorlog_",
   ghDefaultLabels = ["bug", "documentation", "duplicate", "enhancement", "good first issue", "help wanted", "invalid", "question", "wontfix"],
   mentorshipLabels = ["good first issue", "first-timers-only", "hacktoberfest", "outreachy", "gsoc", "help wanted", "help needed"],
   communityFailMsg = "No community endpoint, probably because this is a fork";
@@ -21,7 +25,8 @@ const maxPerPage = 100,
 ////// Don't edit from here on, thanks!
 
 const init = function() {
-  const MyOctokit = Octokit.defaults({
+  const MyOctokit = Octokit.plugin(throttling);
+  return octokit = new MyOctokit({
     "auth": process.env.github_sustain_sw_token,
     "mediaType": {
       'previews': ['scarlet-witch']
@@ -51,13 +56,26 @@ const init = function() {
       },
     }
   });
-  return octokit = new MyOctokit();
 };
 
 // General error handler method to re-use as much as possible please
 const handleError = function(httpError, freeText) {
   console.log("🙈🙈", freeText);
-  console.log("|--> ",httpError.status, "for", httpError.request.url);
+  console.log("|--> ", httpError.status, "for", httpError.request.url);
+
+  if (httpError.status == 403) {
+    throw "🚨 We're forbidden and possible ratelimited.";
+  }
+
+  let errFileName = errorFilePath + "_" +
+    httpError.status + "_" +
+    httpError.request.url;
+
+  fs.writeFile(errFileName, httpError, function(err) {
+    if (err) return console.log(err);
+    console.log('saved error data to ' + errFileName);
+  });
+
 }
 
 
@@ -152,8 +170,10 @@ const countPaginatedResults = async function(result, endpoint, state, label) {
     const fullPages = (lastPage - 1) * maxPerPage;
     return noOfResults = fullPages + lastPageCount;
   } catch (e) {
-    console.error("Gvald! {", endpoint, "}", state, label, "\n", e);
-    console.log(result);
+    if (label) {
+      handleError(e, endpoint + "state: " + state, "Label: " + label + "\n");
+    }
+    handleError(e, endpoint + "state: " + state);
   }
 }
 
@@ -237,7 +257,7 @@ const processIssuesAndPRAggregates = async function(state, label) {
       };
     }
   } catch (e) {
-    handleError(e,"issue and pr endpoint had a problemo");
+    handleError(e, "issue and pr endpoint had a problemo");
   }
   return returnObj;
 }
