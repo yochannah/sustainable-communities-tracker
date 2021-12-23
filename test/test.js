@@ -7,6 +7,25 @@ const assert = require('assert');
 
 //setup environment to get the expected results.
 
+describe('File System', function() {
+  const newPath = "temp",
+    testFileName = "/test.json";
+  let filePath, fileName;
+
+  before('Running temp init dir setup', function() {
+    filePath = fm.initFilePath("month12", newPath);
+    fileName = filePath + testFileName;
+  });
+
+  it('Should create a recursive directory to store the results if none exists', function() {
+    assert.ok(fs.existsSync(filePath));
+  })
+  it('Should write a file to the new directory', function() {
+    fm.saveFile("Booya", fileName);
+    assert.ok(fs.existsSync(fileName));
+  });
+});
+
 //don't use octokit because that would query live github. this is a fake stub
 const myMocktokit = mocktokit.init();
 
@@ -94,25 +113,6 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
           emptyMean = ghGetter.calculateMean(newArr);
         assert.equal(emptyMean, null);
       })
-    });
-  });
-
-  describe('File System', function() {
-    const newPath = "temp",
-      testFileName = "/test.json";
-    let filePath, fileName;
-
-    before('Running temp init dir setup', function() {
-      filePath = fm.initFilePath("month12", newPath);
-      fileName = filePath + testFileName;
-    });
-
-    it('Should create a recursive directory to store the results if none exists', function() {
-      assert.ok(fs.existsSync(filePath));
-    })
-    it('Should write a file to the new directory', function() {
-      fm.saveFile("Booya", fileName);
-      assert.ok(fs.existsSync(fileName));
     });
   });
 
