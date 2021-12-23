@@ -113,23 +113,20 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
     it('Should write a file to the new directory', function() {
       fm.saveFile("Booya", fileName);
       assert.ok(fs.existsSync(fileName));
-      //honestly I wanted this in the after() block
-      //but there's some weird async thing going on
-      //that makes this test fail if I do it in after 🤦‍♂️
-      //oh, it happened here too. Let's try a setTimeout
-
-      setTimeout(function(){
-        fs.rmSync(newPath, {
-          recursive: true
-        }, function(e) {
-          if (e) {
-            console.error(e);
-          }
-        });        
-      },3000)
     });
   });
 
+after('tidy up the test file!', function() {
+  setTimeout(function(){
+    fs.rmSync(newPath, {
+      recursive: true
+    }, function(e) {
+      if (e) {
+        console.error(e);
+      }
+    });
+  },3000)
+});
 
 }).catch(function(whyItMessedUp) {
   console.error("😭 It went wrong y'all");
