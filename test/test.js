@@ -116,13 +116,17 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
       //honestly I wanted this in the after() block
       //but there's some weird async thing going on
       //that makes this test fail if I do it in after 🤦‍♂️
-      fs.rmSync(newPath, {
-        recursive: true
-      }, function(e) {
-        if (e) {
-          console.error(e);
-        }
-      });
+      //oh, it happened here too. Let's try a setTimeout
+
+      setTimeout(function(){
+        fs.rmSync(newPath, {
+          recursive: true
+        }, function(e) {
+          if (e) {
+            console.error(e);
+          }
+        });        
+      },3000)
     });
   });
 
