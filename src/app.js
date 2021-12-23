@@ -6,8 +6,10 @@ const {
 } = require("@octokit/plugin-throttling");
 const parse_headers = require('parse-link-header');
 const fs = require('fs');
+const errorHandler = require('./errorHandler.js');
+const path = require('path');
 
-var octokit, repo, owner;
+var octokit, repo, owner, ownerRepo;
 
 //// These settings can be edited if you wish, especially generateTestData
 //// which is useful when you want to generate files to run tests on anew
@@ -16,7 +18,6 @@ var octokit, repo, owner;
 const maxPerPage = 100,
   generateTestData = false,
   testDataFileName = "test/data_prep/mockData.json",
-  errorFilePath = "errorlog_",
   ghDefaultLabels = ["bug", "documentation", "duplicate", "enhancement", "good first issue", "help wanted", "invalid", "question", "wontfix"],
   mentorshipLabels = ["good first issue", "first-timers-only", "hacktoberfest", "outreachy", "gsoc", "help wanted", "help needed"],
   communityFailMsg = "No community endpoint, probably because this is a fork";
@@ -57,26 +58,6 @@ const init = function() {
     }
   });
 };
-
-// General error handler method to re-use as much as possible please
-const handleError = function(httpError, freeText) {
-  console.log("🙈🙈", freeText);
-  console.log("|--> ", httpError.status, "for", httpError.request.url);
-
-  if (httpError.status == 403) {
-    throw "🚨 We're forbidden and possible ratelimited.";
-  }
-
-  let errFileName = errorFilePath + "_" +
-    httpError.status + "_" +
-    httpError.request.url;
-
-  fs.writeFile(errFileName, httpError, function(err) {
-    if (err) return console.log(err);
-    console.log('saved error data to ' + errFileName);
-  });
-
-}
 
 
 // with thanks to orelsanpls for helping me remember how to do async es6 functions
@@ -171,9 +152,9 @@ const countPaginatedResults = async function(result, endpoint, state, label) {
     return noOfResults = fullPages + lastPageCount;
   } catch (e) {
     if (label) {
-      handleError(e, endpoint + "state: " + state, "Label: " + label + "\n");
+      errorHandler.httpError(e, endpoint + "state: " + state, "Label: " + label + "\n", ownerRepo);
     }
-    handleError(e, endpoint + "state: " + state);
+    errorHandler.httpError(e, endpoint + "state: " + state, ownerRepo);
   }
 }
 
@@ -182,10 +163,7 @@ const countPaginatedResults = async function(result, endpoint, state, label) {
 // use with caution, this is not comparable from project to project,
 // but can be used as an internal measure of change or stability.
 const checkLocCount = async function() {
-  return langs = await octokit.request('GET /repos/{owner}/{repo}/languages', {
-    "owner": owner,
-    "repo": repo
-  });
+  return langs = await octokit.request('GET /repos/{owner}/{repo}/languages', ownerRepo);
 }
 
 const processLocCount = async function() {
@@ -257,7 +235,7 @@ const processIssuesAndPRAggregates = async function(state, label) {
       };
     }
   } catch (e) {
-    handleError(e, "issue and pr endpoint had a problemo");
+    errorHandler.httpError(e, "issue and pr endpoint had a problemo", ownerRepo);
   }
   return returnObj;
 }
@@ -265,13 +243,10 @@ const processIssuesAndPRAggregates = async function(state, label) {
 const getCommunityStats = async function() {
   let response;
   try {
-    const community = await octokit.request('GET /repos/{owner}/{repo}/community/profile', {
-      "owner": owner,
-      "repo": repo
-    });
+    const community = await octokit.request('GET /repos/{owner}/{repo}/community/profile', ownerRepo);
     response = community.data;
   } catch (e) {
-    handleError(e, communityFailMsg);
+    errorHandler.httpError(e, communityFailMsg, ownerRepo);
     response = communityFailMsg;
   }
   return response;
@@ -280,13 +255,10 @@ const getCommunityStats = async function() {
 const getContributors = async function() {
   let response;
   try {
-    const conts = await octokit.request('GET /repos/{owner}/{repo}/stats/contributors', {
-      "owner": owner,
-      "repo": repo
-    });
+    const conts = await octokit.request('GET /repos/{owner}/{repo}/stats/contributors', ownerRepo);
     return conts;
   } catch (e) {
-    handleError(e, "contributors error");
+    errorHandler.httpError(e, "contributors error", ownerRepo);
   };
 }
 
@@ -310,10 +282,7 @@ const processContributors = function(response) {
 
 
 const checkLabels = async function() {
-  return await octokit.request('GET /repos/{owner}/{repo}/labels', {
-    "owner": owner,
-    "repo": repo
-  });
+  return await octokit.request('GET /repos/{owner}/{repo}/labels', ownerRepo);
 }
 
 const processLabels = async function(response) {
@@ -521,6 +490,11 @@ function calculateMean(anArray) {
 async function fullRun(repository, org, anOctokit) {
   repo = repository;
   owner = org;
+  //this next var is useful for reducing complex args
+  ownerRepo = {
+    "org": owner,
+    "repo": repo
+  };
   octokit = anOctokit || init();
 
   try {
