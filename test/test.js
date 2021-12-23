@@ -1,7 +1,9 @@
-var ghGetter = require("../src/app.js"),
+const ghGetter = require("../src/app.js"),
+  fm = require("../src/fileManager.js"),
+  fs = require('fs'),
   mocktokit = require("./mocktokit");
 
-var assert = require('assert');
+const assert = require('assert');
 
 //setup environment to get the expected results.
 
@@ -43,19 +45,19 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
     describe('Time to close: ', function() {
       let hammerTime = result.timeToMerge.timeToClose;
       describe('should return mean time to close correctly', function() {
-        it('for PRs', function(){
-          assert.equal(hammerTime.pr.mean.ms,37195311);
+        it('for PRs', function() {
+          assert.equal(hammerTime.pr.mean.ms, 37195311);
         });
-        it('for issues', function(){
-          assert.equal(hammerTime.issue.mean.ms,104784230);
+        it('for issues', function() {
+          assert.equal(hammerTime.issue.mean.ms, 104784230);
         });
       });
       describe('should return median time to close correctly', function() {
-        it('for PRs', function(){
-          assert.equal(hammerTime.pr.median.ms,2295000);
+        it('for PRs', function() {
+          assert.equal(hammerTime.pr.median.ms, 2295000);
         });
-        it('for issues', function(){
-          assert.equal(hammerTime.issue.median.ms,176219000);
+        it('for issues', function() {
+          assert.equal(hammerTime.issue.median.ms, 176219000);
         });
       });
     });
@@ -94,6 +96,41 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
       })
     });
   });
+
+  describe('File System', function() {
+    const newPath = "temp",
+      testFileName = "/test.json";
+    let filePath, fileName;
+
+    before('Running temp init dir setup', function() {
+      filePath = fm.initFilePath("month12", newPath);
+      fileName = filePath + testFileName;
+    });
+
+    it('Should create a recursive directory to store the results if none exists', function() {
+      assert.ok(fs.existsSync(filePath));
+    })
+    it('Should write a file to the new directory', function() {
+      fm.saveFile("Booya", fileName);
+      assert.ok(fs.existsSync(fileName));
+    });
+
+    after('Post-test: clearing out temp dir', function() {
+      // even though this is synchronous it still sometimes happened
+      // too fast, and deleted the file so quick it made the test fail.
+      // Maybe there's a synchronous after() method I should be using too?
+      setTimeout(function() {
+        fs.rmSync(newPath, {
+          recursive: true
+        }, function(e) {
+          if (e) {
+            console.error(e);
+          }
+        });
+      }, 3000);
+    });
+  });
+
 
 }).catch(function(whyItMessedUp) {
   console.error("😭 It went wrong y'all");

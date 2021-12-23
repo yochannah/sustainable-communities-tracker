@@ -3,8 +3,8 @@ const path = require('path');
 
 const initFilePath = function(month, filePath) {
   const thePath = path.join(filePath, month, "auto");
-  console.log("⏩ output file will save to ", thePath);
-  fs.mkdir(thePath, {
+  console.log("⏩ output files will save to", thePath);
+  fs.mkdirSync(thePath, {
     recursive: true
   }, function(error) {
     if (error) {
@@ -20,7 +20,7 @@ const saveFile = function(contents, fileName) {
       console.log(err);
       return false;
     }
-    console.log('💾 saved data to ' + fileName);
+    console.log('💾 saved data to' + fileName);
     return true;
   });
 }
