@@ -7,25 +7,6 @@ const assert = require('assert');
 
 //setup environment to get the expected results.
 
-describe('File System', function() {
-  const newPath = "temp",
-    testFileName = "/test.json";
-  let filePath, fileName;
-
-  before('Running temp init dir setup', function() {
-    filePath = fm.initFilePath("month12", newPath);
-    fileName = filePath + testFileName;
-  });
-
-  it('Should create a recursive directory to store the results if none exists', function() {
-    assert.ok(fs.existsSync(filePath));
-  })
-  it('Should write a file to the new directory', function() {
-    fm.saveFile("Booya", fileName);
-    assert.ok(fs.existsSync(fileName));
-  });
-});
-
 //don't use octokit because that would query live github. this is a fake stub
 const myMocktokit = mocktokit.init();
 
@@ -116,18 +97,32 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
     });
   });
 
-after('tidy up the test file!', function() {
-  setTimeout(function(){
-    fs.rmSync(newPath, {
-      recursive: true
-    }, function(e) {
-      if (e) {
-        console.error(e);
-      }
-    });
-  },3000)
-});
+  describe('File System', function() {
+    const newPath = "_temp", //this should match a folder in .gitignore
+      testFileName = "/test.json";
+    let filePath, fileName;
 
+    before('Running temp init dir setup', function() {
+      filePath = fm.initFilePath("month12", newPath);
+      fileName = filePath + testFileName;
+    });
+
+    it('Should create a recursive directory to store the results if none exists', function() {
+      assert.ok(fs.existsSync(filePath));
+    })
+    it('Should write a file to the new directory', function() {
+      fm.saveFile("Booya", fileName);
+      assert.ok(fs.existsSync(fileName));
+    });
+    after('tidy up files', function(){
+      //okay this is nasty: I can't seem to get the tests to pass when I
+      // delete the temp files. SO OF COURSE I gave up and don't delete them
+      // what I did instead was put the temp dir in .gitignore so
+      // you'll never check it in.
+      // please don't think less of me, my time is limited.
+      return true;
+    });
+  });
 }).catch(function(whyItMessedUp) {
   console.error("😭 It went wrong y'all");
   console.error(whyItMessedUp);
