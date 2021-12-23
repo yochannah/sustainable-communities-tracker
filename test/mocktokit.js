@@ -44,11 +44,12 @@ var responses = {
 const request = function(url, params) {
   try {
     //useful for debug
-//    console.log("=== 🐙 === Testing " + url + "\n |--- with params: " +
-//      JSON.stringify(params));
+       // console.log(`=== 🐙 === Testing
+       // |--- ${url}
+       // |--- with params: ${JSON.stringify(params)}`);
     //strip out the repeated bit of the URL
     let urlSnippet = url.split("GET /repos/{owner}/{repo}")[1],
-    response = responses[urlSnippet];
+      response = responses[urlSnippet];
 
     //some edge cases where we need alternate results. There's probably a tidier
     // way to do this.

@@ -1,6 +1,8 @@
 const ghGetter = require("../src/app.js"),
   fm = require("../src/fileManager.js"),
   fs = require('fs'),
+  path = require('path'),
+  data = require('./data_prep/fake_urllist.txt'),
   mocktokit = require("./mocktokit");
 
 const assert = require('assert');
@@ -114,8 +116,26 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
       fm.saveFile("Booya", fileName);
       assert.ok(fs.existsSync(fileName));
     });
+
+    before(function() {
+      ghGetter.processMultipleFiles(data, "month12", newPath, myMocktokit);
+    });
+
+    describe('Multiple repos: ', function() {
+      it('should make one file per repo', function() {
+
+        let ob = path.join(filePath, "oogie_boogie.json"),
+          ka = path.join(filePath, "knee_ankle.json"),
+          km = path.join(filePath, "kitten_mitten.json");
+        assert.ok(fs.existsSync(ob));
+        assert.ok(fs.existsSync(ka));
+        assert.ok(fs.existsSync(km));
+      });
+    });
     after('tidy up files', function() {
-      fs.rmSync(newPath, {recursive:true}, function(e) {
+      fs.rmSync(newPath, {
+        recursive: true
+      }, function(e) {
         console.error(e);
       });
     });

@@ -7,7 +7,10 @@ const {
 const parse_headers = require('parse-link-header');
 const fs = require('fs');
 const errorHandler = require('./errorHandler.js');
-const path = require('path');
+const path = require('path'),
+  errors = require('./errors.js'),
+  fm = require('./fileManager.js'),
+  messages = require('./messages.js');
 
 var octokit;
 
@@ -515,8 +518,8 @@ async function fullRun(repository, org, anOctokit) {
       ]),
       resultStore = {
         repoInfo: processRepoInfo(interimResponse[0]),
-        commitCount: await countPaginatedResults(config,interimResponse[1], "commits"),
-        locCount: await processLocCount(config,interimResponse[2]),
+        commitCount: await countPaginatedResults(config, interimResponse[1], "commits"),
+        locCount: await processLocCount(config, interimResponse[2]),
         prs: {
           all: interimResponse[3].prs,
           closed: interimResponse[4].prs,
@@ -554,8 +557,53 @@ async function fullRun(repository, org, anOctokit) {
   }
 }
 
+const processMultipleFiles = function(data, month, filePath, octo) {
+  urls = data.split("\n");
+  urls.map(function(repo) {
+    singleRepo(repo, month, filePath, octo);
+  });
+}
+
+const singleRepo = function(url, month, filePath, octo) {
+  const config = splitUrl(url);
+
+  if (!filePath) {
+    console.error(errors.filePathMissing);
+  }
+  if (config.repo && config.org && filePath) {
+    console.log(messages.runningReport(config.repo, config.org, filePath));
+    pathForReports = fm.getFilePath(filePath, month);
+    try {
+      fullRun(config.repo, config.org, octo)
+        .then(function(result) {
+          let fileName = path.join(pathForReports, config.org + "_" + config.repo + ".json");
+          fm.saveFile(JSON.stringify(result), fileName);
+        });
+    } catch (e) {
+      console.error(errors.general, e);
+    }
+  } else {
+    console.log(errors.missingConfig, url);
+  }
+};
+
+const splitUrl = function(url) {
+  try {
+    let urlBits = url.split("https://github.com/")[1].split("/");
+    return {
+      org: urlBits[0],
+      repo: urlBits[1]
+    }
+  } catch (e) {
+    console.error(`Oy vey, we can't parse this url. Error text: ${e}
+    >>${url}<<`);
+  }
+}
+
 module.exports = {
   fullRun: fullRun,
   calculateMedian: calculateMedian,
-  calculateMean: calculateMean
+  calculateMean: calculateMean,
+  processMultipleFiles: processMultipleFiles,
+  singleRepo: singleRepo
 };
