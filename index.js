@@ -12,10 +12,11 @@ var pathForReports;
 const singleRepo = function(url, month) {
   try {
     let urlBits = url.split("https://github.com/")[1].split("/");
-    org = urlBits[0];
+    var org = urlBits[0],
     repo = urlBits[1];
   } catch (e) {
-    console.error("Oy vey, we can't parse this url. Error text: ", e);
+    console.error(`Oy vey, we can't parse this url. Error text: ${e}
+    >>${url}<<`);
   }
 
   if (!filePath) {

@@ -9,7 +9,7 @@ const fs = require('fs');
 const errorHandler = require('./errorHandler.js');
 const path = require('path');
 
-var octokit, repo, owner, ownerRepo;
+var octokit;
 
 //// These settings can be edited if you wish, especially generateTestData
 //// which is useful when you want to generate files to run tests on anew
@@ -62,10 +62,10 @@ const init = function() {
 
 // with thanks to orelsanpls for helping me remember how to do async es6 functions
 // cc-by-sa https://stackoverflow.com/questions/49432579/await-is-only-valid-in-async-function
-const checkCoC = async function() {
+const checkCoC = async function(config) {
   return result = await octokit.request('GET /repos/{owner}/{repo}/community/code_of_conduct', {
-    "owner": owner,
-    "repo": repo,
+    "owner": config.owner,
+    "repo": config.repo,
     "mediaType": {
       'previews': ['scarlet-witch']
     }
@@ -82,13 +82,13 @@ const checkCoC = async function() {
 //   # * multiply the number of pages - 1 by the page size
 //   # * and add the two together. Boom. Commit count in 2 api calls
 
-const checkNoOfResults = async function(endpoint, state, label) {
+const checkNoOfResults = async function(config, endpoint, state, label) {
 
   try {
     const url = 'GET /repos/{owner}/{repo}/' + endpoint,
       params = {
-        "owner": owner,
-        "repo": repo,
+        "owner": config.owner,
+        "repo": config.repo,
         "per_page": maxPerPage,
         "state": state,
         "labels": label
@@ -122,8 +122,7 @@ const checkNoOfResults = async function(endpoint, state, label) {
   }
 }
 
-const countPaginatedResults = async function(result, endpoint, state, label) {
-
+const countPaginatedResults = async function(config, result, endpoint, state, label) {
   try {
     if (!result) {
       console.error("~~~~~~~~~~~~~there's no result! ", result)
@@ -138,8 +137,8 @@ const countPaginatedResults = async function(result, endpoint, state, label) {
     if (numOnFirstPage === maxPerPage) {
       lastPage = links.last.page;
       var lastPageResult = await octokit.request('GET /repos/{owner}/{repo}/' + endpoint, {
-        "owner": owner,
-        "repo": repo,
+        "owner": config.owner,
+        "repo": config.repo,
         "per_page": maxPerPage,
         "page": lastPage,
         "state": state,
@@ -162,8 +161,8 @@ const countPaginatedResults = async function(result, endpoint, state, label) {
 // or  "lines of code".
 // use with caution, this is not comparable from project to project,
 // but can be used as an internal measure of change or stability.
-const checkLocCount = async function() {
-  return langs = await octokit.request('GET /repos/{owner}/{repo}/languages', ownerRepo);
+const checkLocCount = async function(config) {
+  return langs = await octokit.request('GET /repos/{owner}/{repo}/languages', config);
 }
 
 const processLocCount = async function() {
@@ -182,10 +181,10 @@ const processLocCount = async function() {
   }
 }
 
-const checkRepoInfo = async function() {
+const checkRepoInfo = async function(config) {
   return repoInfo = await octokit.request('GET /repos/{owner}/{repo}', {
-    "owner": owner,
-    "repo": repo,
+    "owner": config.owner,
+    "repo": config.repo,
     "mediaType": {
       'previews': ['scarlet-witch']
     }
@@ -210,17 +209,17 @@ const processRepoInfo = function(repoInfo) {
   }
 }
 
-const processIssuesAndPRAggregates = async function(state, label) {
+const processIssuesAndPRAggregates = async function(config, state, label) {
   let returnObj;
   try {
     //first page results for each of the counts
-    let intIssueCount = checkNoOfResults("issues", state, label),
-      intprCount = checkNoOfResults("pulls", state),
+    let intIssueCount = checkNoOfResults(config, "issues", state, label),
+      intprCount = checkNoOfResults(config, "pulls", state),
       interimResponse = await Promise.all([intIssueCount, intprCount]);
 
     //this request set depends on the previous two
-    let issueCount = countPaginatedResults(interimResponse[0], "issues", state, label),
-      prCount = countPaginatedResults(interimResponse[1], "pulls", state),
+    let issueCount = countPaginatedResults(config, interimResponse[0], "issues", state, label),
+      prCount = countPaginatedResults(config, interimResponse[1], "pulls", state),
       results = await Promise.all([prCount, issueCount]);
     // github returns pulls and issuess when you ask for issues so we have to calculate
     // real issues by subtracting the prs!
@@ -235,30 +234,30 @@ const processIssuesAndPRAggregates = async function(state, label) {
       };
     }
   } catch (e) {
-    errorHandler.httpError(e, "issue and pr endpoint had a problemo", ownerRepo);
+    errorHandler.httpError(e, "issue and pr endpoint had a problemo", config);
   }
   return returnObj;
 }
 
-const getCommunityStats = async function() {
+const getCommunityStats = async function(config) {
   let response;
   try {
-    const community = await octokit.request('GET /repos/{owner}/{repo}/community/profile', ownerRepo);
+    const community = await octokit.request('GET /repos/{owner}/{repo}/community/profile', config);
     response = community.data;
   } catch (e) {
-    errorHandler.httpError(e, communityFailMsg, ownerRepo);
+    errorHandler.httpError(e, communityFailMsg, config);
     response = communityFailMsg;
   }
   return response;
 }
 
-const getContributors = async function() {
+const getContributors = async function(config) {
   let response;
   try {
-    const conts = await octokit.request('GET /repos/{owner}/{repo}/stats/contributors', ownerRepo);
+    const conts = await octokit.request('GET /repos/{owner}/{repo}/stats/contributors', config);
     return conts;
   } catch (e) {
-    errorHandler.httpError(e, "contributors error", ownerRepo);
+    errorHandler.httpError(e, "contributors error", config);
   };
 }
 
@@ -281,11 +280,11 @@ const processContributors = function(response) {
 }
 
 
-const checkLabels = async function() {
-  return await octokit.request('GET /repos/{owner}/{repo}/labels', ownerRepo);
+const checkLabels = async function(config) {
+  return await octokit.request('GET /repos/{owner}/{repo}/labels', config);
 }
 
-const processLabels = async function(response) {
+const processLabels = async function(config, response) {
   const labelList = response.data.map(function(label) {
     return label.name;
   });
@@ -298,7 +297,7 @@ const processLabels = async function(response) {
       ghDefaultLabels.indexOf(label) >= 0);
 
   mentorshipLabelList.forEach(function(label) {
-    labelsToCheck.push(processIssuesAndPRAggregates("open", label));
+    labelsToCheck.push(processIssuesAndPRAggregates(config, "open", label));
   });
 
   response = await Promise.all(labelsToCheck);
@@ -329,12 +328,12 @@ function msToTime(ms) {
 }
 
 
-async function timeToMergePrOrIssue() {
+async function timeToMergePrOrIssue(config) {
   //we use "prs" here but it equally could be issues
   //theyre nearly identical.
   var params = {
-      "owner": owner,
-      "repo": repo,
+      "owner": config.owner,
+      "repo": config.repo,
       "per_page": maxPerPage,
       "state": "all"
     },
@@ -488,25 +487,21 @@ function calculateMean(anArray) {
 }
 
 async function fullRun(repository, org, anOctokit) {
-  repo = repository;
-  owner = org;
-  //this next var is useful for reducing complex args
-  ownerRepo = {
-    "org": owner,
-    "repo": repo
-  };
+  let config = {};
+  config.owner = org;
+  config.repo = repository;
   octokit = anOctokit || init();
 
   try {
-    let repoInfo = checkRepoInfo(),
-      commitNumber = checkNoOfResults("commits"),
-      locCount = checkLocCount(),
-      allPrsAndIssues = processIssuesAndPRAggregates("all"),
-      closedPrsAndIssues = processIssuesAndPRAggregates("closed"),
-      community = getCommunityStats(),
-      contributors = getContributors(),
-      labels = checkLabels(),
-      timeToMerge = timeToMergePrOrIssue(),
+    let repoInfo = checkRepoInfo(config),
+      commitNumber = checkNoOfResults(config, "commits"),
+      locCount = checkLocCount(config),
+      allPrsAndIssues = processIssuesAndPRAggregates(config, "all"),
+      closedPrsAndIssues = processIssuesAndPRAggregates(config, "closed"),
+      community = getCommunityStats(config),
+      contributors = getContributors(config),
+      labels = checkLabels(config),
+      timeToMerge = timeToMergePrOrIssue(config),
       interimResponse = await Promise.all([
         repoInfo, //0
         commitNumber, //1
@@ -520,8 +515,8 @@ async function fullRun(repository, org, anOctokit) {
       ]),
       resultStore = {
         repoInfo: processRepoInfo(interimResponse[0]),
-        commitCount: await countPaginatedResults(interimResponse[1], "commits"),
-        locCount: await processLocCount(interimResponse[2]),
+        commitCount: await countPaginatedResults(config,interimResponse[1], "commits"),
+        locCount: await processLocCount(config,interimResponse[2]),
         prs: {
           all: interimResponse[3].prs,
           closed: interimResponse[4].prs,
@@ -534,7 +529,7 @@ async function fullRun(repository, org, anOctokit) {
         },
         community: interimResponse[5],
         contributors: processContributors(interimResponse[6]),
-        labels: await processLabels(interimResponse[7]),
+        labels: await processLabels(config, interimResponse[7]),
         dateSnapshotTaken: new Date().toISOString(),
         timeToMerge: await timeToMerge
       };
