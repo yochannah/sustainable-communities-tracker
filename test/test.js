@@ -113,21 +113,16 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
     it('Should write a file to the new directory', function() {
       fm.saveFile("Booya", fileName);
       assert.ok(fs.existsSync(fileName));
-    });
-
-    after('Post-test: clearing out temp dir', function() {
-      // even though this is synchronous it still sometimes happened
-      // too fast, and deleted the file so quick it made the test fail.
-      // Maybe there's a synchronous after() method I should be using too?
-      setTimeout(function() {
-        fs.rmSync(newPath, {
-          recursive: true
-        }, function(e) {
-          if (e) {
-            console.error(e);
-          }
-        });
-      }, 3000);
+      //honestly I wanted this in the after() block
+      //but there's some weird async thing going on
+      //that makes this test fail if I do it in after 🤦‍♂️
+      fs.rmSync(newPath, {
+        recursive: true
+      }, function(e) {
+        if (e) {
+          console.error(e);
+        }
+      });
     });
   });
 
