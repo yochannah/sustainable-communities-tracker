@@ -15,7 +15,7 @@ const initFilePath = function(month, filePath) {
 }
 
 const saveFile = function(contents, fileName) {
-  fs.writeFile(fileName + "", contents, function(err) {
+  fs.writeFileSync(fileName + "", contents, function(err) {
     if (err) {
       console.log(err);
       return false;
