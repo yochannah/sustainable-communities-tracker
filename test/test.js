@@ -9,7 +9,7 @@ const assert = require('assert');
 
 //NOTE FOR FUTURE YOU: ALWAYS USE SYNC METHODS to read/write
 // files, otherwise we end up running the
-// after() TIDY UP BEFORE THE TEST IS RUN. And then you cry. 
+// after() TIDY UP BEFORE THE TEST IS RUN. And then you cry.
 
 //setup environment to get the expected results.
 
@@ -126,28 +126,35 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
     });
 
     describe('Multiple repos: ', function() {
+      it('should create the correct number of files from as lines in the input file', function() {
+        try {
+          fs.readdir(filePath, function(e, files) {
+            if (e) {
+              console.error(e);
+              assert.fail("error reading files for filesystem test");
+            } else {
+              let numOfFiles = files.length,
+                numOfLines = data.split("\n").length;
+                //this is 4 because the last test added a test.json in the folder. 
+                assert.equal(numOfFiles, 4, `files: ${files}`);
+                assert.equal(numOfLines, 3);
+            }
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      });
+
       it('should make one file per repo', function() {
 
         let ob = path.join(filePath, "oogie_boogie.json"),
           ka = path.join(filePath, "knee_ankle.json"),
           km = path.join(filePath, "kitten_mitten.json");
-        assert.ok(fs.existsSync(ob));
-        assert.ok(fs.existsSync(ka));
-        assert.ok(fs.existsSync(km));
+        assert.ok(fs.existsSync(ob), `missing ${ob}`);
+        assert.ok(fs.existsSync(ka), `missing ${ka}`);
+        assert.ok(fs.existsSync(km), `missing ${km}`);
       });
 
-      it('should have exactly the same number of files as lines in the input file', function() {
-        fs.readdirSync(filePath, function(e, files) {
-          if (e) {
-            console.error(e);
-            assert.fail("error reading files for filesystem test")
-          } else {
-            let numOfFiles = files.length,
-              numOfLines = data.split("\n").length;
-            assert.equals(numOfFiles, numOfLines)
-          }
-        });
-      });
     });
 
     after('tidy up files', function() {

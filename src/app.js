@@ -563,10 +563,13 @@ async function fullRun(repository, org, anOctokit) {
 }
 
 const processMultipleFiles = function(data, month, filePath, octo) {
-  urls = data.split("\n");
-  urls.map(function(repo) {
+  let urls = data.split("\n");
+  var reposRemaining = urls.length-1;
+  while(reposRemaining >= 0) {
+    let repo = urls[reposRemaining];
     singleRepo(repo, month, filePath, octo);
-  });
+    reposRemaining--;
+  }
 }
 
 const singleRepo = function(url, month, filePath, octo) {
