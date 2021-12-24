@@ -1,5 +1,5 @@
 const ObjectsToCsv = require('objects-to-csv'),
-  inFilePath = process.env.github_sustain_filepath + "month0/",
+  inFilePath = process.env.github_sustain_filepath + "month6/",
   fs = require('fs'),
   fsPromises = require('fs').promises;
 

@@ -553,8 +553,6 @@ async function fullRun(repository, org, anOctokit) {
         console.log('saved test data to ' + testDataFileName);
       });
     }
-
-
     return resultStore;
   } catch (e) {
     console.error(e);
@@ -562,37 +560,45 @@ async function fullRun(repository, org, anOctokit) {
   }
 }
 
+// Thank you so much https://stackoverflow.com/a/24985483
+// Roamer-1888  for helping me get sequenced chained promises right.
+// Answer is CC-BY-SA https://creativecommons.org/licenses/by-sa/3.0/
+// This code stops the github API from banning me for abuse.
 const processMultipleFiles = function(data, month, filePath, octo) {
   let urls = data.split("\n");
-  var reposRemaining = urls.length-1;
-  while(reposRemaining >= 0) {
-    let repo = urls[reposRemaining];
-    singleRepo(repo, month, filePath, octo);
-    reposRemaining--;
-  }
+  return urls.reduce(function(promise, repo) {
+      return promise.then(function() {
+          return singleRepo(repo, month, filePath, octo);
+      });
+  }, Promise.resolve());
 }
 
 const singleRepo = function(url, month, filePath, octo) {
-  const config = splitUrl(url);
+  return new Promise(function(resolve, reject) {
+    const config = splitUrl(url);
 
-  if (!filePath) {
-    console.error(errors.filePathMissing);
-  }
-  if (config.repo && config.org && filePath) {
-    console.log(messages.runningReport(config.repo, config.org, filePath));
-    pathForReports = fm.getFilePath(filePath, month);
-    try {
-      fullRun(config.repo, config.org, octo)
-        .then(function(result) {
-          let fileName = path.join(pathForReports, config.org + "_" + config.repo + ".json");
-          fm.saveFile(JSON.stringify(result), fileName);
-        });
-    } catch (e) {
-      console.error(errors.general, e);
+    if (!filePath) {
+      console.error(errors.filePathMissing);
     }
-  } else {
-    console.log(errors.missingConfig, url);
-  }
+    if (config.repo && config.org && filePath) {
+      console.log(messages.runningReport(config.repo, config.org, filePath));
+      pathForReports = fm.getFilePath(filePath, month);
+      try {
+        fullRun(config.repo, config.org, octo)
+          .then(function(result) {
+            let fileName = path.join(pathForReports, config.org + "_" + config.repo + ".json");
+            fm.saveFile(JSON.stringify(result), fileName);
+            resolve();
+          });
+      } catch (e) {
+        console.error(errors.general, e);
+        reject();
+      }
+    } else {
+      console.log(errors.missingConfig, url);
+      reject();
+    }
+  });
 };
 
 const splitUrl = function(url) {
