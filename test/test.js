@@ -7,6 +7,10 @@ const ghGetter = require("../src/app.js"),
 
 const assert = require('assert');
 
+//NOTE FOR FUTURE YOU: ALWAYS USE SYNC METHODS to read/write
+// files, otherwise we end up running the
+// after() TIDY UP BEFORE THE TEST IS RUN. And then you cry. 
+
 //setup environment to get the expected results.
 
 //don't use octokit because that would query live github. this is a fake stub
@@ -131,7 +135,21 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
         assert.ok(fs.existsSync(ka));
         assert.ok(fs.existsSync(km));
       });
+
+      it('should have exactly the same number of files as lines in the input file', function() {
+        fs.readdirSync(filePath, function(e, files) {
+          if (e) {
+            console.error(e);
+            assert.fail("error reading files for filesystem test")
+          } else {
+            let numOfFiles = files.length,
+              numOfLines = data.split("\n").length;
+            assert.equals(numOfFiles, numOfLines)
+          }
+        });
+      });
     });
+
     after('tidy up files', function() {
       fs.rmSync(newPath, {
         recursive: true
@@ -140,6 +158,7 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
       });
     });
   });
+
 }).catch(function(whyItMessedUp) {
   console.error("😭 It went wrong y'all");
   console.error(whyItMessedUp);

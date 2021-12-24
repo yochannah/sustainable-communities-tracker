@@ -185,13 +185,18 @@ const processLocCount = async function() {
 }
 
 const checkRepoInfo = async function(config) {
-  return repoInfo = await octokit.request('GET /repos/{owner}/{repo}', {
-    "owner": config.owner,
-    "repo": config.repo,
-    "mediaType": {
-      'previews': ['scarlet-witch']
-    }
-  })
+  try {
+    let repoInfo = await octokit.request('GET /repos/{owner}/{repo}', {
+      "owner": config.owner,
+      "repo": config.repo,
+      "mediaType": {
+        'previews': ['scarlet-witch']
+      }
+    });
+    return repoInfo;
+  } catch (e) {
+    throw "Error checking repo details";
+  }
 };
 
 const processRepoInfo = function(repoInfo) {
