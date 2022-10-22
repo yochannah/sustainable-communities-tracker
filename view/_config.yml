@@ -29,18 +29,11 @@ github_username:  yochannah
 
 # Build settings
 theme: minima
-plugins:
-  - jekyll-feed
-collections:
-  repos:
-    output: true
 
 defaults:
-  - scope:
-      type: categories  # select all category pages
     values:
       layout: single_repo
-      permalink: repos/:repo/
+      permalink: repos/:repo_list/
 
 # Exclude from processing.
 # The following items will not be processed, by default.
@@ -61,3 +54,6 @@ defaults:
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
+
+exclude:
+  - old_repos
