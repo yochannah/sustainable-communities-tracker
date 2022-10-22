@@ -1,0 +1,64 @@
+<canvas id="issuesChart" width="400" height="400"></canvas>
+<script>
+const ctx = document.getElementById('issuesChart');
+const data = {{site.data.month0[page.reponame].timeToMerge | jsonify}};
+
+const myData =  {
+
+        datasets: [{
+          data: data.pr,
+          label: "PRs",
+          backgroundColor: "rgba(255, 205, 86, 0.2)",
+          borderColor :"rgba(255, 205, 86, 1)",
+          parsing : {
+            xAxisKey: "created_at",
+            yAxisKey: "timeToClose"
+            }
+          },
+          {
+            data: data.issue,
+            label: "Issues",
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            parsing : {
+              xAxisKey: "created_at",
+              yAxisKey: "timeToClose"
+              }
+            }
+          ]
+    };
+
+const dummyData = {
+  labels:["pr","issue","pr"],
+  datasets : [{
+    data:[12,16,22,45,67,89],
+    label: "helo"
+  }]
+};
+
+const myChart = new Chart(ctx, {
+    type: 'bar',
+    data: myData,
+    options : {
+      backgroundColor: [
+      'rgba(255, 99, 132, 0.2)',
+      'rgba(255, 159, 64, 0.2)',
+      'rgba(255, 205, 86, 0.2)',
+      'rgba(75, 192, 192, 0.2)',
+      'rgba(54, 162, 235, 0.2)',
+      'rgba(153, 102, 255, 0.2)',
+      'rgba(201, 203, 207, 0.2)'
+    ],
+    borderColor: [
+      'rgb(255, 99, 132)',
+      'rgb(255, 159, 64)',
+      'rgb(255, 205, 86)',
+      'rgb(75, 192, 192)',
+      'rgb(54, 162, 235)',
+      'rgb(153, 102, 255)',
+      'rgb(201, 203, 207)'
+    ],
+    borderWidth: 1
+    }
+});
+</script>
