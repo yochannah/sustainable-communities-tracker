@@ -1,4 +1,4 @@
-# From https://jekyllrb.com/docs/plugins/generators/
+# From https://jekyllrb.com/docs/plugins/generators/ but heavily modded
 
 module PageGeneratorPlugin
   class RepoPageGenerator < Jekyll::Generator
@@ -26,17 +26,19 @@ module PageGeneratorPlugin
       # Initialize data hash with a key pointing to all posts under current category.
       # This allows accessing the list in a template via `page.linked_docs`.
       @data = {
-        'linked_docs' => reponame
+        'reponame' => reponame,
+        "layout" => "single_repo"
       }
 
     end
 
+
     # Placeholders that are used in constructing page URL.
     def url_placeholders
       {
-        :repo_list   => @dir,
+        :path   => "repo",
         :basename   => basename,
-        :output_ext => output_ext,
+        :output_ext => output_ext
       }
     end
   end
