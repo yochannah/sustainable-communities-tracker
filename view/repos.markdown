@@ -1,5 +1,5 @@
 ---
-layout: repo
+layout: repos
 title: Repos
 permalink: /repos/
 ---

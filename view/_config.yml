@@ -31,6 +31,16 @@ github_username:  yochannah
 theme: minima
 plugins:
   - jekyll-feed
+collections:
+  repos:
+    output: true
+
+defaults:
+  - scope:
+      type: categories  # select all category pages
+    values:
+      layout: single_repo
+      permalink: repos/:repo/
 
 # Exclude from processing.
 # The following items will not be processed, by default.

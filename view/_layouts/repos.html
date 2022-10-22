@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+
+{%- include head.html -%}
+
+<body>
+
+  {%- include header.html -%}
+
+  <main class="page-content" aria-label="Content">
+    <div class="wrapper">
+      <ul class="contents">
+
+        {% capture repo_list %}
+          {% for repo in site.data.month0%}
+            {{repo[0]}}
+            {% if forloop.last == false %}::{% endif%}
+          {% endfor %}
+        {% endcapture %}
+
+        {% assign repo_array = repo_list | split: '::' | sort_natural  %}
+
+        {% for repo in repo_array  %}
+
+        <li>
+          <a href="#{{repo | strip}}">
+          {{repo}}
+          </a>
+        </li>
+        {%endfor%}
+      </ul>
+      <div class="community">
+        {% for repo in site.data.month0 %}
+
+
+        {% assign reponame = repo[0] %}
+        {% assign info = repo[1] %}
+
+        {% assign info12 = site.data.month12[reponame] %}
+
+        <div class="card people-card" id="{{reponame}}">
+          <h2>{{reponame}}</h2>
+          <h3>Repo info</h3>
+          <table>
+            <thead>
+              <th></th>
+              <th>Month 0</th>
+              <th>Month 12</th>
+            </thead>
+          <tr>
+            <td>Date taken:</td>
+            <td>{{info.dateSnapshotTaken}}</td></tr>
+            <tr>
+              <td>
+              License
+            </td>
+            <td>
+              {%include licence.html url=info.repoInfo.license.url name=info.repoInfo.license.name  %}
+            </td>
+            <td>
+              {%include licence.html url=info12.repoInfo.license.url name=info12.repoInfo.license.name  %}
+            </td>
+          </tr>
+            <tr>
+              <td>
+              Code of Conduct
+            </td>
+              {% include coc.html url=info.repoInfo.code_of_conduct.url %}
+              {% include coc.html url=info12.repoInfo.code_of_conduct.url %}
+            </tr>
+            <tr>
+              <td>
+              Stars
+              </td>
+              <td>{{info.repoInfo.stargazers_count | default : "None"}}</td>
+              <td>{{info12.repoInfo.stargazers_count | default : "None"}}</td>
+            </tr>
+            <tr>
+            <td>Forks</td>
+            <td>{{info.repoInfo.forks_count | default : "None"}}</td>
+            <td>{{info12.repoInfo.forks_count | default : "None"}}</td>
+          </tr>
+          <tr>
+            <td>Commits</td>
+            <td>{{info.commitCount}}</td>
+            <td>{{info12.commitCount}}</td>
+          </tr>
+          <tr>
+            <td>totalBytes</td>
+            <td>{{info.locCount.totalBytes}}</td>
+            <td>{{info12.locCount.totalBytes}}</td>
+          </tr>
+          <tr>
+            <td>contributors</td>
+            <td>{{info.contributors.size}}</td>
+            <td>{{info12.contributors.size}}</td>
+          </tr>
+        </table>
+
+          <h3>Issues</h3>
+          <table>
+            <tr>
+            <td>All</td>
+            <td>{{info.issues.all}}</td>
+            <td>{{info12.issues.all}}</td>
+          </tr>
+          <tr>
+            <td>Open</td>
+            <td>{{info.issues.open}}</td>
+            <td>{{info12.issues.open}}</td>
+          </tr>
+          <tr>
+            <td>Closed</td>
+            <td>{{info.issues.closed}}</td>
+            <td>{{info12.issues.closed}}</td>
+          </tr>
+        </table>
+          <h3>Labels</h3>
+          <h4>Mentorship labels</h4>
+          <h5> Month 0 </h5>
+            <table>
+              <thead>
+                <th></th>
+                <th>month0</th>
+                <th>month12</th>
+              </thead>
+              {%for label in info.labels.open_mentorship_labels %}
+                <tr>
+                  <td>{{label[0]}}</td>
+                  <td>{{label[1]}}</td>
+                  <td>{{info12.labels.open_mentorship_labels[label[0]]}}</td>
+                </tr>
+                {%endfor%}
+            </table>
+            <h4>All labels</h4>
+            <div>🏷 0: {{info.labels.all_labels | join: ", "}}</div>
+            <div>🏷 12: {{info12.labels.all_labels | join: ", "}}</div>
+
+
+          <h3>Time to close</h3>
+          <table>
+            <thead>
+              <th></th>
+              <th>Month0</th>
+              <th>Month12</th>
+            </thead>
+            {% assign closeTime = info.timeToMerge.timeToClose%}
+            {% assign closeTime12 = info12.timeToMerge.timeToClose%}
+            <tr><td>PR Mean: </td>
+              <td>{{closeTime.pr.mean.humanReadable}}</td>
+              <td>{{closeTime12.pr.mean.humanReadable}}</td>
+            </tr>
+            <tr>
+              <td>PR Median: </td>
+              <td> {{closeTime.pr.median.humanReadable}}</td>
+              <td> {{closeTime12.pr.median.humanReadable}}</td>
+            </tr>
+            <tr>
+              <td>Issue Mean: </td>
+              <td> {{closeTime.issue.mean.humanReadable}}</td>
+              <td> {{closeTime12.issue.mean.humanReadable}}</td>
+            </tr>
+            <tr>
+              <td>Median:  </td>
+              <td>{{closeTime.issue.median.humanReadable}}</td>
+              <td>{{closeTime12.issue.median.humanReadable}}</td>
+            </tr>
+        </table>
+
+          <h3>Community</h3>
+          <table>
+            {%for comm in info.community%}
+            <tr>
+
+              <td>{{comm[0]}}</td>
+              <td>
+              {% if comm[0] == "files"%}
+                  <table>
+                {% for file in comm[1]%}
+
+                    <tr>
+                      <td>{{file[0]}}</td>
+                      <td>{{file[1]}}</td>
+                    </tr>
+                {%endfor%}
+                  </table>
+              {% else %}
+                {{comm[1]}}
+              {%endif %}
+            </td>
+            </tr>
+            {% endfor %}
+          </table>
+        {% endfor %}
+      </div>
+    </div>
+  </main>
+
+  {%- include footer.html -%}
+
+</body>
+</table>
+</html>
