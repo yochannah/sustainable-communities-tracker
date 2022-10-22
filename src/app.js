@@ -497,7 +497,7 @@ function calculateMean(anArray) {
 async function fullRun(repository, org, anOctokit) {
   let config = {};
   config.owner = org;
-  config.repo = repository;
+  config.repo = repository.trim();
   octokit = anOctokit || init();
 
   try {

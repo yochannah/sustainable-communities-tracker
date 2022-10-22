@@ -14,7 +14,7 @@ const month = "month" + argv.month;
 if (cliArgs.validate(argv)) {
   if (argv.url) {
     pathForReports = fm.initFilePath(month, filePath);
-    ghGetter.singleRepo(argv.url, month, filePath);
+    ghGetter.singleRepo(argv.url.trim(), month, filePath);
   } else {
     fs.readFile(argv.urlList, "utf8", function(err, data) {
       if (err) {
