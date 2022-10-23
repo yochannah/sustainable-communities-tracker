@@ -23,9 +23,14 @@
   data.pr = dateify(data.pr);
   data.issue = dateify(data.issue);
 
+  //this generates the labels for the issues graph
   function generateMonthRange(anArray) {
     let start = anArray[anArray.length - 1].created_at,
     end = anArray[0].created_at;
+    //one month padding on each side
+    end = end.plus({ months: 1 });
+    start = start.minus({months:1});
+
     console.log(start,end);
     let monthNum = luxon.Interval.fromDateTimes(start,end);
   //  monthNum = monthNum.length('months');
@@ -59,41 +64,11 @@
         borderColor: 'rgba(54, 162, 235, 1)',
         parsing: {
           xAxisKey: "created_at",
-          yAxisKey: "timeToClose"
+          yAxisKey: "timeToClose",
+          label: "created_at"
         }
       }
-    ],
-    options: {
-      scales: {
-        x: {
-          type: 'time',
-          time: {
-            unit: 'month',
-            displayFormats: {
-              month : "yyyy LLL"
-            }
-          }
-        },
-        y: {
-          type: 'time',
-          time: {
-            unit: 'millisecond',
-            displayFormats : {
-              millisecond : "DD"
-            }
-          }
-        }
-
-      }
-    }
-  };
-
-  const dummyData = {
-    labels: ["pr", "issue", "pr"],
-    datasets: [{
-      data: [12, 16, 22, 45, 67, 89],
-      label: "helo"
-    }]
+    ]
   };
 
   const myChart = new Chart(ctx, {
@@ -118,7 +93,8 @@
         'rgb(153, 102, 255)',
         'rgb(201, 203, 207)'
       ],
-      borderWidth: 1
+      borderWidth: 1,
+
     }
   });
 </script>

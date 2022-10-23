@@ -30,5 +30,7 @@
   <td>{%- include changed_value_num.html v1=info.issues.closed v2=info12.issues.closed -%}</td>
 </tr>
 </table>
-<h4>Issues over time</h4>
-{%- include issues_over_time.html -%}
+{% if info.issues.all > 0 %}
+  <h4>Issues over time</h4>
+  {%- include issues_over_time.html -%}
+{% endif %}
