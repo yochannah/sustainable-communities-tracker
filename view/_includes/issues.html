@@ -1,0 +1,34 @@
+{% assign reponame = page.reponame %}
+{% assign info = site.data.month0[reponame] %}
+{% assign info12 = site.data.month12[reponame] %}
+
+<table>
+<thead>
+  <tr>
+    <td></td>
+    <td>Month0</td>
+    <td>Month12</td>
+    <td>Change</td>
+  </tr>
+</thead>
+<tr>
+  <td>All</td>
+  <td>{{info.issues.all}}</td>
+  <td>{{info12.issues.all}}</td>
+  <td>{%- include changed_value_num.html v1=info.issues.all v2=info12.issues.all -%}</td>
+</tr>
+<tr>
+  <td>Open</td>
+  <td>{{info.issues.open}}</td>
+  <td>{{info12.issues.open}}</td>
+  <td>{%- include changed_value_num.html v1=info.issues.open v2=info12.issues.open -%}</td>
+</tr>
+<tr>
+  <td>Closed</td>
+  <td>{{info.issues.closed}}</td>
+  <td>{{info12.issues.closed}}</td>
+  <td>{%- include changed_value_num.html v1=info.issues.closed v2=info12.issues.closed -%}</td>
+</tr>
+</table>
+<h4>Issues over time</h4>
+{%- include issues_over_time.html -%}

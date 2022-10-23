@@ -1,6 +1,6 @@
-<canvas id="issuesChart" width="400" height="400"></canvas>
+<canvas id="chartIssuesBar" width="400" height="400"></canvas>
 <script>
-const ctx = document.getElementById('issuesChart');
+const ctx = document.getElementById('chartIssuesBar');
 const data = {{site.data.month0[page.reponame].timeToMerge | jsonify}};
 
 const myData =  {

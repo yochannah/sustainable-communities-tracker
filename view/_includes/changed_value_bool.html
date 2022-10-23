@@ -1,0 +1,9 @@
+
+  {% if include.v1 == include.v2  %}
+    Same
+  {% else %}
+    🚨 Changed<br>
+    Was:&nbsp;{{include.v1}}
+    <br>
+    Is:&nbsp;&nbsp;{{include.v2}}
+  {% endif %}

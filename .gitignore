@@ -1,3 +1,4 @@
+errorlog*
 _temp
 node_modules
 test/data_prep/mockData.json
