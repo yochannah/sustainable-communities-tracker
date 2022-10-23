@@ -1,73 +1,124 @@
 <canvas id="chartIssuesBar" width="400" height="400"></canvas>
 <script>
-const ctx = document.getElementById('chartIssuesBar');
-const data = {{site.data.month0[page.reponame].timeToMerge | jsonify}};
+  const ctx = document.getElementById('chartIssuesBar');
+  const data = {{site.data.month0[page.reponame].timeToMerge | jsonify}};
+  const dt = luxon.DateTime;
+  const dur = luxon.Duration;
 
-function sorter(a, b){
-  const datea = new Date(a.created_at);
-  const dateb = new Date(b.created_at);
-  return dateb-datea;
-}
+  function dateify(anArray) {
+    let newArray = anArray.map( function(item){
+      var new_item = item;
 
-data.pr = data.pr.sort(sorter);
-data.issue = data.issue.sort(sorter);
+      let ttc = item["timeToClose"];
+      ttc = dur.fromMillis(ttc).as("minutes");
+      new_item["timeToClose"] = ttc;
 
-const myData =  {
+      new_item["created_at"] = dt.fromISO(item["created_at"]);
 
-        datasets: [{
-          data: data.pr,
-          label: "PRs",
-          backgroundColor: "rgba(255, 205, 86, 0.2)",
-          borderColor :"rgba(255, 205, 86, 1)",
-          parsing : {
-            xAxisKey: "created_at",
-            yAxisKey: "timeToClose"
-            }
-          },
-          {
-            data: data.issue,
-            label: "Issues",
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            parsing : {
-              xAxisKey: "created_at",
-              yAxisKey: "timeToClose"
-              }
-            }
-          ]
-    };
+      return new_item;
+    });
+    return newArray;
+  }
 
-const dummyData = {
-  labels:["pr","issue","pr"],
-  datasets : [{
-    data:[12,16,22,45,67,89],
-    label: "helo"
-  }]
-};
+  data.pr = dateify(data.pr);
+  data.issue = dateify(data.issue);
 
-const myChart = new Chart(ctx, {
-    type: 'bar',
-    data: myData,
-    options : {
-      backgroundColor: [
-      'rgba(255, 99, 132, 0.2)',
-      'rgba(255, 159, 64, 0.2)',
-      'rgba(255, 205, 86, 0.2)',
-      'rgba(75, 192, 192, 0.2)',
-      'rgba(54, 162, 235, 0.2)',
-      'rgba(153, 102, 255, 0.2)',
-      'rgba(201, 203, 207, 0.2)'
+  function generateMonthRange(anArray) {
+    let start = anArray[anArray.length - 1].created_at,
+    end = anArray[0].created_at;
+    console.log(start,end);
+    let monthNum = luxon.Interval.fromDateTimes(start,end);
+  //  monthNum = monthNum.length('months');
+    console.log(monthNum);
+    monthNum = monthNum.splitBy({months: 1});
+    let monthList = monthNum.map(function(x){
+      return x.end.toFormat('yyyy LLL');
+    });
+    monthList.splice(0,0,monthNum[0].start.toFormat('yyyy LLL'));
+    return monthList;
+  }
+
+  console.log("mn",generateMonthRange(data.issue));
+
+  const myData = {
+    labels: generateMonthRange(data.issue),
+    datasets: [{
+        data: data.pr,
+        label: "PRs",
+        backgroundColor: "rgba(255, 205, 86, 0.2)",
+        borderColor: "rgba(255, 205, 86, 1)",
+        parsing: {
+          xAxisKey: "created_at",
+          yAxisKey: "timeToClose"
+        },
+      },
+      {
+        data: data.issue,
+        label: "Issues",
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        parsing: {
+          xAxisKey: "created_at",
+          yAxisKey: "timeToClose"
+        }
+      }
     ],
-    borderColor: [
-      'rgb(255, 99, 132)',
-      'rgb(255, 159, 64)',
-      'rgb(255, 205, 86)',
-      'rgb(75, 192, 192)',
-      'rgb(54, 162, 235)',
-      'rgb(153, 102, 255)',
-      'rgb(201, 203, 207)'
-    ],
-    borderWidth: 1
+    options: {
+      scales: {
+        x: {
+          type: 'time',
+          time: {
+            unit: 'month',
+            displayFormats: {
+              month : "yyyy LLL"
+            }
+          }
+        },
+        y: {
+          type: 'time',
+          time: {
+            unit: 'millisecond',
+            displayFormats : {
+              millisecond : "DD"
+            }
+          }
+        }
+
+      }
     }
-});
+  };
+
+  const dummyData = {
+    labels: ["pr", "issue", "pr"],
+    datasets: [{
+      data: [12, 16, 22, 45, 67, 89],
+      label: "helo"
+    }]
+  };
+
+  const myChart = new Chart(ctx, {
+    type: 'line',
+    data: myData,
+    options: {
+      backgroundColor: [
+        'rgba(255, 99, 132, 0.2)',
+        'rgba(255, 159, 64, 0.2)',
+        'rgba(255, 205, 86, 0.2)',
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(153, 102, 255, 0.2)',
+        'rgba(201, 203, 207, 0.2)'
+      ],
+      borderColor: [
+        'rgb(255, 99, 132)',
+        'rgb(255, 159, 64)',
+        'rgb(255, 205, 86)',
+        'rgb(75, 192, 192)',
+        'rgb(54, 162, 235)',
+        'rgb(153, 102, 255)',
+        'rgb(201, 203, 207)'
+      ],
+      borderWidth: 1
+    }
+  });
 </script>
