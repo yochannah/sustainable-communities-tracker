@@ -3,6 +3,15 @@
 const ctx = document.getElementById('chartIssuesBar');
 const data = {{site.data.month0[page.reponame].timeToMerge | jsonify}};
 
+function sorter(a, b){
+  const datea = new Date(a.created_at);
+  const dateb = new Date(b.created_at);
+  return dateb-datea;
+}
+
+data.pr = data.pr.sort(sorter);
+data.issue = data.issue.sort(sorter);
+
 const myData =  {
 
         datasets: [{
