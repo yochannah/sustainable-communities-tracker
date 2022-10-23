@@ -1,0 +1,70 @@
+{% assign reponame = page.reponame %}
+{% assign info = site.data.month0[reponame] %}
+{% assign info12 = site.data.month12[reponame] %}
+
+<h3>Repo info</h3>
+<table>
+  <thead>
+    <th></th>
+    <th>Month 0</th>
+    <th>Month 12</th>
+    <th>Change</th>
+  </thead>
+<tr>
+  <td>Date taken:</td>
+  <td>{{info.dateSnapshotTaken}}</td></tr>
+  <tr>
+    <td>
+    License
+  </td>
+  <td>
+    {%include licence.html url=info.repoInfo.license.url name=info.repoInfo.license.name  %}
+  </td>
+  <td>
+    {%include licence.html url=info12.repoInfo.license.url name=info12.repoInfo.license.name  %}
+  </td>
+  <td>
+    {%- include changed_value_bool.html v1=info.repoInfo.license.name v2=info12.repoInfo.license.name -%}
+  </td>
+</tr>
+  <tr>
+    <td>
+    Code of Conduct
+  </td>
+    <td>{% include coc.html url=info.community.code_of_conduct %}</td>
+    <td>{% include coc.html url=info12.community.code_of_conduct %}</td>
+    <td>{%- include changed_value_bool.html v1=info.community.code_of_conduct v2=info12.community.code_of_conduct -%}</td>
+  </tr>
+  <tr>
+    <td>
+    Stars
+    </td>
+    <td>{{info.repoInfo.stargazers_count | default : "None"}}</td>
+    <td>{{info12.repoInfo.stargazers_count | default : "None"}}</td>
+    <td>{%- include changed_value_num.html v1=info.repoInfo.stargazers_count v2=info12.repoInfo.stargazers_count -%}</td>
+  </tr>
+  <tr>
+  <td>Forks</td>
+  <td>{{info.repoInfo.forks_count | default : "None"}}</td>
+  <td>{{info12.repoInfo.forks_count | default : "None"}}</td>
+  <td>{%- include changed_value_num.html v1=info.repoInfo.forks_count v2=info12.repoInfo.forks_count -%}</td>
+</tr>
+<tr>
+  <td>Commits</td>
+  <td>{{info.commitCount}}</td>
+  <td>{{info12.commitCount}}</td>
+  <td>{%- include changed_value_num.html v1=info.commitCount v2=info12.commitCount -%}</td>
+</tr>
+<tr>
+  <td>totalBytes</td>
+  <td>{{info.locCount.totalBytes}}</td>
+  <td>{{info12.locCount.totalBytes}}</td>
+  <td>{%- include changed_value_num.html v1=info.locCount.totalBytes v2=info12.locCount.totalBytes -%}</td>
+</tr>
+<tr>
+  <td>contributors</td>
+  <td>{{info.contributors.size}}</td>
+  <td>{{info12.contributors.size}}</td>
+  <td>{%- include changed_value_num.html v1=info.contributors.size v2=info12.contributors.size -%}</td>
+</tr>
+</table>
