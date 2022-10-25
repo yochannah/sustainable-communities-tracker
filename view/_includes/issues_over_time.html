@@ -1,40 +1,53 @@
 <canvas id="chartIssuesBar" width="400" height="400"></canvas>
 <script>
   const ctx = document.getElementById('chartIssuesBar');
-  const data = {{site.data.month0[page.reponame].timeToMerge | jsonify}};
+  const data0 = {{site.data.month0[page.reponame].timeToMerge | jsonify}};
+  const data12 = {{site.data.month12[page.reponame].timeToMerge | jsonify}};
   const dt = luxon.DateTime;
   const dur = luxon.Duration;
+
 
   function dateify(anArray) {
     let newArray = anArray.map( function(item){
       var new_item = item;
 
       let ttc = item["timeToClose"];
-      ttc = dur.fromMillis(ttc).as("minutes");
+      ttc = dur.fromMillis(ttc).as("hours");
       new_item["timeToClose"] = ttc;
 
       new_item["created_at"] = dt.fromISO(item["created_at"]);
 
       return new_item;
     });
+    newArray.sort(function(a,b){
+      return a.created_at > b.created_at;
+    });
     return newArray;
   }
 
-  data.pr = dateify(data.pr);
-  data.issue = dateify(data.issue);
+  const footer = (tooltipItems) => {
+    let raw = tooltipItems[0].raw;
+    let ttip = "";
+      ttip += 'TTC: ' + raw.humanReadableTimeToClose + "\n";
+      ttip += 'Created: ' + raw.created_at.toFormat('yyyy LLL') + "\n";
+      ttip += 'Closed: ' + raw.closed_at;
+    return ttip;
+};
+
+  data0.pr = dateify(data0.pr);
+  data0.issue = dateify(data0.issue);
+
+  data12.pr = dateify(data12.pr);
+  data12.issue = dateify(data12.issue);
 
   //this generates the labels for the issues graph
   function generateMonthRange(anArray) {
     let start = anArray[anArray.length - 1].created_at,
     end = anArray[0].created_at;
     //one month padding on each side
-    end = end.plus({ months: 1 });
+    end = dt.local(2022,09);
     start = start.minus({months:1});
-
-    console.log(start,end);
-    let monthNum = luxon.Interval.fromDateTimes(start,end);
-  //  monthNum = monthNum.length('months');
-    console.log(monthNum);
+    let monthNum = luxon.Interval.fromDateTimes(start,end);;
     monthNum = monthNum.splitBy({months: 1});
     let monthList = monthNum.map(function(x){
       return x.end.toFormat('yyyy LLL');
@@ -43,12 +56,9 @@
     return monthList;
   }
 
-  console.log("mn",generateMonthRange(data.issue));
-
   const myData = {
-    labels: generateMonthRange(data.issue),
     datasets: [{
-        data: data.pr,
+        data: data0.pr,
         label: "PRs",
         backgroundColor: "rgba(255, 205, 86, 0.2)",
         borderColor: "rgba(255, 205, 86, 1)",
@@ -58,7 +68,7 @@
         },
       },
       {
-        data: data.issue,
+        data: data0.issue,
         label: "Issues",
         backgroundColor: 'rgba(54, 162, 235, 0.2)',
         borderColor: 'rgba(54, 162, 235, 1)',
@@ -66,6 +76,27 @@
           xAxisKey: "created_at",
           yAxisKey: "timeToClose",
           label: "created_at"
+        }
+      },
+      {
+        data: data12.issue,
+        label: "Issues 12",
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderDash: [3,2],
+        parsing: {
+          xAxisKey: "created_at",
+          yAxisKey: "timeToClose"
+        }
+      },{
+        data: data12.pr,
+        label: "PRs 12",
+        backgroundColor: "rgba(255, 205, 86, 0.2)",
+        borderColor: "rgba(255, 205, 86, 1)",
+        borderDash: [3,2],
+        parsing: {
+          xAxisKey: "created_at",
+          yAxisKey: "timeToClose"
         }
       }
     ]
@@ -75,6 +106,22 @@
     type: 'line',
     data: myData,
     options: {
+      scales : {
+        x : {
+          type: "time",
+          time: {
+            tooltipFormat: 'yyyy LLL',
+            max: "1666562434274"
+          },
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            footer: footer,
+          }
+        }
+      },
       backgroundColor: [
         'rgba(255, 99, 132, 0.2)',
         'rgba(255, 159, 64, 0.2)',
