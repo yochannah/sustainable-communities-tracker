@@ -32,5 +32,11 @@
 </table>
 {% if info.issues.all > 0 %}
   <h4>Issues over time</h4>
+  {%- include ttc.html -%}
+{% endif %}
+
+
+{% if info.issues.all > 0 %}
+  <h4>Issues over time</h4>
   {%- include issues_over_time.html -%}
 {% endif %}
