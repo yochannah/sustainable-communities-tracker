@@ -1,6 +1,6 @@
 <canvas id="chartIssuesTtc" width="400" height="400"></canvas>
 <script>
-  // (function(){
+ (function(){
   const ctx = document.getElementById('chartIssuesTtc');
   const data0 = {{site.data.month0[page.reponame].timeToMerge | jsonify}};
   const data12 = {{site.data.month12[page.reponame].timeToMerge | jsonify}};
@@ -129,5 +129,5 @@ const runningUnclosedTotal = function(dataset, label){
 
     }
   });
-  // })();
+   })();
 </script>

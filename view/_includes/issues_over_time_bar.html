@@ -1,0 +1,111 @@
+<canvas id="chartIssuesBar" width="400" height="400"></canvas>
+<script>
+  (function(){
+  const ctx = document.getElementById('chartIssuesBar');
+  const data0 = {{site.data.month0[page.reponame].timeToMerge | jsonify}};
+  const data12 = {{site.data.month12[page.reponame].timeToMerge | jsonify}};
+  const dt = luxon.DateTime;
+  const dur = luxon.Duration;
+  const interval = luxon.Interval;
+
+
+  function dateify(anArray) {
+    let newArray = anArray.map( function(item){
+      var new_item = item;
+
+      let ttc = item["timeToClose"];
+      ttc = dur.fromMillis(ttc).as("hours");
+      new_item["timeToClose"] = ttc;
+      new_item["created_at"] = dt.fromISO(item["created_at"]);
+      new_item["closed_at"] = dt.fromISO(item["closed_at"]);
+
+      return new_item;
+    });
+    newArray.sort(function(a,b){
+      return a.created_at > b.created_at;
+    });
+    return newArray;
+  }
+
+  const footer = (tooltipItems) => {
+    console.log(tooltipItems);
+    let raw = tooltipItems[0].raw;
+    let ttip = "";
+      ttip += 'Created: ' + raw[0].toFormat('yyyy LLL') + "\n";
+      ttip += 'Closed: ' + raw[1].toFormat('yyyy LLL');
+    return ttip;
+};
+
+const getFloatingChartPoints = function(aVal){
+  return [aVal["created_at"],aVal["closed_at"]];
+};
+
+const toFloatingChart = function(aDataset){
+  return {
+    data: aDataset.map(getFloatingChartPoints),
+    labels : aDataset.map(x => x.created_at)
+  };
+};
+
+  data0.pr = dateify(data0.pr);
+  data0.issue = dateify(data0.issue);
+
+  data12.pr = dateify(data12.pr);
+  data12.issue = dateify(data12.issue);
+
+  let d0 = {
+    pr : toFloatingChart(data0.pr),
+    issue : toFloatingChart(data0.issue),
+  },
+  d12 = {
+    pr : toFloatingChart(data12.pr),
+    issue : toFloatingChart(data12.issue),
+  }
+
+  let labels = d12.pr.labels
+  .concat(d12.issue.labels);
+
+
+  const myData = {
+    minBarLength: 2,
+    labels: labels,
+    datasets: [
+      {
+          data: d12.pr.data,
+          label: "PRs 12",
+          backgroundColor: "rgba(255, 205, 86, 0.2)",
+          borderColor: "rgba(255, 205, 86, 1)",
+        },
+        {
+          data: d12.issue.data,
+          label: "Issues 12",
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+        },
+    ]
+  };
+  const myChart = new Chart(ctx, {
+    type: 'bar',
+    data: myData,
+    options: {
+      scales : {
+        x : {
+          type: "time",
+          max: 1666562434274,
+          min: 1619823600000
+        },
+        y : {display : false}
+      },
+      indexAxis : 'y',
+      plugins: {
+        tooltip: {
+          callbacks: {
+            footer: footer,
+          }
+        }
+      },
+      borderWidth: 1
+    }
+  });
+  })();
+</script>
