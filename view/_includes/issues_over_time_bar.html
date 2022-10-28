@@ -17,7 +17,11 @@
       ttc = dur.fromMillis(ttc).as("hours");
       new_item["timeToClose"] = ttc;
       new_item["created_at"] = dt.fromISO(item["created_at"]);
-      new_item["closed_at"] = dt.fromISO(item["closed_at"]);
+      if(item["closed_at"]){
+        new_item["closed_at"] = dt.fromISO(item["closed_at"]);
+      } else {
+        new_item["closed_at"] = dt.now();
+      }
 
       return new_item;
     });
@@ -47,27 +51,20 @@ const toFloatingChart = function(aDataset){
   };
 };
 
-  data0.pr = dateify(data0.pr);
-  data0.issue = dateify(data0.issue);
 
   data12.pr = dateify(data12.pr);
   data12.issue = dateify(data12.issue);
 
-  let d0 = {
-    pr : toFloatingChart(data0.pr),
-    issue : toFloatingChart(data0.issue),
-  },
-  d12 = {
+  let d12 = {
     pr : toFloatingChart(data12.pr),
     issue : toFloatingChart(data12.issue),
-  }
-
-  let labels = d12.pr.labels
-  .concat(d12.issue.labels);
-
+  },
+  labels = d12.pr.labels
+  .concat(d12.issue.labels),
+  prs_and_issues = d12.pr.data
+  .concat(d12.issue.data);
 
   const myData = {
-    minBarLength: 2,
     labels: labels,
     datasets: [
       {
@@ -75,12 +72,14 @@ const toFloatingChart = function(aDataset){
           label: "PRs 12",
           backgroundColor: "rgba(255, 205, 86, 0.2)",
           borderColor: "rgba(255, 205, 86, 1)",
+          minBarLength: 20,
         },
         {
           data: d12.issue.data,
           label: "Issues 12",
           backgroundColor: 'rgba(54, 162, 235, 0.2)',
           borderColor: 'rgba(54, 162, 235, 1)',
+          minBarLength: 20
         },
     ]
   };
@@ -92,9 +91,15 @@ const toFloatingChart = function(aDataset){
         x : {
           type: "time",
           max: 1666562434274,
-          min: 1619823600000
+          min: 1619823600000,
         },
-        y : {display : false}
+        y : {
+          type : "timeseries",
+          time : {
+            unit:"month",
+            round:"week"},
+          grid: {display:false}
+        }
       },
       indexAxis : 'y',
       plugins: {
