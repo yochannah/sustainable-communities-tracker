@@ -27,14 +27,9 @@
     {%- include changed_value_bool.html v1=info.repoInfo.license.name v2=info12.repoInfo.license.name -%}
   </td>
 </tr>
-  <tr>
-    <td>
-    Code of Conduct
-  </td>
-    <td>{% include coc.html url=info.community.code_of_conduct %}</td>
-    <td>{% include coc.html url=info12.community.code_of_conduct %}</td>
-    <td>{%- include changed_value_bool.html v1=info.community.code_of_conduct v2=info12.community.code_of_conduct -%}</td>
-  </tr>
+ 
+{% include coc.html %}
+
   <tr>
     <td>
     Stars
