@@ -92,13 +92,19 @@ const toFloatingChart = function(aDataset){
           type: "time",
           max: 1666562434274,
           min: 1619823600000,
+          title: {
+            text:"Length of time an issue/PR is open", 
+            display:true
+          }
         },
         y : {
           type : "timeseries",
           time : {
             unit:"month",
-            round:"week"},
-          grid: {display:false}
+            round:"week"
+          },
+          grid: {display:false},
+          ticks: {display:false}
         }
       },
       indexAxis : 'y',
