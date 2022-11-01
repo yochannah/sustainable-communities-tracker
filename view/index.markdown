@@ -17,7 +17,7 @@ layout: home
 </tr>
 </thead>
 
-  {% for repo in site.data %}
+  {% for repo in site.data.month12 %}
   {% assign reponame = repo[0] %}
   {% assign info = repo[1] %}
 
@@ -47,7 +47,7 @@ layout: home
   </tr>
   </thead>
 
-    {% for repo in site.data %}
+    {% for repo in site.data.month12 %}
     {% assign reponame = repo[0] %}
     {% assign info = repo[1] %}
 
