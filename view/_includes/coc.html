@@ -1,29 +1,29 @@
 {% assign reponame = page.reponame %}
-{% assign info = site.data.month0[reponame].community.files.code_of_conduct %}
-{% assign info12 = site.data.month12[reponame].community.files.code_of_conduct %}
+{% assign cocinfo = site.data.month0[reponame].community.files.code_of_conduct %}
+{% assign cocinfo12 = site.data.month12[reponame].community.files.code_of_conduct %}
   <tr>
     <td>
     Code of Conduct 
   </td>
     <td>
-      {% if info.html_url %}
+      {% if cocinfo.html_url %}
       <a href="{{info.html_url}}">
-        {{info.html_url}}
+        {{cocinfo.html_url}}
       </a>
       {%else%}
       None
       {%endif%}
     </td>
     <td>
-      {% if info12.html_url %}
+      {% if cocinfo12.html_url %}
       <a href="{{info12.html_url}}">
-        {{info12.html_url}}
+        {{cocinfo12.html_url}}
       </a>
       {%else%}
       None
       {%endif%}
     </td>
     <td>
-      {%- include changed_value_bool.html v1=info.html_url v2=info12.html_url -%}
+      {%- include changed_value_bool.html v1=cocinfo.html_url v2=cocinfo12.html_url -%}
     </td>
   </tr>

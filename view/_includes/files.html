@@ -1,0 +1,33 @@
+{% assign reponame = page.reponame %}
+{% assign files = site.data.month0[reponame].community.files %}
+{% assign files12 = site.data.month12[reponame].community.files %}
+
+<table>
+<thead>
+  <tr>
+    <td></td>
+    <td>Month0</td>
+    <td>Month12</td>
+    <td>Change</td>
+  </tr>
+</thead>
+<tr>
+  <td>Contributing</td>
+  <td>{{files.contributing.html_url}}</td>
+  <td>{{files12.contributing.html_url}}</td>
+  <td>{%- include changed_value_num.html v1=files.contributing.html_url v2=files12.contributing.html_url -%}</td>
+</tr>
+<tr>
+  <td>Issue Template</td>
+  <td>{{files.issue_template.html_url}}</td>
+  <td>{{files12.issue_template.html_url}}</td>
+  <td>{%- include changed_value_num.html v1=files.issue_template.html_url v2=files12.issue_template.html_url -%}</td>
+</tr>
+<tr>
+  <td>PR Template</td>
+  <td>{{files.pull_request_template.html_url}}</td>
+  <td>{{files12.pull_request_template.html_url}}</td>
+  <td>{%- include changed_value_num.html v1=files.pull_request_template.html_url v2=files12.pull_request_template.html_url -%}</td>
+</tr>
+</table>
+

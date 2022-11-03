@@ -1,0 +1,22 @@
+<h3>Labels</h3>
+<h4>Mentorship labels</h4>
+<h5> Month 0 </h5>
+  <table>
+    <thead>
+      <th></th>
+      <th>month0</th>
+      <th>month12</th>
+    </thead>
+    {%for label in info.labels.open_mentorship_labels %}
+      <tr>
+        <td>{{label[0]}}</td>
+        <td>{{label[1]}}</td>
+        <td>{{info12.labels.open_mentorship_labels[label[0]]}}
+          {{info12.labels.open_mentorship_labels}}
+        </td>
+      </tr>
+      {%endfor%}
+  </table>
+  <h4>All labels</h4>
+  <div>🏷 0: {{info.labels.all_labels | join: ", "}}</div>
+  <div>🏷 12: {{info12.labels.all_labels | join: ", "}}</div>
