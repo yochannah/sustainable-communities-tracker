@@ -1,8 +1,29 @@
-
-  {%if include.url %}
-  <a href="{{include.url}}">
-    {{include.url}}
-  </a>
-  {%else%}
-  None
-  {%endif%}
+{% assign reponame = page.reponame %}
+{% assign cocinfo = site.data.month0[reponame].community.files.code_of_conduct %}
+{% assign cocinfo12 = site.data.month12[reponame].community.files.code_of_conduct %}
+  <tr>
+    <td>
+    Code of Conduct 
+  </td>
+    <td>
+      {% if cocinfo.html_url %}
+      <a href="{{cocinfo.html_url}}">
+        {{cocinfo.html_url}}
+      </a>
+      {%else%}
+      None
+      {%endif%}
+    </td>
+    <td>
+      {% if cocinfo12.html_url %}
+      <a href="{{cocinfo12.html_url}}">
+        {{cocinfo12.html_url}}
+      </a>
+      {%else%}
+      None
+      {%endif%}
+    </td>
+    <td>
+      {%- include changed_value_bool.html v1=cocinfo.html_url v2=cocinfo12.html_url -%}
+    </td>
+  </tr>

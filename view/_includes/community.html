@@ -1,0 +1,34 @@
+
+
+<h3>Community</h3>
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>Month0</th>
+      <th>Month12</th>
+      <th>Change?</th>
+    </tr>
+  </thead>
+
+  <tr>
+    <td>Health Percentage</td>
+    <td>{{info.community.health_percentage}}</td>
+    <td>{{info12.community.health_percentage}}</td>
+    <td>{% include changed_value_num.html v1=info.community.health_percentage v2=info12.community.health_percentage %}</td>
+  </tr>
+
+  <tr>
+    <td>Description</td>
+    <td>{{info.community.description}}</td>
+    <td>{{info12.community.description}}</td>
+    <td>{% include changed_value_bool.html v1=info.community.description v2=info12.community.description %}</td>
+  </tr>
+
+  <tr>
+    <td>Documentation</td>
+    <td>{{info.community.documentation}}</td>
+    <td>{{info12.community.documentation}}</td>
+    <td>{% include changed_value_bool.html v1=info.community.documentation v2=info12.community.documentation %}</td>
+  </tr>
+</table>

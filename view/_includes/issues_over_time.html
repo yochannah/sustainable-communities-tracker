@@ -1,64 +1,149 @@
-<canvas id="chartIssuesBar" width="400" height="400"></canvas>
+<canvas id="chartIssuesLine" width="400" height="400"></canvas>
 <script>
-const ctx = document.getElementById('chartIssuesBar');
-const data = {{site.data.month0[page.reponame].timeToMerge | jsonify}};
+  (function(){
+  const ctx = document.getElementById('chartIssuesLine');
+  const data0 = {{site.data.month0[page.reponame].timeToMerge | jsonify}};
+  const data12 = {{site.data.month12[page.reponame].timeToMerge | jsonify}};
+  const dt = luxon.DateTime;
+  const dur = luxon.Duration;
 
-const myData =  {
 
-        datasets: [{
-          data: data.pr,
-          label: "PRs",
-          backgroundColor: "rgba(255, 205, 86, 0.2)",
-          borderColor :"rgba(255, 205, 86, 1)",
-          parsing : {
-            xAxisKey: "created_at",
-            yAxisKey: "timeToClose"
-            }
-          },
-          {
-            data: data.issue,
-            label: "Issues",
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            parsing : {
-              xAxisKey: "created_at",
-              yAxisKey: "timeToClose"
-              }
-            }
-          ]
-    };
+  function dateify(anArray) {
+    let newArray = anArray.map( function(item){
+      var new_item = item;
 
-const dummyData = {
-  labels:["pr","issue","pr"],
-  datasets : [{
-    data:[12,16,22,45,67,89],
-    label: "helo"
-  }]
+      let ttc = item["timeToClose"];
+      ttc = dur.fromMillis(ttc).as("hours");
+      new_item["timeToClose"] = ttc;
+
+      new_item["created_at"] = dt.fromISO(item["created_at"]);
+
+      return new_item;
+    });
+    newArray.sort(function(a,b){
+      return a.created_at > b.created_at;
+    });
+    return newArray;
+  }
+
+  const footer = (tooltipItems) => {
+    let raw = tooltipItems[0].raw;
+    let ttip = "";
+      ttip += 'TTC: ' + raw.humanReadableTimeToClose + "\n";
+      ttip += 'Created: ' + raw.created_at.toFormat('yyyy LLL') + "\n";
+      ttip += 'Closed: ' + raw.closed_at;
+    return ttip;
 };
 
-const myChart = new Chart(ctx, {
-    type: 'bar',
+  data0.pr = dateify(data0.pr);
+  data0.issue = dateify(data0.issue);
+
+  data12.pr = dateify(data12.pr);
+  data12.issue = dateify(data12.issue);
+
+  //this generates the labels for the issues graph
+  function generateMonthRange(anArray) {
+    let start = anArray[anArray.length - 1].created_at,
+    end = anArray[0].created_at;
+    //one month padding on each side
+    end = dt.local(2022,09);
+    start = start.minus({months:1});
+    let monthNum = luxon.Interval.fromDateTimes(start,end);;
+    monthNum = monthNum.splitBy({months: 1});
+    let monthList = monthNum.map(function(x){
+      return x.end.toFormat('yyyy LLL');
+    });
+    monthList.splice(0,0,monthNum[0].start.toFormat('yyyy LLL'));
+    return monthList;
+  }
+
+  const myData = {
+    datasets: [{
+        data: data0.pr,
+        label: "PRs",
+        backgroundColor: "rgba(255, 205, 86, 0.2)",
+        borderColor: "rgba(255, 205, 86, 1)",
+        parsing: {
+          xAxisKey: "created_at",
+          yAxisKey: "timeToClose"
+        },
+      },
+      {
+        data: data0.issue,
+        label: "Issues",
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        parsing: {
+          xAxisKey: "created_at",
+          yAxisKey: "timeToClose",
+          label: "created_at"
+        }
+      },
+      {
+        data: data12.issue,
+        label: "Issues 12",
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderDash: [3,2],
+        parsing: {
+          xAxisKey: "created_at",
+          yAxisKey: "timeToClose"
+        }
+      },{
+        data: data12.pr,
+        label: "PRs 12",
+        backgroundColor: "rgba(255, 205, 86, 0.2)",
+        borderColor: "rgba(255, 205, 86, 1)",
+        borderDash: [3,2],
+        parsing: {
+          xAxisKey: "created_at",
+          yAxisKey: "timeToClose"
+        }
+      }
+    ]
+  };
+
+  const myChart = new Chart(ctx, {
+    type: 'line',
     data: myData,
-    options : {
+    options: {
+      scales : {
+        x : {
+          type: "time",
+          time: {
+            tooltipFormat: 'yyyy LLL',
+            max: "1666562434274"
+          },
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            footer: footer,
+          }
+        }
+      },
       backgroundColor: [
-      'rgba(255, 99, 132, 0.2)',
-      'rgba(255, 159, 64, 0.2)',
-      'rgba(255, 205, 86, 0.2)',
-      'rgba(75, 192, 192, 0.2)',
-      'rgba(54, 162, 235, 0.2)',
-      'rgba(153, 102, 255, 0.2)',
-      'rgba(201, 203, 207, 0.2)'
-    ],
-    borderColor: [
-      'rgb(255, 99, 132)',
-      'rgb(255, 159, 64)',
-      'rgb(255, 205, 86)',
-      'rgb(75, 192, 192)',
-      'rgb(54, 162, 235)',
-      'rgb(153, 102, 255)',
-      'rgb(201, 203, 207)'
-    ],
-    borderWidth: 1
+        'rgba(255, 99, 132, 0.2)',
+        'rgba(255, 159, 64, 0.2)',
+        'rgba(255, 205, 86, 0.2)',
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(153, 102, 255, 0.2)',
+        'rgba(201, 203, 207, 0.2)'
+      ],
+      borderColor: [
+        'rgb(255, 99, 132)',
+        'rgb(255, 159, 64)',
+        'rgb(255, 205, 86)',
+        'rgb(75, 192, 192)',
+        'rgb(54, 162, 235)',
+        'rgb(153, 102, 255)',
+        'rgb(201, 203, 207)'
+      ],
+      borderWidth: 1,
+
     }
-});
+  });
+  })();
 </script>

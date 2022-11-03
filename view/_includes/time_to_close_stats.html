@@ -1,0 +1,29 @@
+<h3>Time to close</h3>
+<table>
+  <thead>
+    <th></th>
+    <th>Month0</th>
+    <th>Month12</th>
+  </thead>
+  {% assign closeTime = info.timeToMerge.timeToClose%}
+  {% assign closeTime12 = info12.timeToMerge.timeToClose%}
+  <tr><td>PR Mean: </td>
+    <td>{{closeTime.pr.mean.humanReadable}}</td>
+    <td>{{closeTime12.pr.mean.humanReadable}}</td>
+  </tr>
+  <tr>
+    <td>PR Median: </td>
+    <td> {{closeTime.pr.median.humanReadable}}</td>
+    <td> {{closeTime12.pr.median.humanReadable}}</td>
+  </tr>
+  <tr>
+    <td>Issue Mean: </td>
+    <td> {{closeTime.issue.mean.humanReadable}}</td>
+    <td> {{closeTime12.issue.mean.humanReadable}}</td>
+  </tr>
+  <tr>
+    <td>Median:  </td>
+    <td>{{closeTime.issue.median.humanReadable}}</td>
+    <td>{{closeTime12.issue.median.humanReadable}}</td>
+  </tr>
+</table>

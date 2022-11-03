@@ -1,0 +1,132 @@
+<canvas id="chartIssuesTtc" width="400" height="400"></canvas>
+<script>
+ (function(){
+  const ctx = document.getElementById('chartIssuesTtc');
+  const data0 = {{site.data.month0[page.reponame].timeToMerge | jsonify}};
+  const data12 = {{site.data.month12[page.reponame].timeToMerge | jsonify}};
+  const dt = luxon.DateTime;
+  const dur = luxon.Duration;
+
+const colors = {
+    bg: {
+      PRs:
+      "rgba(255, 205, 86, 0.2)",
+      Issues: "rgba(54, 162, 235, 0.2)"
+    },
+    border: {
+      PRs : "rgba(255, 205, 86, 1)",
+      Issues: "rgba(54, 162, 235, 0.2)"
+    }
+  }
+
+  function dateify(anArray) {
+    let newArray = anArray.map( function(item){
+      var new_item = item;
+
+      let ttc = item["timeToClose"];
+      ttc = dur.fromMillis(ttc).as("hours");
+      new_item["timeToClose"] = ttc;
+
+      new_item["created_at"] = dt.fromISO(item["created_at"]);
+
+      if(item.closed) {
+        new_item["closed_at"] = dt.fromISO(item["closed_at"]);
+      }
+
+      return new_item;
+    });
+
+    newArray.sort(function(a,b){
+      return a.created_at > b.created_at;
+    });
+    return newArray;
+  }
+
+  //configures tooltip to show useful data about each point - created and closed
+  const footer = (tooltipItems) => {
+    let raw = tooltipItems[0].raw;
+    let ttip = "";
+      ttip += 'TTC: ' + raw.humanReadableTimeToClose + "\n";
+      ttip += 'Created: ' + raw.created_at.toFormat('yyyy LLL') + "\n";
+      ttip += 'Closed: ' + raw.closed_at.toFormat('yyyy LLL');
+    return ttip;
+};
+
+const timeOpenOneIssue = function(ds){
+  let x1 = ds.created_at,
+  x2 = ds.closed_at,
+  yval = 1;
+
+  if(!ds.closed) {
+    x2 = dt.now();
+  }
+
+  return [
+    {x:x1, y:yval},
+    {x:x2, y:yval}
+  ];
+}
+
+const runningUnclosedTotal = function(dataset, label){
+  return dataset.map(function(ds) {
+    let pointStyle = "triangle";
+    if (ds.closed) {
+      pointStyle = "circle";
+    }
+    let response = {
+      data: timeOpenOneIssue(ds),
+      label : label,
+      backgroundColor: colors.bg[label],
+      borderColor: colors.border[label],
+      pointStyle : pointStyle
+    };
+    return response;
+  });
+}
+
+  // data0.pr = data0.pr.filter(pr => !pr.closed)
+  // data0.issue = data0.issue.filter(issue => !issue.closed)
+  // data12.pr = data12.pr.filter(pr => !pr.closed)
+  // data12.issue = data12.issue.filter(issue => !issue.closed)
+
+  //format date/time info to be displayable in chartjs
+  data0.pr = dateify(data0.pr);
+  data0.issue = dateify(data0.issue);
+
+  data12.pr = dateify(data12.pr);
+  data12.issue = dateify(data12.issue);
+
+  // console.log(runningUnclosedTotal(data0.pr, "PRs"));
+  // console.log(runningUnclosedTotal(data0.issue, "Issues"));
+  // console.log(runningUnclosedTotal(data12.pr, "PRs"));
+  // console.log(runningUnclosedTotal(data12.issue, "Issues"));
+
+  var label="PRs",
+  myDatasets = runningUnclosedTotal(data12.issue,"Issues")
+    .concat(runningUnclosedTotal(data12.pr,"PRs"));
+    // .concat(runningUnclosedTotal(data0.issue,"Issues"))
+    // .concat(runningUnclosedTotal(data12.pr,"PRs"));
+
+  const myChart = new Chart(ctx, {
+    type: 'line',
+    data: {datasets : myDatasets},
+    options: {
+      scales : {
+        x : {
+          type: "time",
+          time: {
+            tooltipFormat: 'yyyy LLL',
+            max: "1666562434274"
+          },
+        },
+        y : {stacked:true}
+      },
+      plugins: {
+        legend: {display:false} // too many labels
+      },
+      borderWidth: 1,
+
+    }
+  });
+   })();
+</script>
