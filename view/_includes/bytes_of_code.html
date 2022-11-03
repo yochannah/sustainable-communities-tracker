@@ -1,0 +1,53 @@
+<canvas id="chartLoc" width="400" height="400"></canvas>
+<script>
+  (function(){
+  const ctx = document.getElementById('chartLoc');
+  const data0 = {{site.data.month0[page.reponame].locCount | jsonify}};
+  const data12 = {{site.data.month12[page.reponame].locCount | jsonify}};
+  const dt = luxon.DateTime;
+  const dur = luxon.Duration;
+  const interval = luxon.Interval;
+
+  const footer = (tooltipItems) => {
+    console.log(tooltipItems);
+    let raw = tooltipItems[0].raw;
+    let ttip = "";
+    return ttip;
+};
+
+  const myData = {
+   // labels: [1,2,3,4,5,5],
+    datasets: [
+      {
+          data: data0.breakdown,
+          label: "Month 0",
+          backgroundColor: "rgba(255, 205, 86, 0.2)",
+          borderColor: "rgba(255, 205, 86, 1)",
+          minBarLength: 20,
+        },
+        {
+          data: data12.breakdown,
+          label: "Month 12",
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          minBarLength: 20
+        },
+    ]
+  };
+  const myChart = new Chart(ctx, {
+    type: 'bar',
+    data: myData,
+    options: {
+
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            footer: footer,
+          }
+        }
+      },
+      borderWidth: 1
+    });
+  })();
+</script>

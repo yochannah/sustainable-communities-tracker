@@ -2,9 +2,9 @@
 {% assign info = site.data.month0[reponame] %}
 {% assign info12 = site.data.month12[reponame] %}
 
-{% assign url = site.data.month0[reponame].community.files.code_of_conduct.html_url | split: "/blob/" %}
+{% assign url = reponame | split: "_" %}
 
-<a href="{{url[0]]}}">Visit Repo</a>
+<a href="http://www.github.com/{{url[0]}}/{{url[1]}}">Visit Repo</a>
 
 <h3>Repo info</h3>
 <table>
@@ -69,3 +69,5 @@
   <td>{%- include changed_value_num.html v1=info.contributors.size v2=info12.contributors.size -%}</td>
 </tr>
 </table>
+
+{%- include bytes_of_code.html -%}
