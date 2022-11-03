@@ -2,6 +2,10 @@
 {% assign info = site.data.month0[reponame] %}
 {% assign info12 = site.data.month12[reponame] %}
 
+{% assign url = site.data.month0[reponame].community.files.code_of_conduct.html_url | split: "/blob/" %}
+
+<a href="{{url[0]]}}">Visit Repo</a>
+
 <h3>Repo info</h3>
 <table>
   <thead>
@@ -12,7 +16,9 @@
   </thead>
 <tr>
   <td>Date taken:</td>
-  <td>{{info.dateSnapshotTaken}}</td></tr>
+  <td>{{info.dateSnapshotTaken}}</td>
+  <td>{{info12.dateSnapshotTaken}}</td>
+</tr>
   <tr>
     <td>
     License
