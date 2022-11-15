@@ -1,0 +1,97 @@
+<canvas id="chartSurveyAggregate" width="400" height="400"></canvas>
+<script>
+    // (function(){
+    console.log("wtf")
+    const ctx = document.getElementById('chartSurveyAggregate');
+    var survey0 = {{ site.data.surveys.OSS0 | jsonify}};
+    var survey6 = {{ site.data.surveys.OSS6 | jsonify}};
+    var survey12 = {{ site.data.surveys.OSS12 | jsonify}};
+    const dt = luxon.DateTime;
+    const dur = luxon.Duration;
+
+    console.log("Survey0 length: " + survey0.length)
+    //filter incomplete answers
+    survey0 = survey0.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
+    survey6 = survey6.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
+    survey12 = survey12.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
+
+    console.log("Survey0 length: " + survey0.length)
+
+    console.log(survey0.map(answer => answer["project-open-contrib"]));
+
+    //aggregate stats across rows
+    function agg_completed_bool(survey,variable) {
+        return survey.reduce(function (newVal, answer, i) {
+            //init datastore object
+            if (i === 1) {
+                newVal = {
+                    "Yes": 0,
+                    "No": 0
+                }
+            } else {
+                newVal[answer["project-open-contrib"]]++;
+            }
+            return newVal;
+        });
+    }
+
+    console.log(agg_completed_bool(survey0,"project-open-contrib"));
+
+
+
+  const myData = {
+    datasets: [{
+        data: agg_completed_bool(survey0,"project-open-contrib"),
+        label: "0",
+        backgroundColor: "rgba(255, 205, 86, 0.2)",
+        borderColor: "rgba(255, 205, 86, 1)",
+      },
+      {
+        data: agg_completed_bool(survey6,"project-open-contrib"),
+        label: "6",
+        backgroundColor: "rgba(153, 102, 255, 0.2)",
+        borderColor: "rgba(153, 102, 255, 1)",
+      },
+      {
+        data: agg_completed_bool(survey12,"project-open-contrib"),
+        label: "12",
+         backgroundColor: 'rgba(54, 162, 235, 0.2)',
+         borderColor: 'rgba(54, 162, 235, 1)',
+      }
+    ]
+  };
+
+  const myChart = new Chart(ctx, {
+    type: 'bar',
+    data: myData,
+    options: {
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+
+          }
+        }
+      },
+      backgroundColor: [
+        'rgba(255, 99, 132, 0.2)',
+        'rgba(255, 159, 64, 0.2)',
+        'rgba(255, 205, 86, 0.2)',
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(153, 102, 255, 0.2)',
+        'rgba(201, 203, 207, 0.2)'
+      ],
+      borderColor: [
+        'rgb(255, 99, 132)',
+        'rgb(255, 159, 64)',
+        'rgb(255, 205, 86)',
+        'rgb(75, 192, 192)',
+        'rgb(54, 162, 235)',
+        'rgb(153, 102, 255)',
+        'rgb(201, 203, 207)'
+      ],
+      borderWidth: 1
+    });
+//  })();
+</script>

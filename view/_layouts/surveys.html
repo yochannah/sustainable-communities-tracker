@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+
+{%- include head.html -%}
+
+<body>
+
+  {%- include scripts.html -%}
+  {%- include header.html -%}
+
+  <main class="page-content" aria-label="Content">
+    <div class="wrapper">
+
+      <h1>{{page.name}}</h1>
+
+      {{page.content}}
+
+      Aggregate stats
+      
+      {%- include survey_aggregate.html -%}
+
+      {% for survey in site.data.surveys.OSS0 %}
+      {% if survey.ProjectPseudonym != nil and survey.project-open-contrib != nil  %} 
+        <h2>{{survey.ProjectPseudonym}}</h2>😇
+          {% for question in survey %}
+            {% assign k = question[0] %}
+            {% assign v = question[1] %}
+      
+            <b>{{k}}</b>
+            {{v}}<br>
+    
+          {% endfor %}
+        {%endif%}
+      {% endfor %}
+
+    </div>
+
+  </main>
+
+  {%- include footer.html -%}
+
+</body>
+
+</html>
