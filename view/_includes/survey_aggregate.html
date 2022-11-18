@@ -6,18 +6,18 @@
     var survey0 = {{ site.data.surveys.OSS0 | jsonify}};
     var survey6 = {{ site.data.surveys.OSS6 | jsonify}};
     var survey12 = {{ site.data.surveys.OSS12 | jsonify}};
+    const surveys = [survey0, survey6, survey12];
     const dt = luxon.DateTime;
     const dur = luxon.Duration;
 
-    console.log("Survey0 length: " + survey0.length)
+ 
     //filter incomplete answers
     survey0 = survey0.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
     survey6 = survey6.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
     survey12 = survey12.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
 
-    console.log("Survey0 length: " + survey0.length)
 
-    console.log(survey0.map(answer => answer["project-open-contrib"]));
+    // console.log(survey0.map(answer => answer["project-open-contrib"]));
 
     //aggregate stats across rows
     function agg_completed_bool(survey,variable) {
@@ -35,9 +35,7 @@
         });
     }
 
-    console.log(agg_completed_bool(survey0,"project-open-contrib"));
-
-
+// todo - adjust this so it visualuses based on a pre-set selection of choices, not just booleans
 
   const myData = {
     datasets: [{
