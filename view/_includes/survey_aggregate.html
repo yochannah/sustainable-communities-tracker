@@ -6,6 +6,7 @@
     var survey0 = {{ site.data.surveys.OSS0 | jsonify}};
     var survey6 = {{ site.data.surveys.OSS6 | jsonify}};
     var survey12 = {{ site.data.surveys.OSS12 | jsonify}};
+    const questionText = {{ site.data.surveys.OSS12[0] | jsonify}};
     const dt = luxon.DateTime;
     const dur = luxon.Duration;
     const backgroundColor = [
@@ -16,7 +17,7 @@
         'rgba(255, 99, 132, 0.2)',
         'rgba(201, 203, 207, 0.2)',
         'rgba(255, 159, 64, 0.2)',
-      ];
+    ];
     const borderColor = [
         'rgb(54, 162, 235)',
         'rgb(153, 102, 255)',
@@ -25,7 +26,7 @@
         'rgb(255, 99, 132)',
         'rgb(201, 203, 207)',
         'rgb(255, 159, 64)',
-      ];
+    ];
     const datasetLabels = [
         "Month 0",
         "Month 6",
@@ -43,7 +44,7 @@
     // console.log(survey0.map(answer => answer["project-open-contrib"]));
 
     //aggregate stats across rows
-    function agg_completed_bool(survey,variable) {
+    function agg_completed_bool(survey, variable) {
         return survey.reduce(function (newVal, answer, i) {
             //init datastore object
             if (i === 1) {
@@ -58,44 +59,43 @@
         });
     }
 
-// todo - adjust this so it visualises based on a pre-set selection of choices, not just booleans
+    // todo - adjust this so it visualises based on a pre-set selection of choices, not just booleans
 
-surveys.map(survey => console.log(survey));
-console.log(survey0, surveys[0]);
+    surveys.map(survey => console.log(survey));
+    console.log(survey0, surveys[0]);
 
-function generateDataSet(variable) {
-    return surveys.map(function(survey, i){
-        return {
-            data: agg_completed_bool(survey,variable),
-            label : datasetLabels[i],
-            backgroundColor: backgroundColor[i],
-            borderColor: borderColor[i],
-            borderWidth: 1
-        }
-    });
-};
+    function generateDataSet(variable) {
+        return surveys.map(function (survey, i) {
+            return {
+                data: agg_completed_bool(survey, variable),
+                label: datasetLabels[i],
+                backgroundColor: backgroundColor[i],
+                borderColor: borderColor[i],
+                borderWidth: 1
+            }
+        });
+    };
 
-console.log(generateDataSet("project-open-contrib"));
+    const generateChart = function (variable) {
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                datasets: generateDataSet(variable)
+            },
+            options: {
+                plugins: {
+                    title: {
+                        text: questionText[variable],
+                        display: true
+                    }
+                },
+                backgroundColor: backgroundColor,
+                borderColor: borderColor
+            }
+        });
+    }
 
-  const myData = {
-    datasets: generateDataSet("project-open-contrib")
-  };
-
-  const myChart = new Chart(ctx, {
-    type: 'bar',
-    data: myData,
-    options: {
-      },
-      plugins: {
-        tooltip: {
-          callbacks: {
-
-          }
-        }
-      },
-      backgroundColor: backgroundColor,
-      borderColor: borderColor,
-    });
+generateChart("project-open-contrib");
 
 //  })();
 </script>
