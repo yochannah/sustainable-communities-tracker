@@ -56,7 +56,11 @@
                     "No": 0
                 }
             } else {
-                newVal[answer[variable]]++;
+                if (!(answer[variable] in newVal)) {
+                    console.debug('null value, not adding', answer, answer[variable]);
+                } else {
+                    newVal[answer[variable]]++;
+                }
             }
             return newVal;
         });
@@ -96,20 +100,20 @@
     }
 
 
-const generateElem = function(variable){
-    let chartElemHtml = `<canvas id="chart${variable}" width="400" height="400" class="aggGraph"></canvas>`;
-    let anchor = document.getElementById("aggregateAnchor");
-    anchor.innerHTML += chartElemHtml;
-}
+    const generateElem = function (variable) {
+        let chartElemHtml = `<canvas id="chart${variable}" width="400" height="400" class="aggGraph"></canvas>`;
+        let anchor = document.getElementById("aggregateAnchor");
+        anchor.innerHTML += chartElemHtml;
+    }
 
-//this has to be done before we generate the graphs or it doesn't render, idk why
-boolGraphs.map(function(graph){
-    generateElem(graph);
-});
+    //this has to be done before we generate the graphs or it doesn't render, idk why
+    boolGraphs.map(function (graph) {
+        generateElem(graph);
+    });
 
-boolGraphs.map(function(graph){
-    generateChart(graph);
-});
+    boolGraphs.map(function (graph) {
+        generateChart(graph);
+    });
 
 
 //  })();
