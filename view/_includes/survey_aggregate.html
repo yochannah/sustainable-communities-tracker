@@ -1,0 +1,101 @@
+<canvas id="chartSurveyAggregate" width="400" height="400"></canvas>
+<script>
+    // (function(){
+    console.log("wtf")
+    const ctx = document.getElementById('chartSurveyAggregate');
+    var survey0 = {{ site.data.surveys.OSS0 | jsonify}};
+    var survey6 = {{ site.data.surveys.OSS6 | jsonify}};
+    var survey12 = {{ site.data.surveys.OSS12 | jsonify}};
+    const questionText = {{ site.data.surveys.OSS12[0] | jsonify}};
+    const dt = luxon.DateTime;
+    const dur = luxon.Duration;
+    const backgroundColor = [
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(153, 102, 255, 0.2)',
+        'rgba(255, 205, 86, 0.2)',
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(255, 99, 132, 0.2)',
+        'rgba(201, 203, 207, 0.2)',
+        'rgba(255, 159, 64, 0.2)',
+    ];
+    const borderColor = [
+        'rgb(54, 162, 235)',
+        'rgb(153, 102, 255)',
+        'rgb(255, 205, 86)',
+        'rgb(75, 192, 192)',
+        'rgb(255, 99, 132)',
+        'rgb(201, 203, 207)',
+        'rgb(255, 159, 64)',
+    ];
+    const datasetLabels = [
+        "Month 0",
+        "Month 6",
+        "Month12"
+    ]
+
+    //filter incomplete answers
+    survey0 = survey0.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
+    survey6 = survey6.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
+    survey12 = survey12.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
+
+    const surveys = [survey0, survey6, survey12];
+
+
+    // console.log(survey0.map(answer => answer["project-open-contrib"]));
+
+    //aggregate stats across rows
+    function agg_completed_bool(survey, variable) {
+        return survey.reduce(function (newVal, answer, i) {
+            //init datastore object
+            if (i === 1) {
+                newVal = {
+                    "Yes": 0,
+                    "No": 0
+                }
+            } else {
+                newVal[answer[variable]]++;
+            }
+            return newVal;
+        });
+    }
+
+    // todo - adjust this so it visualises based on a pre-set selection of choices, not just booleans
+
+    surveys.map(survey => console.log(survey));
+    console.log(survey0, surveys[0]);
+
+    function generateDataSet(variable) {
+        return surveys.map(function (survey, i) {
+            return {
+                data: agg_completed_bool(survey, variable),
+                label: datasetLabels[i],
+                backgroundColor: backgroundColor[i],
+                borderColor: borderColor[i],
+                borderWidth: 1
+            }
+        });
+    };
+
+    const generateChart = function (variable) {
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                datasets: generateDataSet(variable)
+            },
+            options: {
+                plugins: {
+                    title: {
+                        text: questionText[variable],
+                        display: true
+                    }
+                },
+                backgroundColor: backgroundColor,
+                borderColor: borderColor
+            }
+        });
+    }
+
+generateChart("project-open-contrib");
+
+//  })();
+</script>
