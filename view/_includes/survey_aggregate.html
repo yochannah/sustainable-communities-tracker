@@ -1,8 +1,7 @@
-<canvas id="chartSurveyAggregate" width="400" height="400"></canvas>
+<div id="aggregateAnchor"></div>
+
 <script>
     // (function(){
-    console.log("wtf")
-    const ctx = document.getElementById('chartSurveyAggregate');
     var survey0 = {{ site.data.surveys.OSS0 | jsonify}};
     var survey6 = {{ site.data.surveys.OSS6 | jsonify}};
     var survey12 = {{ site.data.surveys.OSS12 | jsonify}};
@@ -31,17 +30,21 @@
         "Month 0",
         "Month 6",
         "Month12"
-    ]
+    ];
 
-    //filter incomplete answers
+    const boolGraphs = [
+        "project-open-contrib",
+        "funds-grant-funds",
+        "funds-others-pick-up",
+        "future-funding-plans"
+    ];
+
+    //filter incomplete answers. I feel like there's a more concise way to do it. 
     survey0 = survey0.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
     survey6 = survey6.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
     survey12 = survey12.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
 
     const surveys = [survey0, survey6, survey12];
-
-
-    // console.log(survey0.map(answer => answer["project-open-contrib"]));
 
     //aggregate stats across rows
     function agg_completed_bool(survey, variable) {
@@ -61,9 +64,6 @@
 
     // todo - adjust this so it visualises based on a pre-set selection of choices, not just booleans
 
-    surveys.map(survey => console.log(survey));
-    console.log(survey0, surveys[0]);
-
     function generateDataSet(variable) {
         return surveys.map(function (survey, i) {
             return {
@@ -77,7 +77,7 @@
     };
 
     const generateChart = function (variable) {
-        new Chart(ctx, {
+        return new Chart(document.getElementById('chart' + variable), {
             type: 'bar',
             data: {
                 datasets: generateDataSet(variable)
@@ -95,7 +95,22 @@
         });
     }
 
-generateChart("project-open-contrib");
+
+const generateElem = function(variable){
+    let chartElemHtml = `<canvas id="chart${variable}" width="400" height="400" class="aggGraph"></canvas>`;
+    let anchor = document.getElementById("aggregateAnchor");
+    anchor.innerHTML += chartElemHtml;
+}
+
+//this has to be done before we generate the graphs or it doesn't render, idk why
+boolGraphs.map(function(graph){
+    generateElem(graph);
+});
+
+boolGraphs.map(function(graph){
+    generateChart(graph);
+});
+
 
 //  })();
 </script>
