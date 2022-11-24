@@ -619,5 +619,9 @@ module.exports = {
   calculateMedian: calculateMedian,
   calculateMean: calculateMean,
   processMultipleFiles: processMultipleFiles,
-  singleRepo: singleRepo
+  singleRepo: singleRepo,
+  countPaginatedResults : countPaginatedResults,
+  checkNoOfResults : checkNoOfResults,
+  initOcto : init,
+  splitUrl : splitUrl
 };
