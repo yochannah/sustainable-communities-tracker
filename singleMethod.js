@@ -6,16 +6,22 @@ const cliArgs = require('./src/cliArgs.js'),
   path = require('path'),
   { countCommits } = require('./src/countCommits.js'),
   { isActive } = require('./src/isActive.js'),
-  args = process.argv.slice(2), // the first two arguments are built in to nodejs
   filePath = process.env.github_sustain_filepath;
 
-//this is set later, only IF we have a month
 const argv = cliArgs.processSingleMethodArgs();
+
+//we don't want ppl to be able to run any random method. this is the "approved" list
 const publicMethods = {
   "isActive": isActive,
   "countCommits": countCommits
 };
 
+/**
+ * Counts commits between two given dates for a single github repo. 
+ * @param {string} url - this is the url to run the check against. Should be a github repo url, e.g. https://github.com/myorg/ashinyrepo
+ * @param {string} argv - the config passed in via commandline, more info available in the command line help of the cli config js file.
+ * @param {string} filePath - where you want the report files to go. Will be created if it doesn't exist.
+ **/
 const singleRepo = function (url, argv, filePath) {
   new Promise(function (resolve, reject) {
     let config = splitUrl(url);
@@ -45,6 +51,11 @@ const singleRepo = function (url, argv, filePath) {
   });
 }
 
+/**
+ * Counts commits between two given dates for multiple repos. 
+ * @param {string} data - this is a list of URLs in a text file, each URL on a new line. Each should be a github repo url, e.g. https://github.com/myorg/ashinyrepo
+ * @param {string} filePath - where you want the report files to go. Will be created if it doesn't exist.
+ **/
 const processMultipleFiles = function (data, filePath) {
   let urls = data.split("\n");
   return urls.reduce(function (promise, singleUrl) {
@@ -54,18 +65,24 @@ const processMultipleFiles = function (data, filePath) {
   }, Promise.resolve());
 }
 
-//only execute if a url or urls are provided
-if (cliArgs.validate(argv)) {
-  const pathForReports = fm.initFilePath(null, filePath);
-  if (argv.url) {
-    singleRepo(argv.url, argv, pathForReports);
-  } else {
-    fs.readFile(argv.urlList, "utf8", function (err, data) {
-      if (err) {
-        errorHandler.fileError(err, "error running" + argv.method, ownerRepo);
-      } else {
-        processMultipleFiles(data, pathForReports);
-      }
-    });
+/**
+ * Runs a single named method on the approved list at the top - see publicMethods for full list of approved methods. No params, but takes command line args from the window. 
+ * */
+const runSingleMethod = function () {
+  if (cliArgs.validate(argv)) {
+    const pathForReports = fm.initFilePath(null, filePath);
+    if (argv.url) {
+      singleRepo(argv.url, argv, pathForReports);
+    } else {
+      fs.readFile(argv.urlList, "utf8", function (err, data) {
+        if (err) {
+          errorHandler.fileError(err, "error running" + argv.method, ownerRepo);
+        } else {
+          processMultipleFiles(data, pathForReports);
+        }
+      });
+    }
   }
-}
+};
+
+runSingleMethod();

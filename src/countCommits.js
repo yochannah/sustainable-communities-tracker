@@ -15,7 +15,11 @@ const path = require('path'),
 const { initOcto, checkNoOfResults, countPaginatedResults, splitUrl } = require("./app.js");
 
 var octokit;
-
+/**
+ * Counts commits between two given dates. 
+ * @param {string} config - an octokit config object, paramss for the github api
+ * @param {string} anOctokit - this is optional and ususally only needs to be passed in if doing tests, where we don't want to get real api answers as they'll be variable and the test might fail due to latency. lol.
+ **/
 function countCommits(config, anOctokit) {
   config.owner = config.org;
   config.repo = config.repo.trim();
