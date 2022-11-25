@@ -44,6 +44,11 @@ const processSingleMethodArgs = function() {
         description: 'YYYY-MM-DD that this activity is being measured from. If omitted, defaults to 12 months from start date.',
         type: 'date',
         required: false
+      },
+      method : {
+        description: 'methodname to run',
+        type: 'string',
+        required: true
       }
     })
     .options({

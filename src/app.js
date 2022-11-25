@@ -94,6 +94,8 @@ const checkNoOfResults = async function(config, endpoint, state, label) {
         "repo": config.repo,
         "per_page": maxPerPage,
         "state": state,
+        "since" : config.since,
+        "until": config.until,
         "labels": label
       },
       result = await octokit.request(url, params);
@@ -145,9 +147,11 @@ const countPaginatedResults = async function(config, result, endpoint, state, la
         "per_page": maxPerPage,
         "page": lastPage,
         "state": state,
-        "labels": label
+        "labels": label,
+        "since" : config.since,
+        "until" : config.until
       });
-      lastPageCount = lastPageResult.data.length
+      lastPageCount = lastPageResult.data.length;
     }
 
     const fullPages = (lastPage - 1) * maxPerPage;

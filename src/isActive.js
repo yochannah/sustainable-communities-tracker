@@ -7,6 +7,7 @@ const {
   const parse_headers = require('parse-link-header');
   const fs = require('fs');
   const errorHandler = require('./errorHandler.js');
+  const { DateTime } = require("luxon");
   const path = require('path'),
     errors = require('./errors.js'),
     fm = require('./fileManager.js'),
@@ -15,35 +16,17 @@ const {
   
   var octokit;
 
-  async function isActive(repository, org, anOctokit) {
-    let config = {},
-    state = "all",
-    label = null;
-    config.owner = org;
-    config.repo = repository.trim();
+  async function isActive(config, anOctokit) {
+    config.owner = config.org;
+    config.repo = config.repo.trim();
     octokit = anOctokit || initOcto();
-
-  //checkNoOfResults function(config, endpoint, state, label)
-    checkNoOfResults(config, "commits", state, label).then(function(response){
-    console.log('%cresponse','background-color:aqua; font-weight:bold',response);
-   // countPaginatedResults(config, interimResponse[1], "commits");
+    let results = checkNoOfResults(config, "commits").then(function(response){
+      countPaginatedResults(config, response, "commits").then(function(count){
+      console.log('%c ISACTIVE: 🤓 ',count);
+   });
+   
   });
 
 }
 
-module.exports = {isActive : isActive};
-
-  // interimResponse = await Promise.all([
-  //   repoInfo, //0
-  //   commitNumber, //1
-  //   locCount, //2
-  //   allPrsAndIssues, //3
-  //   closedPrsAndIssues, //4
-  //   community, //5
-  //   contributors, //6
-  //   labels, //7
-  //   timeToMerge //
-  // ]),
-
-  // commitCount: await countPaginatedResults(config, interimResponse[1], "commits"),
-        
+module.exports = {isActive};

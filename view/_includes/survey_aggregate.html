@@ -39,6 +39,10 @@
         "future-funding-plans"
     ];
 
+    const numericGraphs = [
+        "leadership-team-size"
+    ];
+
     //filter incomplete answers. I feel like there's a more concise way to do it. 
     survey0 = survey0.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
     survey6 = survey6.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
@@ -99,6 +103,25 @@
         });
     }
 
+    const generateNumChart = function (variable) {
+        return new Chart(document.getElementById('chart' + variable), {
+            type: 'bar',
+            data: {
+                datasets: generateDataSet(variable)
+            },
+            options: {
+                plugins: {
+                    title: {
+                        text: questionText[variable],
+                        display: true
+                    }
+                },
+                backgroundColor: backgroundColor,
+                borderColor: borderColor
+            }
+        });
+    }
+
 
     const generateElem = function (variable) {
         let chartElemHtml = `<canvas id="chart${variable}" width="400" height="400" class="aggGraph"></canvas>`;
@@ -111,8 +134,16 @@
         generateElem(graph);
     });
 
+    numericGraphs.map(function (graph) {
+        generateElem(graph);
+    });
+
     boolGraphs.map(function (graph) {
         generateChart(graph);
+    });
+
+    numericGraphs.map(function (graph) {
+        generateNumChart(graph);
     });
 
 

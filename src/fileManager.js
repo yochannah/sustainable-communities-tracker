@@ -1,12 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 
-const initFilePath = function(month, filePath) {
+const initFilePath = function (month, filePath) {
   const thePath = getFilePath(filePath, month);
   console.log("⏩ output files will save to", thePath);
   fs.mkdirSync(thePath, {
     recursive: true
-  }, function(error) {
+  }, function (error) {
     if (error) {
       throw "😬 error initialising filepath" + error;
     }
@@ -14,12 +14,16 @@ const initFilePath = function(month, filePath) {
   return thePath;
 }
 
-const getFilePath = function(filePath, month){
-  return thePath = path.join(filePath, month, "auto");
+const getFilePath = function (filePath, month) {
+  if (month) {
+    return thePath = path.join(filePath, month, "auto");
+  } else {
+    return thePath = path.join(filePath);
+  }
 }
 
-const saveFile = function(contents, fileName) {
-  fs.writeFileSync(fileName, contents, function(err) {
+const saveFile = function (contents, fileName) {
+  fs.writeFileSync(fileName, contents, function (err) {
     if (err) {
       console.log(err);
       return false;
@@ -32,5 +36,5 @@ const saveFile = function(contents, fileName) {
 module.exports = {
   initFilePath: initFilePath,
   saveFile: saveFile,
-  getFilePath : getFilePath
+  getFilePath: getFilePath
 };
