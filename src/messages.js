@@ -6,5 +6,8 @@ module.exports = {
   |  ORG: ${org}
   | saving to: ${filePath}
   | -------------------- `
+  },
+  reasons : {
+    hasActivity: "Returns true if there was activity in this repo in the last month."
   }
 };

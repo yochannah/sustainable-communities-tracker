@@ -26,11 +26,23 @@ const singleRepo = function (url, argv, filePath) {
   new Promise(function (resolve, reject) {
     let config = splitUrl(url);
     config.since = DateTime.fromISO(argv.start);
+
+    //end is optional - and if it's missing, we just want 12 months since the start date, which cna't be missing. 
     if (config.end) {
       config.until = DateTime.fromISO(argv.until);
     } else {
-      config.until = config.since.plus({ months: 12 }).toString();
+      config.until = config.since.plus({ months: 12 });
     }
+
+    //However, what we don't want is for any of our dates to be in the future, because there are scenarios where we calculate one month backwards from our end date, and that could put the whole window in the future, which would be silly 😬
+    //So, if end is in the future... WRONG! End is now today. 
+
+    const now = DateTime.now()
+    if (config.until > now) {
+      config.until = now;
+    }
+
+    config.until = config.until.toString();
     config.since = config.since.toString();
     //execute method for a single repo
 
