@@ -12,13 +12,19 @@ const errToFile = function (errFileName) {
 
 // General error handler method to re-use as much as possible please
 const httpError = function (httpError, freeText, ownerRepo) {
-  errorString = `|-🙈 Error for ${ownerRepo.org}/${ownerRepo.repo}
+  console.log('👾 httpError', Object.keys(httpError));
+
+  if (httpError.status == 404) {
+    console.debug(`🔍 Can't find ${ownerRepo.org}/${ownerRepo.repo}`);
+  } else {
+    errorString = `|-🙈 Error for ${ownerRepo.org}/${ownerRepo.repo}
    |- ${freeText}
    |- ${httpError.status} url ${httpError.request.url};
    `;
-  console.log(errorString);
-  if (httpError.status == 403) {
-    throw "🚨 We're forbidden and possibly ratelimited.";
+    console.error(errorString);
+    if (httpError.status == 403) {
+      throw new Error("🚨 We're forbidden and possibly ratelimited.");
+    }
   }
 
   let errFileName = [errorFilePath,
@@ -28,7 +34,10 @@ const httpError = function (httpError, freeText, ownerRepo) {
   ].join("_");
 
   errToFile(errFileName);
+}
 
+const generalError = function (someVar, freeText) {
+  console.error('👿 ', freeText, someVar);
 }
 
 const fileError = function (file, freeText, ownerRepo) {
@@ -38,7 +47,7 @@ const fileError = function (file, freeText, ownerRepo) {
    `;
   console.log(errorString);
 
-  let errFileName = [errorFilePath, 
+  let errFileName = [errorFilePath,
     "file",
     ownerRepo.org,
     ownerRepo.repo
@@ -51,5 +60,6 @@ const fileError = function (file, freeText, ownerRepo) {
 
 module.exports = {
   httpError: httpError,
-  fileError : fileError
+  fileError: fileError,
+  generalError: generalError
 }

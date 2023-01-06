@@ -61,6 +61,11 @@ const processSingleMethodArgs = function() {
         description: 'Single URL to check - format: https://github.com/org/repo',
         alias: 'repo',
         type: 'string'
+      },
+      tsvFile: {
+        description: 'Path to a TSV with properties to parse for the method',
+        alias: 'tsv',
+        type: 'string'
       }
     })
     .help()
@@ -69,7 +74,7 @@ const processSingleMethodArgs = function() {
   }
 
 const validate = function(argv) {
-  if (!argv.urlList && !argv.url) {
+  if (!argv.urlList && !argv.url&& !argv.tsv) {
     console.error(errors.needUrls);
     return false;
   }

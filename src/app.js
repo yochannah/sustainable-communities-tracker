@@ -28,7 +28,7 @@ const maxPerPage = 100,
 
 ////// Don't edit from here on, thanks!
 
-const init = function() {
+const init = function () {
   const MyOctokit = Octokit.plugin(throttling);
   return octokit = new MyOctokit({
     "auth": process.env.github_sustain_sw_token,
@@ -65,7 +65,7 @@ const init = function() {
 
 // with thanks to orelsanpls for helping me remember how to do async es6 functions
 // cc-by-sa https://stackoverflow.com/questions/49432579/await-is-only-valid-in-async-function
-const checkCoC = async function(config) {
+const checkCoC = async function (config) {
   return result = await octokit.request('GET /repos/{owner}/{repo}/community/code_of_conduct', {
     "owner": config.owner,
     "repo": config.repo,
@@ -85,7 +85,7 @@ const checkCoC = async function(config) {
 //   # * multiply the number of pages - 1 by the page size
 //   # * and add the two together. Boom. Commit count in 2 api calls
 
-const checkNoOfResults = async function(config, endpoint, state, label) {
+const checkNoOfResults = async function (config, endpoint, state, label) {
 
   try {
     const url = 'GET /repos/{owner}/{repo}/' + endpoint,
@@ -94,7 +94,7 @@ const checkNoOfResults = async function(config, endpoint, state, label) {
         "repo": config.repo,
         "per_page": maxPerPage,
         "state": state,
-        "since" : config.since,
+        "since": config.since,
         "until": config.until,
         "labels": label
       },
@@ -127,11 +127,14 @@ const checkNoOfResults = async function(config, endpoint, state, label) {
   }
 }
 
-const countPaginatedResults = async function(config, result, endpoint, state, label) {
+const countPaginatedResults = async function (config, result, endpoint, state, label) {
   try {
     if (!result) {
-      console.error("~~~~~~~~~~~~~there's no result! ", result)
+      throw new Error(`~~~~~~~~~~~~~there's no result!${result}`);
     }
+    if (result.status == 404) {
+      return;
+    } 
     const numOnFirstPage = result.data.length,
       links = parse_headers(result.headers.link);
     var lastPage = 1, // We'll always have at least one page of results
@@ -148,8 +151,8 @@ const countPaginatedResults = async function(config, result, endpoint, state, la
         "page": lastPage,
         "state": state,
         "labels": label,
-        "since" : config.since,
-        "until" : config.until
+        "since": config.since,
+        "until": config.until
       });
       lastPageCount = lastPageResult.data.length;
     }
@@ -157,10 +160,10 @@ const countPaginatedResults = async function(config, result, endpoint, state, la
     const fullPages = (lastPage - 1) * maxPerPage;
     return noOfResults = fullPages + lastPageCount;
   } catch (e) {
-    if (label) {
-      errorHandler.httpError(e, endpoint + "state: " + state, "Label: " + label + "\n", ownerRepo);
-    }
-    errorHandler.httpError(e, endpoint + "state: " + state, ownerRepo);
+      errorHandler.httpError(e, `${endpoint}
+       -State: ${state}
+       -Label: ${label}
+       -${config.owner}/${config.repo}`,config);
   }
 }
 
@@ -168,15 +171,15 @@ const countPaginatedResults = async function(config, result, endpoint, state, la
 // or  "lines of code".
 // use with caution, this is not comparable from project to project,
 // but can be used as an internal measure of change or stability.
-const checkLocCount = async function(config) {
+const checkLocCount = async function (config) {
   return langs = await octokit.request('GET /repos/{owner}/{repo}/languages', config);
 }
 
-const processLocCount = async function() {
+const processLocCount = async function () {
   //adds the totals of bytes per language for one easy to parse metric
   function summariseLangs(langs) {
     var oneCountToRuleThemAll = 0;
-    Object.keys(langs.data).map(function(lang) {
+    Object.keys(langs.data).map(function (lang) {
       oneCountToRuleThemAll = oneCountToRuleThemAll + langs.data[lang];
     });
     return oneCountToRuleThemAll;
@@ -188,7 +191,7 @@ const processLocCount = async function() {
   }
 }
 
-const checkRepoInfo = async function(config) {
+const checkRepoInfo = async function (config) {
   try {
     let repoInfo = await octokit.request('GET /repos/{owner}/{repo}', {
       "owner": config.owner,
@@ -203,7 +206,7 @@ const checkRepoInfo = async function(config) {
   }
 };
 
-const processRepoInfo = function(repoInfo) {
+const processRepoInfo = function (repoInfo) {
   const data = repoInfo.data;
   return {
     code_of_conduct: data.code_of_conduct,
@@ -221,7 +224,7 @@ const processRepoInfo = function(repoInfo) {
   }
 }
 
-const processIssuesAndPRAggregates = async function(config, state, label) {
+const processIssuesAndPRAggregates = async function (config, state, label) {
   let returnObj;
   try {
     //first page results for each of the counts
@@ -251,7 +254,7 @@ const processIssuesAndPRAggregates = async function(config, state, label) {
   return returnObj;
 }
 
-const getCommunityStats = async function(config) {
+const getCommunityStats = async function (config) {
   let response;
   try {
     const community = await octokit.request('GET /repos/{owner}/{repo}/community/profile', config);
@@ -263,7 +266,7 @@ const getCommunityStats = async function(config) {
   return response;
 }
 
-const getContributors = async function(config) {
+const getContributors = async function (config) {
   let response;
   try {
     const conts = await octokit.request('GET /repos/{owner}/{repo}/stats/contributors', config);
@@ -273,9 +276,9 @@ const getContributors = async function(config) {
   };
 }
 
-const processContributors = function(response) {
+const processContributors = function (response) {
   try {
-    return response.data.map(function(contributor) {
+    return response.data.map(function (contributor) {
       return {
         commits: contributor.total,
         github_id: contributor.author.login
@@ -292,23 +295,23 @@ const processContributors = function(response) {
 }
 
 
-const checkLabels = async function(config) {
+const checkLabels = async function (config) {
   return await octokit.request('GET /repos/{owner}/{repo}/labels', config);
 }
 
-const processLabels = async function(config, response) {
-  const labelList = response.data.map(function(label) {
+const processLabels = async function (config, response) {
+  const labelList = response.data.map(function (label) {
     return label.name;
   });
 
   //from label list, we want to count only open mentorship labels
   const mentorshipLabelList = labelList.filter(label =>
-      mentorshipLabels.indexOf(label) >= 0),
+    mentorshipLabels.indexOf(label) >= 0),
     labelsToCheck = [],
     labelsToStore = labelList.filter(label =>
       ghDefaultLabels.indexOf(label) >= 0);
 
-  mentorshipLabelList.forEach(function(label) {
+  mentorshipLabelList.forEach(function (label) {
     labelsToCheck.push(processIssuesAndPRAggregates(config, "open", label));
   });
 
@@ -316,7 +319,7 @@ const processLabels = async function(config, response) {
 
   theGoodStuff = {}
 
-  response.map(function(count, i) {
+  response.map(function (count, i) {
     theGoodStuff[mentorshipLabelList[i]] = count;
   });
 
@@ -344,11 +347,11 @@ async function timeToMergePrOrIssue(config) {
   //we use "prs" here but it equally could be issues
   //theyre nearly identical.
   var params = {
-      "owner": config.owner,
-      "repo": config.repo,
-      "per_page": maxPerPage,
-      "state": "all"
-    },
+    "owner": config.owner,
+    "repo": config.repo,
+    "per_page": maxPerPage,
+    "state": "all"
+  },
     url = 'GET /repos/{owner}/{repo}/issues',
     prs = await octokit.request(url, params),
     lastPage;
@@ -371,7 +374,7 @@ async function timeToMergePrOrIssue(config) {
     let prInfo = await Promise.all(allPageRequests);
 
     //now we only want one array of pr data
-    prInfo.map(function(thePage) {
+    prInfo.map(function (thePage) {
       allPrs = allPrs.concat(thePage.data);
     });
   }
@@ -393,7 +396,7 @@ async function timeToMergePrOrIssue(config) {
       issue: []
     }
   }
-  allPrs.map(function(pr) {
+  allPrs.map(function (pr) {
     let isPrOrIssue = isPr(pr);
     let response = {
       id: pr.id,
@@ -489,7 +492,7 @@ function calculateMean(anArray) {
   //seriously I don't need hundred precision decimalss of ms though
   // so we round it.
   if (anArray.length) {
-    let sum = anArray.reduce(function(a, b) {
+    let sum = anArray.reduce(function (a, b) {
       return a + b;
     });
     return Math.round(sum / anArray.length);
@@ -499,6 +502,10 @@ function calculateMean(anArray) {
 }
 
 async function fullRun(repository, org, anOctokit) {
+  //skip the repo is there's a reason to
+  if (!repository) { return }
+
+  //otherwise. continue.`
   let config = {};
   config.owner = org;
   config.repo = repository.trim();
@@ -552,7 +559,7 @@ async function fullRun(repository, org, anOctokit) {
       testData.push(testPulls);
       testData = JSON.stringify(testData);
 
-      fs.writeFile(testDataFileName, testData, function(err) {
+      fs.writeFile(testDataFileName, testData, function (err) {
         if (err) return console.log(err);
         console.log('saved test data to ' + testDataFileName);
       });
@@ -568,17 +575,17 @@ async function fullRun(repository, org, anOctokit) {
 // Roamer-1888  for helping me get sequenced chained promises right.
 // Answer is CC-BY-SA https://creativecommons.org/licenses/by-sa/3.0/
 // This code stops the github API from banning me for abuse.
-const processMultipleFiles = function(data, month, filePath, octo) {
+const processMultipleFiles = function (data, month, filePath, octo) {
   let urls = data.split("\n");
-  return urls.reduce(function(promise, repo) {
-      return promise.then(function() {
-          return singleRepo(repo, month, filePath, octo);
-      });
+  return urls.reduce(function (promise, repo) {
+    return promise.then(function () {
+      return singleRepo(repo, month, filePath, octo);
+    });
   }, Promise.resolve());
 }
 
-const singleRepo = function(url, month, filePath, octo) {
-  return new Promise(function(resolve, reject) {
+const singleRepo = function (url, month, filePath, octo) {
+  return new Promise(function (resolve, reject) {
     const config = splitUrl(url);
 
     if (!filePath) {
@@ -589,7 +596,7 @@ const singleRepo = function(url, month, filePath, octo) {
       pathForReports = fm.getFilePath(filePath, month);
       try {
         fullRun(config.repo, config.org, octo)
-          .then(function(result) {
+          .then(function (result) {
             let fileName = path.join(pathForReports, config.org + "_" + config.repo + ".json");
             fm.saveFile(JSON.stringify(result), fileName);
             resolve();
@@ -605,16 +612,32 @@ const singleRepo = function(url, month, filePath, octo) {
   });
 };
 
-const splitUrl = function(url) {
+const splitUrl = function (url) {
   try {
-    let urlBits = url.split("https://github.com/")[1].split("/");
-    return {
-      org: urlBits[0],
-      repo: urlBits[1]
+    let theUrl = new URL(url);
+
+    //this repo is only useful for github. Stop processing if it's something else.  
+    if (theUrl.host !== "github.com") {
+      console.debug(`${url} is not a GitHub URL, skipping.`);
+      return false;
+    }
+
+    //get the config for ocotokit.
+    if (theUrl.pathname.length > 1) {
+      //removes the ".git" suffix if there is one, but doesn't capture
+      // .github.io URLS.
+      let pathBits = theUrl.pathname.split(/(?:\.git\/?)$/gm)[0].split("/");
+      return {
+        org: pathBits[1],
+        repo: pathBits[2]
+      }
+    } else {
+      return false;
     }
   } catch (e) {
-    console.error(`Oy vey, we can't parse this url. Error text: ${e}
-    >>${url}<<`);
+    console.error(`Oy vey, we can't parse this url. 
+    Error text: ${e}
+    URL: >>${url}<<`);
   }
 }
 
@@ -624,8 +647,8 @@ module.exports = {
   calculateMean: calculateMean,
   processMultipleFiles: processMultipleFiles,
   singleRepo: singleRepo,
-  countPaginatedResults : countPaginatedResults,
-  checkNoOfResults : checkNoOfResults,
-  initOcto : init,
-  splitUrl : splitUrl
+  countPaginatedResults: countPaginatedResults,
+  checkNoOfResults: checkNoOfResults,
+  initOcto: init,
+  splitUrl: splitUrl
 };
