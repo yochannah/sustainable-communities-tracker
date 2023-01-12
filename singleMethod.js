@@ -18,6 +18,42 @@ const publicMethods = {
   "countCommits": countCommits
 };
 
+const aggregateSummaries = {
+  isActive: function (results, data) {
+    let active = 0, quiet = 0;
+    results.map(function (result) {
+      if (result.isActive) {
+        active++;
+      } else {
+        if (!result.isActive) {
+          quiet++;
+        } else {
+          console.log("something weird happened. Maybe an error?", result);
+        }
+      }
+    });
+    return {
+      isActive: {
+        active: active,
+        quiet: quiet
+      }
+    }
+  },
+  countCommits: function (results, data) {
+    var commitCount = [];
+    results.map(function (result) {
+      if (result.commitCount) {
+        commitCount.push(parseInt(result.commitCount, 10));
+      }
+      else {
+        console.log('👾 error for ', result.config.org, result.config.repo);
+      }
+    });
+    //we want a numerically sorted list, not a string-sorted list. 
+    return commitCount.sort((a, b) => (a - b));
+  }
+};
+
 /**
  * Counts commits between two given dates for a single github repo. 
  * @param {string} url - this is the url to run the check against. Should be a github repo url, e.g. https://github.com/myorg/ashinyrepo
@@ -44,22 +80,24 @@ const singleRepo = function (url, argv, filePath) {
           reject();
         } else {
           let fileName = path.join(filePath, `${argv.method}_${config.org}_${config.repo}.json`);
-          console.debug(`--> Saving ${url} to ${fileName}`)
+          //  console.debug(`--> Saving ${url} to ${fileName}`)
           fm.saveFile(JSON.stringify(result), fileName);
-          resolve();
+          resolve(result);
         }
-      }).catch(function (e) { errorHandler.generalError(e, `Error in config or saving to file? ${url}`) });
+      }).catch(function (e) {
+        errorHandler.generalError(e, `Error in config or saving to file? ${url}`);
+      });
       return respuesta;
     }
     catch (e) {
       errorHandler.generalError(e, errors.general);
-      reject();
+      reject(e);
     }
   });
 }
 
 /**
- * Counts commits between two given dates for multiple repos. 
+ * Runs a method between two given dates for multiple repos. 
  * @param {string} data - this is a list of URLs in a text file, each URL on a new line. Each should be a github repo url, e.g. https://github.com/myorg/ashinyrepo
  * @param {string} filePath - where you want the report files to go. Will be created if it doesn't exist.
  **/
@@ -73,41 +111,72 @@ const processMultipleUrls = function (data, filePath) {
 }
 
 /**
+ * Runs a method between two given dates for multiple repos. 
+ * @param {string} data - this is a set of rows in a tsv, see same file for more info.
+ * @param {string} filePath - where you want the report files to go. Will be created if it doesn't exist.
+ **/
+const processMultipleRows = function (data, filePath) {
+  let response = data.reduce(function (accumulator, row) {
+    if (row.urls) {
+      let config = splitUrl(row.urls);
+      if (config) {
+        config.method = argv.method;
+        //data the first survey response was recorded
+        config.start = row.RecordedDate;
+        //date the final survey response was recorded
+        config.end = row.EndDate;
+        accumulator.push(singleRepo(row.urls, config, filePath));
+      }
+      return accumulator;
+    }
+    else {
+      console.debug("Yo, what did you do?", row);
+    }
+  }, []);
+  return response;
+}
+
+/**
  * Runs a single named method on the approved list at the top - see publicMethods for full list of approved methods. No params, but takes command line args from the window. 
  * */
 const runSingleMethod = function () {
+  let report = {};
   if (cliArgs.validate(argv)) {
     const pathForReports = fm.initFilePath(null, filePath);
     if (argv.url) {
+      //run checks on one repo
       singleRepo(argv.url, argv, pathForReports);
+      report.methodType = "single repo";
+      report.url = argv.url;
+      report.method = argv.method;
+      report.pathSaved = pathForReports;
     } else {
       if (argv.urlList) {
+        report.methodType = "url list";
+        report.urls = [];
+        report.method = argv.method;
+        report.pathSaved = pathForReports;
+        //read a basic txt file with one url per line. 
         fs.readFile(argv.urlList, "utf8", function (err, data) {
           if (err) {
             errorHandler.fileError(err, "error running" + argv.method, ownerRepo);
           } else {
-            processMultipleUrls(data, pathForReports);
+            //this does the same as singlerepo, but as many times as needed per url
+            let urls = processMultipleUrls(data, pathForReports);
+            Promise.all(urls).then(function (response) {
+              console.log(aggregateReportFromResults(response, tsv.data, argv.method));
+            });
           }
         });
       } else {
-        //this should be the tsv
+        //this should be the tsv, with more complex formatting than the single-url-per-line. 
         fm.readTsv(argv.tsvFile).then(function (tsv) {
-          return tsv.data.reduce(function (promise, row) {
-            return promise.then(function () {
-              if (row.urls) {
-                let config = splitUrl(row.urls);
-                if (config) {
-                  config.method = argv.method;
-                  config.start = row.RecordedDate;
-                  config.end = row.EndDate;
-                  return singleRepo(row.urls, config, filePath);
-                }
-              }
-              else {
-                console.debug("Yo, what did you do?", row);
-              }
-            }).catch(function(e){errorHandler.generalError(argv.method, "<-- ☠️", row, e)});;
-          }, Promise.resolve());
+          let results = processMultipleRows(tsv.data, pathForReports);
+          Promise.all(results).then(function (response) {
+            console.log(aggregateReportFromResults(response, tsv.data, argv.method));
+          });
+
+
         });
       }
     }
@@ -124,6 +193,9 @@ function sanitiseDate(dateString) {
   }
 }
 
+/**
+ * 
+ * */
 function prepareConfig(url, argv, months) {
 
   //separate repo and org from the URL
@@ -132,7 +204,7 @@ function prepareConfig(url, argv, months) {
   //convert startdate into a datetime. 
   config.since = DateTime.fromISO(sanitiseDate(argv.start));
 
-  if(config.since.invalid) {
+  if (config.since.invalid) {
     errorHandler.generalError(config.since, `start date was invalid: ${argv.start}`);
   }
 
@@ -156,6 +228,47 @@ function prepareConfig(url, argv, months) {
   config.since = config.since.toISO();
 
   return config;
+}
+
+
+function getDatesOfChecks(data) {
+  //record the span of dates these checks cover.
+  var datesOfChecks = {
+    start: DateTime.now(),
+    end: DateTime.fromISO("1972-01-01")
+  }
+  data.map(function (result) {
+    //I tried from ISO but it DOESN'T like the space in the datetime. 
+    let rStart = DateTime.fromSQL(result.RecordedDate);
+    let rEnd = DateTime.fromSQL(result.EndDate);
+
+    if (rStart < datesOfChecks.start) { datesOfChecks.start = rStart; }
+    if (result.EndDate && (rEnd > datesOfChecks.end)) { datesOfChecks.end = rEnd; }
+  });
+
+  datesOfChecks.start = datesOfChecks.start.toISO();
+  datesOfChecks.end = datesOfChecks.end.toISO();
+  return datesOfChecks;
+}
+
+function aggregateReportFromResults(results, data, method) {
+  try {
+    let checks = aggregateSummaries[method](results, data);
+    // console.log('😲 results', results);
+    // console.log('👾 data', data);
+
+
+
+    return {
+      urlsSubmitted: data.length,
+      successfulResults: results.length,
+      checks: checks,
+      dateGathered: DateTime.now().toISO(),
+      dateChecksCovered: getDatesOfChecks(data)
+    };
+  } catch (e) {
+    console.error('😱 Error running method', e);
+  }
 }
 
 runSingleMethod();

@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const errorHandler = require('./errorHandler.js');
 
 const initFilePath = function (month, filePath) {
   const thePath = getFilePath(filePath, month);
@@ -8,7 +9,7 @@ const initFilePath = function (month, filePath) {
     recursive: true
   }, function (error) {
     if (error) {
-      throw "😬 error initialising filepath" + error;
+      errorHandler.fileError(filePath,error);
     }
   });
   return thePath;
@@ -25,7 +26,7 @@ const getFilePath = function (filePath, month) {
 const saveFile = function (contents, fileName) {
   fs.writeFileSync(fileName, contents, function (err) {
     if (err) {
-      console.log(err);
+      errorHandler.fileError(filePath,err);
       return false;
     }
     console.log('💾 saved data to' + fileName);
@@ -41,13 +42,13 @@ const readTsv = function (somePath) {
   return new Promise(function (resolve, reject) {
     fs.readFile(somePath, "utf8", function (err, data) {
       if (err) {
-        console.error("🙄", err);
+        cerrorHandler.fileError(filePath,err);
       } else {
         var lines = data.split("\n");
         lines = lines.map(line => line.split("\t"));
         const headRow = lines.shift();
         const metadata = lines.shift();
-        console.log("Found a TSV with the header row:")
+        console.log(`Found a TSV with ${lines.length} lines and the header row:`)
         console.log(headRow);
         // console.log("Found a TSV with the metadata row:")
         // console.log(metadata);
