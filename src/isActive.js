@@ -7,35 +7,54 @@ const errorHandler = require("./errorHandler.js");
 function isActive(config, anOctokit) {
   return results = new Promise(function (resolve, reject) {
 
-      //skip the repo is there's a reason to
-  if (!config.repo) {reject()}
+    //skip the repo is there's a reason to
+    if (!config.repo) { 
+      console.log('👾 config', config);
+      reject("no repo") }
 
-  //otherwise. continue.
-  config.owner = config.org;
-  config.repo = config.repo.trim();
-  //to check if the repo is "active", we check if there are any commits in the last month. 
+    //otherwise. continue.
+    config.owner = config.org;
+    config.repo = config.repo.trim();
+    //to check if the repo is "active", we check if there are any commits in the last month. 
 
-  let endDate = config.until,
-  startDate = DateTime.fromISO(endDate);
-  startDate = startDate.minus({months:1});
-  startDate = startDate.toString();
+    let endDate = config.until,
+      startDate = DateTime.fromISO(endDate);
+    startDate = startDate.minus({ months: 1 });
+    startDate = startDate.toString();
 
-  config.since = startDate;
-  const octokit = anOctokit || initOcto();
-
+    config.since = startDate;
+    const octokit = anOctokit || initOcto();
 
     checkNoOfResults(config, "commits").then(function (response) {
       countPaginatedResults(config, response, "commits").then(function (count) {
         resolve({
-          isActive : count > 0,
-          explanation : messages.reasons.hasActivity,
+          isActive: count > 0,
+          explanation: messages.reasons.hasActivity,
           commitCount: count,
           config: config,
           dateRetrieved: DateTime.now().toString()
         });
-      }).catch(function(e) {errorHandler.generalError(e,"<-- count paginatedResults")})
-    }).catch(function(e) {errorHandler.generalError(e,"<-- checknoofResults")});
+      }).catch(function (e) { errorHandler.generalError(e, "<-- count paginatedResults") })
+    }).catch(function (e) { errorHandler.generalError(e, "<-- checknoofResults") });
   });
 }
 
-module.exports = { isActive };
+function wasActive(config, anOctokit) {
+  console.log('👾 wasactive', config);
+  let endDate = config.until,
+    startDate = DateTime.fromISO(config.since);
+
+  //if we're missing a start date for some reason
+  // 12 months before the end date is good instead. 
+  if (!startDate || startDate.invalid) {
+    startDate = DateTime.fromISO(endDate);
+    startDate = startDate.minus({ months: 12 });
+  }
+  endDate = startDate.plus({ months: 1 });
+  startDate = startDate.toString();
+  config.until = endDate;
+  config.since = startDate;
+  return isActive(config, anOctokit);
+}
+
+module.exports = { isActive, wasActive };

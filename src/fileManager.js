@@ -104,8 +104,6 @@ const readTsv = function (somePath) {
             });
         });
 
-
-
         resolve({
           data: oneRowPerURL,
           numOfRows: oneRowPerURL.length,
