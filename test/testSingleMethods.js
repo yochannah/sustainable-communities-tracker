@@ -18,14 +18,17 @@ const assert = require('assert');
 //don't use octokit because that would query live github. this is a fake stub
 const myMocktokit = mocktokit.init();
 
+const basePath = "./test/data_prep/";
+const filePath = path.join(basePath,"test_files");
+const runner = new methodRunner("test", mocktokit, filePath);
+
 // fake params: 
 const fakeParams = {
-  tsv: "./data_prep/faketsv.js",
+  tsvFile: path.join(basePath,"/fake_tsv.tsv"),
   method: "isActive"
 };
 
-const filePath = "./test/data_prep/test_files";
-const runner = new methodRunner("test", mocktokit, filePath);
+
 
 //tsv
 describe('Single Method Test Suite', function () {

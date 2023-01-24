@@ -41,11 +41,13 @@ const generalError = function (someVar, freeText) {
 }
 
 const fileError = function (file, freeText, ownerRepo) {
+  let errorString;
+  if (ownerRepo) {
   errorString = `|-🙈 Error for ${ownerRepo.org}/${ownerRepo.repo}
    |- ${freeText}
    |- File: ${file}.;
    `;
-  console.log(errorString);
+
 
   let errFileName = [errorFilePath,
     "file",
@@ -54,6 +56,10 @@ const fileError = function (file, freeText, ownerRepo) {
   ].join("_");
 
   errToFile(errFileName);
+} else {
+  errorString = `${file}, ${freeText}`;
+}
+console.log(errorString);
 }
 
 

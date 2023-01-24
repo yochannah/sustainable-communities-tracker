@@ -79,7 +79,6 @@ const aggregateSummaries = {
 const singleRepo = function (url, argv, filePath, anOctokit) {
     let config = prepareConfig(url, argv, 12);
     let method = argv.method;
-
     return new Promise(function (resolve, reject) {
         // we've been passed a nonexistent method via the command line,
         // or it's not configured in publicmethods. 
@@ -93,13 +92,14 @@ const singleRepo = function (url, argv, filePath, anOctokit) {
             // idk why, I felt like it
             // I'm learning some Spanish words, so respuesta = response. 
             let respuesta = publicMethods[method](config, anOctokit).then(function (result) {
+
                 if (!result) {
                     console.debug(`No response for ${config.url}`);
                     reject();
                 } else {
                     let fileName = path.join(filePath, `${method}_${config.org}_${config.repo}.json`);
-                    //  console.debug(`--> Saving ${url} to ${fileName}`)
-                    fm.saveFile(JSON.stringify(result), fileName);
+                    console.debug(`--> Saving ${url} to ${fileName}`)
+                    fm.saveFile(result, fileName);
                     resolve(result);
                 }
             }).catch(function (e) {
@@ -133,10 +133,12 @@ const processMultipleUrls = function (data, filePath, anOctokit) {
  * Runs a method between two given dates for multiple repos.  
  * @param {string} data - this is a set of rows in a tsv, see same file for more info.
  * @param {string} filePath - where you want the report files to go. Will be created if it doesn't exist.
+ * @param {string} method
  * @param {Object | null} anOctokit optional - communicator module. useful for testing.
 
  **/
 const processMultipleRows = function (data, filePath, method, anOctokit) {
+    console.log('🤪🤪🤪 anOctokit', anOctokit);
     let response = data.reduce(function (accumulator, row) {
         if (row.urls) {
             let config = splitUrl(row.urls);
@@ -164,31 +166,31 @@ const processMultipleRows = function (data, filePath, method, anOctokit) {
  * @param {Object | null} anOctokit optional - communicator module. useful for testing.
  * */
 const runSingleMethod = function (argv, anOctokit, filePath) {
-    let finalReport;
+    console.log('🤪🤪🤪', anOctokit);
+    return new Promise(function (resolve, reject) {
+        let finalReport;
 
-    const pathForReports = fm.initFilePath(null, filePath);
-    if (argv.url) {
-        //run checks on one repo
-        singleRepo(argv.url, argv, pathForReports, anOctokit);
-        finalReport = `One repo only, ${argv.url}`;
-    } else {
-        if (argv.urlList) {
-            //one url per line
-            finalReport = checkType.urlList(argv, anOctokit);
+        const pathForReports = fm.initFilePath(null, filePath);
+        if (argv.url) {
+            //run checks on one repo
+            singleRepo(argv.url, argv, pathForReports, anOctokit);
+            finalReport = `One repo only, ${argv.url}`;
         } else {
-            //this should be the tsv, with more complex formatting than the single-url-per-line. 
-            finalReport = checkType.tsv(argv, anOctokit);
+            if (argv.urlList) {
+                //one url per line
+                finalReport = checkType.urlList(argv, pathForReports, anOctokit);
+            } else {
+                //this should be the tsv, with more complex formatting than the single-url-per-line. 
+                finalReport = checkType.tsv(argv, pathForReports, anOctokit);
+            }
         }
-    }
-    if (finalReport.then) {
-        console.log('👾 8888888', 9999999);
-        return finalReport.then(function () {
-            console.log('👾 Resolving');
-            let thePath = path.join(filePath, `report-${argv.method}-${new Date().toString()}`);
-            fm.saveFile(finalReport, thePath);
+        finalReport.then(function (results) {
+            let thePath = path.join(filePath, `report-${argv.method}-${new Date().toISOString()}.json`);
+            fm.saveFile(results, thePath);
         });
-    }
-    return finalReport;
+
+        resolve(finalReport);
+    });
 };
 
 const checkType = {
@@ -198,13 +200,21 @@ const checkType = {
      * @param {Object | null} anOctokit optional - communicator module. useful for testing.
      * */
     tsv: function (argv, pathForReports, anOctokit) {
-        return fm.readTsv(argv.tsvFile).then(function (tsv) {
-            let results = processMultipleRows(tsv.data, pathForReports, argv.method, anOctokit);
-            return Promise.all(results).then(function (response, x, y) {
-                let report = aggregateReportFromResults(response, tsv.data, argv.method);
-                return report;
-            });
-        });
+        console.log('🤩😎🤩😎', argv.tsvFile);
+        try {
+            if (!argv.tsvFile) {throw `SOMETHING BAD HAPPENED, file is null`} else {
+
+            };
+            return fm.readTsv(argv.tsvFile).then(function (tsv) {
+                let results = processMultipleRows(tsv.data, pathForReports, argv.method, anOctokit);
+                return Promise.all(results).then(function (response, x, y) {
+                    let report = aggregateReportFromResults(response, tsv.data, argv.method);
+                    return report;
+                });
+            })
+        } catch (e) {
+            throw `SOMETHING BAD HAPPENED ${e}`;
+        }
     },
     /**
    * @param {Object} argv cli argument set
@@ -356,7 +366,7 @@ class methodRunner {
             this.config = cliArgs;
             console.debug(`👩🏽‍💻 Environment -> Live. `);
         }
-        
+
         if (this.environment === "test") {
             console.debug(`🎮 Environment -> TEST. `);
         }

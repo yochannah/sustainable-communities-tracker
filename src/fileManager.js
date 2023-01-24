@@ -9,7 +9,7 @@ const initFilePath = function (month, filePath) {
     recursive: true
   }, function (error) {
     if (error) {
-      errorHandler.fileError(filePath,error);
+      errorHandler.fileError(filePath, error);
     }
   });
   return thePath;
@@ -24,9 +24,12 @@ const getFilePath = function (filePath, month) {
 }
 
 const saveFile = function (contents, fileName) {
+  if (typeof contents === "object") {
+    contents = JSON.stringify(contents);
+  }
   fs.writeFileSync(fileName, contents, function (err) {
     if (err) {
-      errorHandler.fileError(filePath,err);
+      errorHandler.fileError(filePath, err);
       return false;
     }
     console.log('💾 saved data to' + fileName);
@@ -42,7 +45,8 @@ const readTsv = function (somePath) {
   return new Promise(function (resolve, reject) {
     fs.readFile(somePath, "utf8", function (err, data) {
       if (err) {
-        cerrorHandler.fileError(filePath,err);
+        errorHandler.fileError(somePath, err);
+        reject();
       } else {
         var lines = data.split("\n");
         lines = lines.map(line => line.split("\t"));
@@ -85,11 +89,11 @@ const readTsv = function (somePath) {
           return (line[0].split("Project").length === 2)
         });
 
-        var oneRowPerURL= [];
+        var oneRowPerURL = [];
 
         //return in an esay to read format that's not just an array
         lines = lines.forEach(function (line) {
-          function urlToObject(line, url){
+          function urlToObject(line, url) {
             return {
               'ProjectPseudonym': line[0],
               'EndDate': line[1],
@@ -99,9 +103,9 @@ const readTsv = function (somePath) {
           }
 
           let urls = generateURLList(line);
-            urls.forEach(function(url){
-              oneRowPerURL.push(urlToObject(line, url));
-            });
+          urls.forEach(function (url) {
+            oneRowPerURL.push(urlToObject(line, url));
+          });
         });
 
         resolve({
