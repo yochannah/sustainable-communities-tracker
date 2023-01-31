@@ -1,3 +1,4 @@
+test/data_prep/test_files/*
 errorlog*
 _temp
 node_modules

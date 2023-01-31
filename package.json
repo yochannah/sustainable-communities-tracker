@@ -7,6 +7,7 @@
     "test": "mocha",
     "testSingle" : "mocha ./test/testSingleMethods.js"
   },
+
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yochannah/sustainable-communities-tracker.git"

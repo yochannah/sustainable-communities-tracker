@@ -4,7 +4,6 @@ const errors = require("./errors.js");
 const fm = require('./fileManager.js'),
     fs = require('fs'),
     { DateTime } = require("luxon"),
-    path = require('path'),
     { countCommits } = require('./countCommits.js'),
     { isActive, wasActive } = require('./isActive.js');
 
@@ -77,8 +76,8 @@ const aggregateSummaries = {
  * @returns {Promise} resolves or rejects based on a successful API call
  **/
 const singleRepo = function (url, argv, filePath, anOctokit) {
-    let config = prepareConfig(url, argv, 12);
     let method = argv.method;
+    let config = prepareConfig(url, argv, 12, method, filePath);
     return new Promise(function (resolve, reject) {
         // we've been passed a nonexistent method via the command line,
         // or it's not configured in publicmethods. 
@@ -97,8 +96,8 @@ const singleRepo = function (url, argv, filePath, anOctokit) {
                     console.debug(`No response for ${config.url}`);
                     reject();
                 } else {
-                    let fileName = path.join(filePath, `${method}_${config.org}_${config.repo}.json`);
-                    console.debug(`--> Saving ${url} to ${fileName}`)
+                    let fileName =  fm.getFileNameSingleMethod(config, "singleResult");
+                    console.log(`--> Saving ${url} to ${fileName}`)
                     fm.saveFile(result, fileName);
                     resolve(result);
                 }
@@ -109,7 +108,7 @@ const singleRepo = function (url, argv, filePath, anOctokit) {
         }
         catch (e) {
             errorHandler.generalError(e, errors.general);
-            reject(e);
+            reject(e); // does this ever happen? 
         }
     });
 }
@@ -138,8 +137,7 @@ const processMultipleUrls = function (data, filePath, anOctokit) {
 
  **/
 const processMultipleRows = function (data, filePath, method, anOctokit) {
-    console.log('🤪🤪🤪 anOctokit', anOctokit);
-    let response = data.reduce(function (accumulator, row) {
+    let response = data.reduce(function (accumulator, row, i) {
         if (row.urls) {
             let config = splitUrl(row.urls);
             if (config) {
@@ -148,7 +146,8 @@ const processMultipleRows = function (data, filePath, method, anOctokit) {
                 config.start = row.RecordedDate;
                 //date the final survey response was recorded
                 config.end = row.EndDate;
-                accumulator.push(singleRepo(row.urls, config, filePath, anOctokit));
+                let thisRow = singleRepo(row.urls, config, filePath, anOctokit)
+                accumulator.push(thisRow);
             }
             return accumulator;
         }
@@ -161,34 +160,32 @@ const processMultipleRows = function (data, filePath, method, anOctokit) {
 
 /**
  * Runs a single named method on the approved list at the top - see publicMethods for full list of approved methods. No params, but takes command line args from the window. 
- * @param {Object} argv - a command-line argument set to run the methods. See cliArgs.js for more info. 
+ * @param {Object} config - a command-line argument set to run the methods. See cliArgs.js for more info. 
  * @emits Saves a file with the report on the aggregate results, and one file per repo iwth repo-specific results.
  * @param {Object | null} anOctokit optional - communicator module. useful for testing.
  * */
-const runSingleMethod = function (argv, anOctokit, filePath) {
-    console.log('🤪🤪🤪', anOctokit);
+const runSingleMethod = function (config, anOctokit, filePath) {
     return new Promise(function (resolve, reject) {
         let finalReport;
 
         const pathForReports = fm.initFilePath(null, filePath);
-        if (argv.url) {
+        if (config.url) {
             //run checks on one repo
-            singleRepo(argv.url, argv, pathForReports, anOctokit);
-            finalReport = `One repo only, ${argv.url}`;
+            singleRepo(config.url, config, pathForReports, anOctokit);
+            finalReport = `One repo only, ${config.url}`;
         } else {
-            if (argv.urlList) {
+            if (config.urlList) {
                 //one url per line
-                finalReport = checkType.urlList(argv, pathForReports, anOctokit);
+                finalReport = checkType.urlList(config, pathForReports, anOctokit);
             } else {
                 //this should be the tsv, with more complex formatting than the single-url-per-line. 
-                finalReport = checkType.tsv(argv, pathForReports, anOctokit);
+                finalReport = checkType.tsv(config, pathForReports, anOctokit);
             }
         }
         finalReport.then(function (results) {
-            let thePath = path.join(filePath, `report-${argv.method}-${new Date().toISOString()}.json`);
+            let thePath = fm.getFileNameSingleMethod(config, "report");
             fm.saveFile(results, thePath);
         });
-
         resolve(finalReport);
     });
 };
@@ -200,7 +197,7 @@ const checkType = {
      * @param {Object | null} anOctokit optional - communicator module. useful for testing.
      * */
     tsv: function (argv, pathForReports, anOctokit) {
-        console.log('🤩😎🤩😎', argv.tsvFile);
+        
         try {
             if (!argv.tsvFile) {throw `SOMETHING BAD HAPPENED, file is null`} else {
 
@@ -260,7 +257,7 @@ function sanitiseDate(dateString) {
  * @param {number} months num of months this check should run across, if no end date is given.
  * @returns {Object} tidied up values 
  * */
-function prepareConfig(url, argv, months) {
+function prepareConfig(url, argv, months, method, filePath) {
 
     //separate repo and org from the URL
     let config = splitUrl(url);
@@ -290,6 +287,9 @@ function prepareConfig(url, argv, months) {
     //github wants ISO strings, not objects. 
     config.until = config.until.toISO();
     config.since = config.since.toISO();
+
+    config.method = method;
+    config.filePath = filePath;
 
     return config;
 }

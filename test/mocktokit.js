@@ -44,9 +44,9 @@ var responses = {
 const request = function(url, params) {
   try {
     //useful for debug
-       console.log(`=== 🐙 === Testing
-       |--- ${url}
-       |--- with params: ${JSON.stringify(params)}`);
+      //  console.log(`=== 🐙 === Testing
+      //  |--- ${url}
+      //  |--- with params: ${JSON.stringify(params)}`);
    // strip out the repeated bit of the URL
     let urlSnippet = url.split("GET /repos/{owner}/{repo}")[1],
       response = responses[urlSnippet];
@@ -71,7 +71,6 @@ const request = function(url, params) {
 
 exports.init = function() {
   console.log("=== 🐙 === Mock Octokit activated: we're using fake data and not the GitHub API");
-  console.log('👾 request', request);
   return {
     request: request
   };

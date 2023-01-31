@@ -66,7 +66,8 @@ const init = function () {
 // with thanks to orelsanpls for helping me remember how to do async es6 functions
 // cc-by-sa https://stackoverflow.com/questions/49432579/await-is-only-valid-in-async-function
 const checkCoC = async function (config) {
-  return result = await octokit.request('GET /repos/{owner}/{repo}/community/code_of_conduct', {
+  let octo = config.octokit || octokit;
+  return result = await octo.request('GET /repos/{owner}/{repo}/community/code_of_conduct', {
     "owner": config.owner,
     "repo": config.repo,
     "mediaType": {
@@ -86,7 +87,7 @@ const checkCoC = async function (config) {
 //   # * and add the two together. Boom. Commit count in 2 api calls
 
 const checkNoOfResults = async function (config, endpoint, state, label) {
-
+  let octo = config.octokit || octokit;
   try {
     const url = 'GET /repos/{owner}/{repo}/' + endpoint,
       params = {
@@ -98,7 +99,7 @@ const checkNoOfResults = async function (config, endpoint, state, label) {
         "until": config.until,
         "labels": label
       },
-      result = await octokit.request(url, params);
+      result = await octo.request(url, params);
 
     if (!result) {
       console.error("🤖🤖🤖🤖🤖🤖");
@@ -129,6 +130,7 @@ const checkNoOfResults = async function (config, endpoint, state, label) {
 
 const countPaginatedResults = async function (config, result, endpoint, state, label) {
   try {
+    let octo = config.octokit || octokit;
     if (!result) {
       throw new Error(`~~~~~~~~~~~~~there's no result!${result}`);
     }
@@ -144,7 +146,7 @@ const countPaginatedResults = async function (config, result, endpoint, state, l
     // results are on the last page as it may be less than the maxPerPage
     if (numOnFirstPage === maxPerPage) {
       lastPage = links.last.page;
-      var lastPageResult = await octokit.request('GET /repos/{owner}/{repo}/' + endpoint, {
+      var lastPageResult = await octo.request('GET /repos/{owner}/{repo}/' + endpoint, {
         "owner": config.owner,
         "repo": config.repo,
         "per_page": maxPerPage,
@@ -172,7 +174,8 @@ const countPaginatedResults = async function (config, result, endpoint, state, l
 // use with caution, this is not comparable from project to project,
 // but can be used as an internal measure of change or stability.
 const checkLocCount = async function (config) {
-  return langs = await octokit.request('GET /repos/{owner}/{repo}/languages', config);
+  let octo = config.octokit || octokit;
+  return langs = await octo.request('GET /repos/{owner}/{repo}/languages', config);
 }
 
 const processLocCount = async function () {
@@ -193,7 +196,8 @@ const processLocCount = async function () {
 
 const checkRepoInfo = async function (config) {
   try {
-    let repoInfo = await octokit.request('GET /repos/{owner}/{repo}', {
+    let octo = config.octokit || octokit;
+    let repoInfo = await octo.request('GET /repos/{owner}/{repo}', {
       "owner": config.owner,
       "repo": config.repo,
       "mediaType": {
@@ -256,8 +260,9 @@ const processIssuesAndPRAggregates = async function (config, state, label) {
 
 const getCommunityStats = async function (config) {
   let response;
+  let octo = config.octokit || octokit;
   try {
-    const community = await octokit.request('GET /repos/{owner}/{repo}/community/profile', config);
+    const community = await octo.request('GET /repos/{owner}/{repo}/community/profile', config);
     response = community.data;
   } catch (e) {
     errorHandler.httpError(e, communityFailMsg, config);
@@ -268,8 +273,9 @@ const getCommunityStats = async function (config) {
 
 const getContributors = async function (config) {
   let response;
+  let octo = config.octokit || octokit;
   try {
-    const conts = await octokit.request('GET /repos/{owner}/{repo}/stats/contributors', config);
+    const conts = await octo.request('GET /repos/{owner}/{repo}/stats/contributors', config);
     return conts;
   } catch (e) {
     errorHandler.httpError(e, "contributors error", config);
@@ -296,7 +302,8 @@ const processContributors = function (response) {
 
 
 const checkLabels = async function (config) {
-  return await octokit.request('GET /repos/{owner}/{repo}/labels', config);
+  let octo = config.octokit || octokit;
+  return await octo.request('GET /repos/{owner}/{repo}/labels', config);
 }
 
 const processLabels = async function (config, response) {
@@ -346,6 +353,7 @@ function msToTime(ms) {
 async function timeToMergePrOrIssue(config) {
   //we use "prs" here but it equally could be issues
   //theyre nearly identical.
+  let octo = config.octokit || octokit;
   var params = {
     "owner": config.owner,
     "repo": config.repo,
@@ -353,7 +361,7 @@ async function timeToMergePrOrIssue(config) {
     "state": "all"
   },
     url = 'GET /repos/{owner}/{repo}/issues',
-    prs = await octokit.request(url, params),
+    prs = await octo.request(url, params),
     lastPage;
 
   //we probably have  more pages
@@ -368,7 +376,7 @@ async function timeToMergePrOrIssue(config) {
   if (lastPage) {
     for (var i = 2; i <= lastPage; i++) {
       params.page = i;
-      let subsequent = await octokit.request(url, params);
+      let subsequent = await octo.request(url, params);
       allPageRequests.push(subsequent);
     }
     let prInfo = await Promise.all(allPageRequests);

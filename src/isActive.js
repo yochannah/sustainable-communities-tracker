@@ -23,7 +23,7 @@ function isActive(config, anOctokit) {
     startDate = startDate.toString();
 
     config.since = startDate;
-    const octokit = anOctokit || initOcto();
+    config.octokit = anOctokit || initOcto();
 
     checkNoOfResults(config, "commits").then(function (response) {
       countPaginatedResults(config, response, "commits").then(function (count) {
@@ -40,7 +40,6 @@ function isActive(config, anOctokit) {
 }
 
 function wasActive(config, anOctokit) {
-  console.log('👾 wasactive', config);
   let endDate = config.until,
     startDate = DateTime.fromISO(config.since);
 
