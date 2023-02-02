@@ -80,13 +80,12 @@ const singleRepo = function (url, argv, filePath, anOctokit) {
     let config = prepareConfig(url, argv, 12, method, filePath);
     return new Promise(function (resolve, reject) {
         // we've been passed a nonexistent method via the command line,
-        // or it's not configured in publicmethods. 
-        if (!(typeof publicMethods[method])) {
-            let err = `There's no method to execute, skipping ${url}`;
-            console.debug(err);
-            reject();
+        // or it's not configured in public methods. 
+        if (!publicMethods.hasOwnProperty(method)) {
+            let err = `There's no method to execute, ${method} is not valid`;
+            // errorHandler.generalError(method, err);
+            reject(err);
         }
-
         try {
             // idk why, I felt like it
             // I'm learning some Spanish words, so respuesta = response. 
@@ -96,7 +95,7 @@ const singleRepo = function (url, argv, filePath, anOctokit) {
                     console.debug(`No response for ${config.url}`);
                     reject();
                 } else {
-                    let fileName =  fm.getFileNameSingleMethod(config, "singleResult");
+                    let fileName = fm.getFileNameSingleMethod(config, "singleResult");
                     console.log(`--> Saving ${url} to ${fileName}`)
                     fm.saveFile(result, fileName);
                     resolve(result);
@@ -120,12 +119,18 @@ const singleRepo = function (url, argv, filePath, anOctokit) {
  * @param {Object | null} anOctokit optional - communicator module. useful for testing.
  **/
 const processMultipleUrls = function (data, filePath, anOctokit) {
-    let urls = data.split("\n");
-    return urls.reduce(function (promise, singleUrl) {
-        return promise.then(function () {
-            return singleRepo(singleUrl, argv, filePath, anOctokit);
-        }).catch(errorHandler.generalError(url, "<-- No likey processing a url"));
-    }, Promise.resolve());
+    if (!publicMethods.hasOwnProperty(method)) {
+        let err = `There's no method to execute, ${method} is not a valid public method`;
+        return Promise.reject(err);
+    } else {
+
+        let urls = data.split("\n");
+        return urls.reduce(function (promise, singleUrl) {
+            return promise.then(function () {
+                return singleRepo(singleUrl, argv, filePath, anOctokit);
+            }).catch(errorHandler.generalError(url, "<-- No likey processing a url"));
+        }, Promise.resolve());
+    }
 }
 
 /**
@@ -137,24 +142,31 @@ const processMultipleUrls = function (data, filePath, anOctokit) {
 
  **/
 const processMultipleRows = function (data, filePath, method, anOctokit) {
-    let response = data.reduce(function (accumulator, row, i) {
-        if (row.urls) {
-            let config = splitUrl(row.urls);
-            if (config) {
-                config.method = method;
-                //data the first survey response was recorded
-                config.start = row.RecordedDate;
-                //date the final survey response was recorded
-                config.end = row.EndDate;
-                let thisRow = singleRepo(row.urls, config, filePath, anOctokit)
-                accumulator.push(thisRow);
+    let response;
+    if (!publicMethods.hasOwnProperty(method)) {
+        let err = `🥾 There's no method to execute, ${method} is not a valid public method`;
+        response = Promise.reject(err);
+    } else {
+        response = data.reduce(function (accumulator, row) {
+            if (row.urls) {
+                let config = splitUrl(row.urls);
+                if (config) {
+                    config.method = method;
+                    //data the first survey response was recorded
+                    config.start = row.RecordedDate;
+                    //date the final survey response was recorded
+                    config.end = row.EndDate;
+                    let thisRow = singleRepo(row.urls, config, filePath, anOctokit)
+                    accumulator.push(thisRow);
+                }
+                return accumulator;
             }
-            return accumulator;
-        }
-        else {
-            console.debug("Yo, what did you do?", row);
-        }
-    }, []);
+            else {
+                console.debug("Yo, what did you do?", row);
+                return Promise.reject();
+            }
+        }, []);
+    }
     return response;
 }
 
@@ -185,6 +197,8 @@ const runSingleMethod = function (config, anOctokit, filePath) {
         finalReport.then(function (results) {
             let thePath = fm.getFileNameSingleMethod(config, "report");
             fm.saveFile(results, thePath);
+        }).catch(function (result) {
+            reject(new `Something went wrong ${result}`);
         });
         resolve(finalReport);
     });
@@ -197,18 +211,26 @@ const checkType = {
      * @param {Object | null} anOctokit optional - communicator module. useful for testing.
      * */
     tsv: function (argv, pathForReports, anOctokit) {
-        
+        // be warned: this method usually works, but failures can be silent and 
+        // it's driving me lightly bonkers. As you can probable see from 
+        // multiple rejects and catch blocks. 
         try {
-            if (!argv.tsvFile) {throw `SOMETHING BAD HAPPENED, file is null`} else {
+            if (!argv.tsvFile) { throw `SOMETHING BAD HAPPENED, file is null` } else {
 
             };
             return fm.readTsv(argv.tsvFile).then(function (tsv) {
                 let results = processMultipleRows(tsv.data, pathForReports, argv.method, anOctokit);
-                return Promise.all(results).then(function (response, x, y) {
-                    let report = aggregateReportFromResults(response, tsv.data, argv.method);
-                    return report;
-                });
-            })
+                if (results.iterable) {
+                    return Promise.all(results).then(function (response, x, y) {
+                        let report = aggregateReportFromResults(response, tsv.data, argv.method);
+                        return report;
+                    }).catch(function (e) {
+                        return Promise.reject("Hm, something went wrong iterating through result promises");
+                    });
+                } else {
+                    return Promise.reject("ERROR HANDLE HERE>>>>>");
+                }
+            });
         } catch (e) {
             throw `SOMETHING BAD HAPPENED ${e}`;
         }

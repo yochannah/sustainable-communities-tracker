@@ -37,7 +37,7 @@ const httpError = function (httpError, freeText, ownerRepo) {
 }
 
 const generalError = function (someVar, freeText) {
-  console.error('👿 ', freeText, someVar);
+  throw new Error(`👿  ${freeText} >> ${someVar}`);
 }
 
 const fileError = function (file, freeText, ownerRepo) {
