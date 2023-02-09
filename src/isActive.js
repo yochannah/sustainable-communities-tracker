@@ -27,6 +27,7 @@ function isActive(config, anOctokit) {
 
     checkNoOfResults(config, "commits").then(function (response) {
       countPaginatedResults(config, response, "commits").then(function (count) {
+        //consider adding date of first and last commit in this window. 
         resolve({
           isActive: count > 0,
           explanation: messages.reasons.hasActivity,

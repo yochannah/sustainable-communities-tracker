@@ -198,7 +198,7 @@ const runSingleMethod = function (config, anOctokit, filePath) {
             let thePath = fm.getFileNameSingleMethod(config, "report");
             fm.saveFile(results, thePath);
         }).catch(function (result) {
-            reject(new `Something went wrong ${result}`);
+            reject(`Something went wrong ${result}`);
         });
         resolve(finalReport);
     });
@@ -216,21 +216,22 @@ const checkType = {
         // multiple rejects and catch blocks. 
         try {
             if (!argv.tsvFile) { throw `SOMETHING BAD HAPPENED, file is null` } else {
-
-            };
-            return fm.readTsv(argv.tsvFile).then(function (tsv) {
-                let results = processMultipleRows(tsv.data, pathForReports, argv.method, anOctokit);
-                if (results.iterable) {
-                    return Promise.all(results).then(function (response, x, y) {
-                        let report = aggregateReportFromResults(response, tsv.data, argv.method);
-                        return report;
-                    }).catch(function (e) {
-                        return Promise.reject("Hm, something went wrong iterating through result promises");
-                    });
-                } else {
-                    return Promise.reject("ERROR HANDLE HERE>>>>>");
-                }
-            });
+                return fm.readTsv(argv.tsvFile).then(function (tsv) {
+                    let results = processMultipleRows(tsv.data, pathForReports, argv.method, anOctokit);
+                    //if this has multiple promises in an array, good. 
+                    if (Symbol.iterator in Object(results)) {
+                        return Promise.all(results).then(function (response, x, y) {
+                            let report = aggregateReportFromResults(response, tsv.data, argv.method);
+                            return report;
+                        }).catch(function (e) {
+                            return Promise.reject("Hm, something went wrong iterating through result promises");
+                        });
+                        //if it's not multiple promises, it's probably an error
+                    } else {
+                        return Promise.reject(`ERROR >>>>> ${results}`);
+                    }
+                });
+            }
         } catch (e) {
             throw `SOMETHING BAD HAPPENED ${e}`;
         }

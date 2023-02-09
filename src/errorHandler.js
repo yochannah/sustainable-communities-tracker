@@ -12,7 +12,7 @@ const errToFile = function (errFileName) {
 
 // General error handler method to re-use as much as possible please
 const httpError = function (httpError, freeText, ownerRepo) {
-  console.log('👾 httpError', Object.keys(httpError));
+  console.log('👾 httpError', Object.keys(httpError),freeText, ownerRepo);
 
   if (httpError.status == 404) {
     console.debug(`🔍 Can't find ${ownerRepo.org}/${ownerRepo.repo}`);

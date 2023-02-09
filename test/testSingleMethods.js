@@ -83,7 +83,7 @@ describe('Single Method Test Suite', function () {
 
         // deep equals needed because properties in the object could get out of order.
         // e.g. {a: 1, b:2} and {b:2, a:1} SHOULD be called equal.
-        assert.deepEqual(JSON.stringify(result), JSON.stringify(fakeReport));
+        assert.deepEqual(result, fakeReport);
         done();
       });
     });
@@ -94,20 +94,33 @@ describe('Single Method Test Suite', function () {
       assert.rejects(function () {
         return runner.runSingleMethod(badParams).then(function () {
           try {
-          done();
-        } catch(e){
-          //something's going wrong, there's a silent fail and this DOESN'T TRIGGER
-          //but neither do tests complete. 🔥
-          console.error('👻 error', e);
-        };
+            done();
+          } catch (e) {
+            //something's going wrong, there's a silent fail and this DOESN'T TRIGGER
+            //but neither do tests complete. 🔥
+            console.error('👻 error', e);
+          };
         });
       });
     });
   });
   describe('Date handlers', function () {
-    it.skip('Should give the full start-end period for activity', function () {
-
+    it('Should give the full start-end period for activity', function () {
+      assert.deepEqual(aggregateReport.dateChecksCovered, fakeReport.dateChecksCovered);
     });
+
+    before(function (done) {
+      //clone fakeparams, don't modify the original in case we re-use it later
+      let wasParams = Object.assign({}, fakeParams);
+      wasParams.method = "wasActive";
+      result = runner.runSingleMethod(wasParams);
+      result.then(function (report) {
+        aggregateReport = report;
+        console.log('👾👾👾👾👾👾👾👾👾👾 report', report);
+        done();
+      });
+    });
+
     it.skip('wasactive should tell us if the repo was active at the start of the test period', function () {
 
     });

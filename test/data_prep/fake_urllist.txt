@@ -1,3 +1,3 @@
 module.exports = `https://github.com/oogie/boogie
-https://github.com/kitten/mitten
+https://github.com/cat/scritch
 https://github.com/knee/ankle`
