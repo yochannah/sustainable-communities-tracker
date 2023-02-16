@@ -149,7 +149,7 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
 
         let ob = path.join(filePath, "oogie_boogie.json"),
           ka = path.join(filePath, "knee_ankle.json"),
-          km = path.join(filePath, "kitten_mitten.json");
+          km = path.join(filePath, "cat_scritch.json");
         assert.ok(fs.existsSync(ob), `missing ${ob}`);
         assert.ok(fs.existsSync(ka), `missing ${ka}`);
         assert.ok(fs.existsSync(km), `missing ${km}`);
