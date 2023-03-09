@@ -1,5 +1,6 @@
 const ghGetter = require("../src/app.js"),
   fm = require("../src/fileManager.js"),
+  fs = require("fs"),
   path = require('path'),
   urlList = require('./data_prep/fake_urllist.txt'),
   methodRunner = require("../src/singleMethod.js").methodRunner,
@@ -34,7 +35,9 @@ const badParams = {
   filePath: filePath
 };
 
-const fakeReport = { "urlsSubmitted": 6, "successfulResults": 6, "checks": { "isActive": { "active": 6, "quiet": 0 } }, "dateGathered": "2023-01-31T15:36:03.220+00:00", "dateChecksCovered": { "start": "2021-06-15T04:02:10.000+01:00", "end": "2022-07-10T07:03:18.000+01:00" } }
+const fakeReport = { "urlsSubmitted": 6, "successfulResults": 6, "checks": { "isActive": { "active": 6, "quiet": 0 } }, "dateGathered": "2023-01-31T15:36:03.220+00:00", "dateChecksCovered": { "start": "2021-06-15T04:02:10.000+01:00", "end": "2022-07-10T07:03:18.000+01:00" } };
+
+let wasParams, isParams, singleParams, files;
 
 /**
  * Prevents silent fails, thanks to https://adamcoster.com/blog/silently-skipped-async-tests-mochajs
@@ -70,7 +73,7 @@ describe('Single Method Test Suite', function () {
     });
 
     it('should save an aggregate report on the results', function (done) {
-      let reportName = fm.getFileNameSingleMethod(fakeParams, "report");
+      let reportName = getFileNameSingleMethod(fakeParams, "report");
       fm.readFile(reportName).then(function (result) {
 
         // dateGathered will always be different (it's set to NOW), 
@@ -111,21 +114,128 @@ describe('Single Method Test Suite', function () {
 
     before(function (done) {
       //clone fakeparams, don't modify the original in case we re-use it later
-      let wasParams = Object.assign({}, fakeParams);
+      wasParams = Object.assign({}, fakeParams);
       wasParams.method = "wasActive";
       result = runner.runSingleMethod(wasParams);
       result.then(function (report) {
         aggregateReport = report;
-        console.log('👾👾👾👾👾👾👾👾👾👾 report', report);
+
+        // setup the filenames we'll be checking. 
+        singleParams = {
+          kc: Object.assign({}, wasParams),
+          km: Object.assign({}, wasParams),
+          ob: Object.assign({}, wasParams),
+          on: Object.assign({}, wasParams),
+          bad: Object.assign({}, wasParams)
+        }
+
+        singleParams.kc.org = "kitten";
+        singleParams.km.org = "kitten";
+        singleParams.ob.org = "ooga";
+        singleParams.on.org = "ooga";
+
+        singleParams.kc.repo = "catten";
+        singleParams.km.repo = "mitten";
+        singleParams.ob.repo = "bmaagal";
+        singleParams.on.repo = "nistoveva";
+
+        singleParams.bad.repo = "sdfsfsdf";
+        singleParams.bad.org = "sdfsdfszz";
+
+        files = {
+          kc: getFileNameSingleMethod(singleParams.kc, "singleResult"),
+          km: getFileNameSingleMethod(singleParams.km, "singleResult"),
+          ob: getFileNameSingleMethod(singleParams.ob, "singleResult"),
+          on: getFileNameSingleMethod(singleParams.on, "singleResult"),
+          bad: getFileNameSingleMethod(singleParams.bad, "singleResult")
+        }
+
         done();
       });
     });
 
-    it.skip('wasactive should tell us if the repo was active at the start of the test period', function () {
 
+    it('wasactive should make files for each report', function () {
+      assert.ok(fs.existsSync(files.kc), `missing ${files.kc}`);
+      assert.ok(fs.existsSync(files.km), `missing ${files.km}`);
+      assert.ok(fs.existsSync(files.ob), `missing ${files.ob}`);
+      assert.ok(fs.existsSync(files.on), `missing ${files.on}`);
     });
-    it.skip('isactive should tell us if the repo was active at the END of the test period', function () {
 
+    it('wasactive should NOT find files that do not exist', function () {
+      assert.throws(function () {
+        fs.readSync(files.bad);
+      }, null, `didn't throw an error when retrieving ${files.bad}, which are files that don't exist`);
+    });
+
+    describe('wasactive should tell us if the repo was active at the start of the test period', function () {
+      //read wasactive file, make sure it shows
+      //the correct number of commits for month 0.
+      //wasactive
+
+      it("should have dates one month apart in the middle of the year", function (done) {
+
+        fm.readFile(files.kc).then(function (result) {
+          result = JSON.parse(result);
+
+          let start = result.config.since;
+          let end = result.config.until;
+
+          start = new Date(start);
+          end = new Date(end);
+
+          assert.equal(end.getMonth() - 1, start.getMonth());
+          assert.equal(end.getFullYear(), start.getFullYear());
+
+          //these two :down: should be congruent. 
+          // >0 == active. 
+          // == 0 is inactive
+          //less than 0, run like hell, you broke the law.
+          assert.equal(result.commitCount, 334)
+          assert.equal(result.isActive, true);
+
+          done();
+        });
+      });
+
+      it("should have dates one month apart at the END/START of the year", function (done) {
+
+        fm.readFile(files.km).then(function (result) {
+          result = JSON.parse(result);
+
+          let start = result.config.since;
+          let end = result.config.until;
+
+          start = new Date(start);
+          end = new Date(end);
+
+          assert.equal(start.getMonth(), 12);
+          assert.equal(end.getMonth(), 1);
+          assert.equal(end.getFullYear(), start.getFullYear()+1);
+
+          //these two :down: should be congruent. 
+          // >0 == active. 
+          // == 0 is inactive
+          //less than 0, should never happen, run like hell, you broke the law.
+          assert.equal(result.commitCount, 0)
+          assert.equal(result.isActive, false);
+
+          done();
+        });
+        //kitten_catten - 1,0
+        //kitten_mitten - 0,1
+        //ooga_bmaagal - 0,0
+        //ooga_nistoveva - 1,1
+
+      });
+    });
+
+    it.skip('isactive should tell us if the repo was active at the END of the test period', function () {
+      //wasactive
+      //kitten_catten - 1,0
+      //kitten_mitten - 0,1
+      //ooga_bmaagal - 0,0
+      //ooga_nistoveva - 1,1
     });
     it.skip('no repo check dates should ever be in the future', function () {
 

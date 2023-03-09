@@ -4,7 +4,17 @@ const mockData = require("./processedmockData.json"),
   mock_issue = require("./data_prep/mock_issue.js"),
   mock_pull = require("./data_prep/mock_pr.js"),
   mock_commit = require("./data_prep/mock_commit.js"),
-  mock_labels = require("./data_prep/mock_labels.js");
+  mock_labels = require("./data_prep/mock_labels.js"),
+  mock_commit_2021_active = require("./data_prep/mock_commit_2021_active.js"),
+  mock_commit_2021_inactive = require("./data_prep/mock_commit_2021_inactive.js"),
+  mock_commit_2022_inactive = require("./data_prep/mock_commit_2022_active.js"),
+  mock_commit_2022_active = require("./data_prep/mock_commit_2022_inactive.js");
+
+//kitten_catten - 1,0
+//kitten_mitten - 0,1
+//ooga_bmaagal - 0,0
+//ooga_nistoveva - 1,1
+
 
 // console.log("<<🥕MOCK ISSUE");
 // console.log(mock_issue);
@@ -13,7 +23,7 @@ const mockData = require("./processedmockData.json"),
 //this response object  maps the serialised object (which is a modified real
 // http response) to our mock octokit.
 
-var responses = {
+const responses = {
   "": mockData.repoInfo,
   "/commits": mock_commit,
   "/languages": mockData.languages,
@@ -37,17 +47,73 @@ var responses = {
     "/issues": mock_issue,
     "/pulls": mock_pull,
     "/commit": mock_commit
+  },
+  singleMethods: {
+    kitten: {
+      2021: {
+        catten: mock_commit_2021_active,
+        mitten: mock_commit_2021_inactive
+      },
+      2022: {
+        catten: mock_commit_2022_inactive,
+        mitten: mock_commit_2022_active
+      }
+    },
+    ooga: {
+      2021: {
+        bmaagal: mock_commit_2021_inactive,
+        nistoveva: mock_commit_2021_active,
+      },
+      2022: {
+        bmaagal: mock_commit_2022_inactive,
+        nistoveva: mock_commit_2022_active
+      }
+    },
+    sevivon : {
+      2021: {
+        sovsovsov: mock_commit_2021_inactive,
+      },
+      2022: {
+        sovsovsov: mock_commit_2022_inactive,
+      }
+    }
   }
-
 }
 
-const request = function(url, params) {
+//kitten_catten - 1,0
+//kitten_mitten - 0,1
+//ooga_bmaagal - 0,0
+//ooga_nistoveva - 1,1
+
+const testRepos = {
+  kitten: [
+    "catten",
+    "mitten"],
+  ooga: ["bmaagal",
+    "nistoveva"
+  ]
+}
+
+/**
+ * 
+ * **/
+const isSingleMethodTestRepo = function (config) {
+  let orgs = Object.keys(testRepos),
+    isTestOrg = orgs.includes(config.owner),
+    isTestRepo;
+  if (isTestOrg) {
+    isTestRepo = testRepos[config.owner].includes(config.repo);
+  }
+  return isTestOrg && isTestRepo;
+}
+
+const request = function (url, params) {
   try {
     //useful for debug
-      //  console.log(`=== 🐙 === Testing
-      //  |--- ${url}
-      //  |--- with params: ${JSON.stringify(params)}`);
-   // strip out the repeated bit of the URL
+    //  console.log(`=== 🐙 === Testing
+    //  |--- ${url}
+    //  |--- with params: ${JSON.stringify(params)}`);
+    // strip out the repeated bit of the URL
     let urlSnippet = url.split("GET /repos/{owner}/{repo}")[1],
       response = responses[urlSnippet];
 
@@ -62,6 +128,17 @@ const request = function(url, params) {
     } else if (params.state) {
       response = responses[urlSnippet][params.state];
     }
+
+    let isSingleMethodTest = isSingleMethodTestRepo(params);
+
+    if (isSingleMethodTest) {
+      let year = new Date(params.since);
+      year = year.getFullYear();
+    //  console.log('👾 params', params);
+    //  console.log('👾 responses.singleMethods', responses.singleMethods);
+      response = responses.singleMethods[params.owner][year][params.repo];
+    }
+
     return response;
 
   } catch (error) {
@@ -69,7 +146,7 @@ const request = function(url, params) {
   }
 }
 
-exports.init = function() {
+exports.init = function () {
   console.log("=== 🐙 === Mock Octokit activated: we're using fake data and not the GitHub API");
   return {
     request: request
