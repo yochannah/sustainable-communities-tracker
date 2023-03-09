@@ -10,11 +10,6 @@ const mockData = require("./processedmockData.json"),
   mock_commit_2022_inactive = require("./data_prep/mock_commit_2022_active.js"),
   mock_commit_2022_active = require("./data_prep/mock_commit_2022_inactive.js");
 
-//kitten_catten - 1,0
-//kitten_mitten - 0,1
-//ooga_bmaagal - 0,0
-//ooga_nistoveva - 1,1
-
 //this response object  maps the serialised object (which is a modified real
 // http response) to our mock octokit.
 
@@ -66,11 +61,6 @@ const responses = {
     }
   }
 }
-
-//kitten_catten - 1,0
-//kitten_mitten - 0,1
-//ooga_bmaagal - 0,0
-//ooga_nistoveva - 1,1
 
 const testRepos = {
   kitten: [

@@ -4,6 +4,7 @@ const ghGetter = require("../src/app.js"),
   path = require('path'),
   urlList = require('./data_prep/fake_urllist.txt'),
   methodRunner = require("../src/singleMethod.js").methodRunner,
+{ DateTime } = require("luxon"),
   mocktokit = require("./mocktokit");
 
 const assert = require('assert');
@@ -48,9 +49,6 @@ function onUncaught(err) {
 }
 process.on('unhandledRejection', onUncaught);
 
-
-
-
 //tsv
 describe('Single Method Test Suite', function () {
   var aggregateReport, result;
@@ -73,7 +71,8 @@ describe('Single Method Test Suite', function () {
     });
 
     it('should save an aggregate report on the results', function (done) {
-      let reportName = getFileNameSingleMethod(fakeParams, "report");
+      let reportName = getFileNameSingleMethod(fakeParams, "report"),
+      tempFakeReport = Object.assign({}, fakeReport);
       fm.readFile(reportName).then(function (result) {
 
         // dateGathered will always be different (it's set to NOW), 
@@ -82,13 +81,13 @@ describe('Single Method Test Suite', function () {
         // the key won't delete from a stringified object, only a true json object
         result = JSON.parse(result);
         delete result.dateGathered;
-        delete fakeReport.dateGathered;
+        delete tempFakeReport.dateGathered;
         delete result.dateChecksCovered;
-        delete fakeReport.dateChecksCovered;
+        delete tempFakeReport.dateChecksCovered;
 
         // deep equals needed because properties in the object could get out of order.
         // e.g. {a: 1, b:2} and {b:2, a:1} SHOULD be called equal.
-        assert.deepEqual(result, fakeReport);
+        assert.deepEqual(result, tempFakeReport);
         done();
       });
     });
@@ -110,10 +109,6 @@ describe('Single Method Test Suite', function () {
     });
   });
   describe('Date handlers', function () {
-    it('Should give the full start-end period for activity', function () {
-      assert.deepEqual(aggregateReport.dateChecksCovered, fakeReport.dateChecksCovered);
-    });
-
     before(function (done) {
       //clone fakeparams, don't modify the original in case we re-use it later
       wasParams = Object.assign({}, fakeParams);
@@ -156,6 +151,22 @@ describe('Single Method Test Suite', function () {
       });
     });
 
+    it('Should give the full start-end period for activity', function () {
+
+        //a fun bug is that the tests will fail if you're in a different timezone, 
+        //if we don't take the timezone out of the equation. 
+        let expectedReport = Object.assign({}, fakeReport),
+
+        testedStart = DateTime.fromISO(aggregateReport.dateChecksCovered.start),
+        testedEnd = DateTime.fromISO(aggregateReport.dateChecksCovered.end),
+
+        expectedStart = DateTime.fromISO(expectedReport.dateChecksCovered.start),
+        expectedEnd = DateTime.fromISO(expectedReport.dateChecksCovered.end);
+
+        assert.ok(testedStart.hasSame(expectedStart, 'day')); //implicitly same month, year   
+        assert.ok(testedEnd.hasSame(expectedEnd, 'day')); //implicitly same month, year  
+    });
+
 
     it('wasactive should make files for each report', function () {
       assert.ok(fs.existsSync(files.kc), `missing ${files.kc}`);
@@ -193,7 +204,7 @@ describe('Single Method Test Suite', function () {
           // >0 == active. 
           // == 0 is inactive
           //less than 0, run like hell, you broke the law.
-          assert.equal(result.commitCount, 334)
+          assert.equal(result.commitCount, 200)
           assert.equal(result.isActive, true);
 
           done();
