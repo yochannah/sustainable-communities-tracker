@@ -15,11 +15,6 @@ const mockData = require("./processedmockData.json"),
 //ooga_bmaagal - 0,0
 //ooga_nistoveva - 1,1
 
-
-// console.log("<<🥕MOCK ISSUE");
-// console.log(mock_issue);
-// console.log("🥕>>");
-
 //this response object  maps the serialised object (which is a modified real
 // http response) to our mock octokit.
 
@@ -67,14 +62,6 @@ const responses = {
       2022: {
         bmaagal: mock_commit_2022_inactive,
         nistoveva: mock_commit_2022_active
-      }
-    },
-    sevivon : {
-      2021: {
-        sovsovsov: mock_commit_2021_inactive,
-      },
-      2022: {
-        sovsovsov: mock_commit_2022_inactive,
       }
     }
   }
