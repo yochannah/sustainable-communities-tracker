@@ -1,6 +1,8 @@
 # sustainable-communities-tracker
 sustainable-communities-tracker
 
+[![Node.js CI](https://github.com/yochannah/sustainable-communities-tracker/actions/workflows/node.js.yml/badge.svg)](https://github.com/yochannah/sustainable-communities-tracker/actions/workflows/node.js.yml)
+
 ## To set up
 
 1. You'll need a recent version of node. Run `npm install` to get the dependencies.
