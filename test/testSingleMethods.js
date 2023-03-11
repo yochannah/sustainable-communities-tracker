@@ -4,7 +4,7 @@ const ghGetter = require("../src/app.js"),
   path = require('path'),
   urlList = require('./data_prep/fake_urllist.txt'),
   methodRunner = require("../src/singleMethod.js").methodRunner,
-{ DateTime } = require("luxon"),
+  { DateTime } = require("luxon"),
   mocktokit = require("./mocktokit");
 
 const assert = require('assert');
@@ -72,7 +72,7 @@ describe('Single Method Test Suite', function () {
 
     it('should save an aggregate report on the results', function (done) {
       let reportName = getFileNameSingleMethod(fakeParams, "report"),
-      tempFakeReport = Object.assign({}, fakeReport);
+        tempFakeReport = Object.assign({}, fakeReport);
       fm.readFile(reportName).then(function (result) {
 
         // dateGathered will always be different (it's set to NOW), 
@@ -153,9 +153,9 @@ describe('Single Method Test Suite', function () {
 
     it('Should give the full start-end period for activity', function () {
 
-        //a fun bug is that the tests will fail if you're in a different timezone, 
-        //if we don't take the timezone out of the equation. 
-        let expectedReport = Object.assign({}, fakeReport),
+      //a fun bug is that the tests will fail if you're in a different timezone, 
+      //if we don't take the timezone out of the equation. 
+      let expectedReport = Object.assign({}, fakeReport),
 
         testedStart = DateTime.fromISO(aggregateReport.dateChecksCovered.start),
         testedEnd = DateTime.fromISO(aggregateReport.dateChecksCovered.end),
@@ -163,8 +163,8 @@ describe('Single Method Test Suite', function () {
         expectedStart = DateTime.fromISO(expectedReport.dateChecksCovered.start),
         expectedEnd = DateTime.fromISO(expectedReport.dateChecksCovered.end);
 
-        assert.ok(testedStart.hasSame(expectedStart, 'day')); //implicitly same month, year   
-        assert.ok(testedEnd.hasSame(expectedEnd, 'day')); //implicitly same month, year  
+      assert.ok(testedStart.hasSame(expectedStart, 'day')); //implicitly same month, year   
+      assert.ok(testedEnd.hasSame(expectedEnd, 'day')); //implicitly same month, year  
     });
 
 
@@ -181,7 +181,7 @@ describe('Single Method Test Suite', function () {
       }, null, `didn't throw an error when retrieving ${files.bad}, which are files that don't exist`);
     });
 
-    describe('wasactive should tell us if the repo was active at the start of the test period', function () {
+    describe('wasactive report should tell us if the repo was active at the start of the test period', function () {
       //read wasactive file, make sure it shows
       //the correct number of commits for month 0.
       //wasactive
@@ -197,21 +197,40 @@ describe('Single Method Test Suite', function () {
           start = new Date(start);
           end = new Date(end);
 
+          //plain old math test here
           assert.equal(end.getMonth() - 1, start.getMonth());
           assert.equal(end.getFullYear(), start.getFullYear());
+
+          done();
+        });
+      });
+
+      it("should show active when active", function (done) {
+
+        fm.readFile(files.kc).then(function (result) {
+          result = JSON.parse(result);
+
+          let start = result.config.since;
+          let end = result.config.until;
+
+          start = new Date(start);
+          end = new Date(end);
 
           //these two :down: should be congruent. 
           // >0 == active. 
           // == 0 is inactive
           //less than 0, run like hell, you broke the law.
           assert.equal(result.commitCount, 200)
+          //this is "isactive" in the period tested, 
+          //so "isactive" is still the correct parameter,
+          //even though it is esting the wasactive method.
           assert.equal(result.isActive, true);
 
           done();
         });
       });
 
-      it.skip("should have dates one month apart at the END/START of the year", function (done) {
+      it("should show inactive when inactive", function (done) {
 
         fm.readFile(files.km).then(function (result) {
           result = JSON.parse(result);
@@ -222,39 +241,128 @@ describe('Single Method Test Suite', function () {
           start = new Date(start);
           end = new Date(end);
 
-          assert.equal(start.getMonth(), 12);
-          assert.equal(end.getMonth(), 1);
-          assert.equal(end.getFullYear(), start.getFullYear()+1);
-
-          //these two :down: should be congruent. 
-          // >0 == active. 
-          // == 0 is inactive
-          //less than 0, should never happen, run like hell, you broke the law.
           assert.equal(result.commitCount, 0)
           assert.equal(result.isActive, false);
 
           done();
         });
-        //kitten_catten -     1,0
-        //kitten_mitten -     0,1
-        //ooga_bmaagal -      0,0
-        //ooga_nistoveva -    1,1
-        //ooga_nachuga -      1,1 //this goes through the default 334 commits route
-        //sevivon_sovsovsov - 1,1 //this goes through the default 334 commits route
-        //total_active        4,4
-        //total_quiet         2,2
+      });
+
+      it("should have dates one month apart at the END/START of the year", function (done) {
+        //this checks for off by one errors at the start/end of the year.
+        fm.readFile(files.on).then(function (result) {
+          result = JSON.parse(result);
+
+          let start = result.config.since;
+          let end = result.config.until;
+
+          start = DateTime.fromISO(start);
+          end = DateTime.fromISO(end);
+
+          let distance = end.diff(start, 'months');
+
+          assert.equal(distance.values.months, 1);
+
+          done();
+        });
       });
     });
 
-    it.skip('isactive should tell us if the repo was active at the END of the test period', function () {
-      //wasactive
+    describe('isactive should tell us if the repo was active at the END of the test period', function () {
+      //repo, wasactive, isactive
       //kitten_catten - 1,0
       //kitten_mitten - 0,1
       //ooga_bmaagal - 0,0
       //ooga_nistoveva - 1,1
-    });
-    it.skip('no repo check dates should ever be in the future', function () {
 
+      it("should show active when active", function (done) {
+
+        fm.readFile(files.on).then(function (result) {
+          result = JSON.parse(result);
+
+          let start = result.config.since;
+          let end = result.config.until;
+
+          start = new Date(start);
+          end = new Date(end);
+
+          //these two :down: should be congruent. 
+          // >0 == active. 
+          // == 0 is inactive
+          //less than 0, run like hell, you broke the law.
+          assert.equal(result.commitCount, 200)
+          //this is "isactive" in the period tested, 
+          //so "isactive" is still the correct parameter,
+          //even though it is esting the wasactive method.
+          assert.equal(result.isActive, true);
+
+          done();
+        });
+      });
+
+      it("should show inactive when inactive", function (done) {
+
+        fm.readFile(files.ob).then(function (result) {
+          result = JSON.parse(result);
+
+          let start = result.config.since;
+          let end = result.config.until;
+
+          start = new Date(start);
+          end = new Date(end);
+
+          assert.equal(result.commitCount, 0)
+          assert.equal(result.isActive, false);
+
+          done();
+        });
+      });
+
+      it("should show inactive when inactive", function (done) {
+
+        fm.readFile(files.ob).then(function (result) {
+          result = JSON.parse(result);
+
+          let start = result.config.since;
+          let end = result.config.until;
+
+          start = new Date(start);
+          end = new Date(end);
+
+          assert.equal(result.commitCount, 0)
+          assert.equal(result.isActive, false);
+
+          done();
+        });
+      });
+    });
+
+    it('no repo check dates should ever be in the future', function (done) {
+      let promises = [
+        fm.readFile(files.ob),
+        fm.readFile(files.on),
+        fm.readFile(files.km),
+        fm.readFile(files.kc)];
+
+      let processFutureDate = function (response) {
+        response = JSON.parse(response);
+        let start = response.config.since;
+        let end = response.config.until;
+        return {
+          start: DateTime.fromISO(start),
+          end: DateTime.fromISO(end)
+        }
+      }
+
+      Promise.all(promises).then(function (values) {
+        values.map(function (repo) {
+          let result = processFutureDate(repo);
+          assert.ok(result.start < DateTime.now());
+          assert.ok(result.end < DateTime.now());
+        });
+
+        done();
+      });
     });
   });
 });
