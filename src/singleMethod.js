@@ -5,7 +5,8 @@ const fm = require('./fileManager.js'),
     fs = require('fs'),
     { DateTime } = require("luxon"),
     { countCommits } = require('./countCommits.js'),
-    { isActive, wasActive } = require('./isActive.js');
+    { isActive, wasActive } = require('./isActive.js'),
+    {stillAlive} = require('./stillAlive.js');
 
 /** 
  * we don't want ppl to be able to run any random method. this is the "approved" list
@@ -15,7 +16,8 @@ const fm = require('./fileManager.js'),
 const publicMethods = {
     "isActive": isActive,
     "wasActive": wasActive,
-    "countCommits": countCommits
+    "countCommits": countCommits,
+    "stillAlive" : stillAlive
 };
 
 const aggregateSummaries = {

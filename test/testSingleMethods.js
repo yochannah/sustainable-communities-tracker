@@ -38,6 +38,47 @@ const badParams = {
 
 const fakeReport = { "urlsSubmitted": 6, "successfulResults": 6, "checks": { "isActive": { "active": 4, "quiet": 2 } }, "dateGathered": "2023-01-31T15:36:03.220+00:00", "dateChecksCovered": { "start": "2021-06-15T04:02:10.000+01:00", "end": "2022-07-10T07:03:18.000+01:00" } };
 
+const expected = {
+  //kitten_catten -     1,0
+  //kitten_mitten -     0,1
+  //ooga_bmaagal -      0,0
+  //ooga_nistoveva -    1,1
+  //ooga_nachuga -      1,1 //this goes through the default 334 commits route
+  //sevivon_sovsovsov - 1,1 //this goes through the default 334 commits route
+  //total_active        4,4
+  //total_quiet         2,2
+  kitten: {
+    catten: {
+      isActive: false,
+      wasActive: true
+    },
+    mitten: {
+      isActive: true,
+      wasActive: false
+    }
+  },
+  ooga: {
+    bmaagal: {
+      isActive: false,
+      wasActive: false
+    },
+    nachuga: {
+      isActive: true,
+      wasActive: true
+    },
+    nistoveva: {
+      isActive: true,
+      wasActive: true
+    }
+  },
+  sevivon: {
+    sovsovsov: {
+      isActive: true,
+      wasActive: true
+    }
+  }
+}
+
 let wasParams, isParams, singleParams, files;
 
 /**
@@ -364,5 +405,23 @@ describe('Single Method Test Suite', function () {
         done();
       });
     });
+  });
+
+  describe.skip("Still Alive?", function () {
+    it("should produce a report with all repo names, and whether it started/ended alive.", function (done) {
+      let config = Object.assign({}, fakeParams);
+      config.method = "stillAlive";
+      let fileName = getFileNameSingleMethod(config, "report");
+
+      fm.readFile(fileName).then(function (theFile) {
+        //the file should have a json of report_stillAlive_org_repo isalive wasalive
+        theFile = JSON.parse(theFile);
+
+        assert.deepEqual(theFile,expected);
+      });
+
+
+    });
+
   });
 });
