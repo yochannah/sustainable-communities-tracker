@@ -133,6 +133,7 @@ function readFile(somePath) {
  * @param {string} config.filePath folder where the results are to be stored. 
  * @param {string} config.org
  * @param {string} config.repo
+ * @param {string} fileType - "report" for aggregate results, or "singleMethod" for... single methods
  * @returns {string} filepath
  * */
 function getFileNameSingleMethod(config, fileType) {
