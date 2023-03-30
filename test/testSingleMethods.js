@@ -79,6 +79,27 @@ const expected = {
   }
 }
 
+let expectedStillAliveReport = {
+  checks: {
+    repoSummary: {
+      kitten_catten: 'DECLINED',
+      kitten_mitten: 'ACTIVATED',
+      ooga_bmaagal: 'INACTIVE',
+      ooga_nachuga: 'ONGOING',
+      ooga_nistoveva: 'ONGOING',
+      sevivon_sovssovsov: 'ONGOING'
+    },
+    statusCounts: {
+      ACTIVATED: 1,
+      DECLINED: 1,
+      INACTIVE: 1,
+      ONGOING: 3
+    }
+  },
+  successfulResults: 6,
+  urlsSubmitted: 6
+}
+
 let wasParams, isParams, singleParams, files;
 
 /**
@@ -407,17 +428,33 @@ describe('Single Method Test Suite', function () {
     });
   });
 
-  describe.skip("Still Alive?", function () {
+  describe("Still Alive?", function () {
+
+    var aggregateReport, result;
+    let config = Object.assign({}, fakeParams);
+    config.method = "stillAlive";
+    let fileName = getFileNameSingleMethod(config, "report");
+
+    before(function (done) {
+      result = runner.runSingleMethod(config);
+      result.then(function (report) {
+        aggregateReport = report;
+        done();
+      });
+    });
+
     it("should produce a report with all repo names, and whether it started/ended alive.", function (done) {
-      let config = Object.assign({}, fakeParams);
-      config.method = "stillAlive";
-      let fileName = getFileNameSingleMethod(config, "report");
 
       fm.readFile(fileName).then(function (theFile) {
         //the file should have a json of report_stillAlive_org_repo isalive wasalive
         theFile = JSON.parse(theFile);
 
-        assert.deepEqual(theFile,expected);
+        //delete dates since they will never match
+        delete theFile.dateGathered;
+        delete theFile.dateChecksCovered;
+
+        assert.deepEqual(theFile, expectedStillAliveReport);
+        done();
       });
 
 

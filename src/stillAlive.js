@@ -51,9 +51,9 @@ function stillAlive(config, anOctokit) {
     let was = wasActive(config, anOctokit);
 
     Promise.allSettled([was, is]).then(function (values) {
-      let resolvedIs = values[0], resolvedWas = values[1];
-      let theStatus = prepareStatus(resolvedIs, resolvedWas);
-      resolve({
+      let resolvedIs = values[0].value, resolvedWas = values[1].value;
+      let theStatus = prepareStatus(resolvedIs, resolvedWas),
+      response = {
         repo: {
           org: config.org,
           repo: config.repo
@@ -64,7 +64,9 @@ function stillAlive(config, anOctokit) {
           was: resolvedWas,
           config: config
         }
-      });
+      }
+      console.log('👾 response', response);
+      resolve(response);
     }).catch(function (someError) {
       console.error(`A thing went wrong: ${someError}`);
       reject(someError);
