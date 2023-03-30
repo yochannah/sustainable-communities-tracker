@@ -87,8 +87,8 @@ const checkCoC = async function (config) {
 //   # * and add the two together. Boom. Commit count in 2 api calls
 
 const checkNoOfResults = async function (config, endpoint, state, label) {
-  let octo = config.octokit || octokit;
   try {
+    let octo = config.octokit || octokit;
     const url = 'GET /repos/{owner}/{repo}/' + endpoint,
       params = {
         "owner": config.owner,
@@ -100,13 +100,11 @@ const checkNoOfResults = async function (config, endpoint, state, label) {
         "labels": label
       },
       result = await octo.request(url, params);
-
     if (!result) {
       console.error("🤖🤖🤖🤖🤖🤖");
       console.error("I'm sorry dave, I'm afraid I can't do that");
       console.error("no result for Url: \n", url, "|--\nparams: ", params);
     }
-
     if (generateTestData) {
       //this serialises a real-world response which we can process to create
       //test data. Usually we won't need this as test data shouldn't  change
@@ -119,7 +117,6 @@ const checkNoOfResults = async function (config, endpoint, state, label) {
         testPulls = result;
       }
     }
-
 
     return result;
   } catch (e) {
@@ -136,7 +133,7 @@ const countPaginatedResults = async function (config, result, endpoint, state, l
     }
     if (result.status == 404) {
       return;
-    } 
+    }
     const numOnFirstPage = result.data.length,
       links = parse_headers(result.headers.link);
     var lastPage = 1, // We'll always have at least one page of results
@@ -162,10 +159,10 @@ const countPaginatedResults = async function (config, result, endpoint, state, l
     const fullPages = (lastPage - 1) * maxPerPage;
     return noOfResults = fullPages + lastPageCount;
   } catch (e) {
-      errorHandler.httpError(e, `${endpoint}
+    errorHandler.httpError(e, `${endpoint}
        -State: ${state}
        -Label: ${label}
-       -${config.owner}/${config.repo}`,config);
+       -${config.owner}/${config.repo}`, config);
   }
 }
 

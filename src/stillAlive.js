@@ -1,29 +1,42 @@
-const { DateTime } = require("luxon");
-const { initOcto, checkNoOfResults, countPaginatedResults, splitUrl } = require("./app.js");
-
 ////////// TBD THIS NEEDS TO RUN ISACTIVE AND WASACTIVE FOR EACH REPO, AND MAKE AN AGGREGATE REPORT
 
 
-/**
- * Counts commits between two given dates. 
- * @param {string} config - an octokit config object, paramss for the github api
- * @param {string} anOctokit - this is optional and ususally only needs to be passed in if doing tests, where we don't want to get real api answers as they'll be variable and the test might fail due to latency. lol.
- **/
-function countCommits(config, anOctokit) {
-  config.owner = config.org;
-  config.repo = config.repo.trim();
-  const octokit = anOctokit || initOcto();
-  return results = new Promise(function (resolve, reject) {
-    checkNoOfResults(config, "commits").then(function (response) {
-      countPaginatedResults(config, response, "commits").then(function (count) {
-        resolve({
-          commitCount: count,
-          config: config,
-          dateRetrieved: DateTime.now().toString()
-        });
+const { DateTime } = require("luxon");
+const { initOcto, checkNoOfResults, countPaginatedResults, splitUrl } = require("./app.js");
+const messages = require("./messages.js");
+const errorHandler = require("./errorHandler.js");
+const { isActive, wasActive } = require("./isActive.js");
+
+function stillAlive(config, anOctokit) {
+  return new Promise(function (resolve, reject) {
+
+    let endDate = config.until,
+      startDate = DateTime.fromISO(config.since);
+
+    //if we're missing a start date for some reason
+    // 12 months before the end date is good instead. 
+    if (!startDate || startDate.invalid) {
+      startDate = DateTime.fromISO(endDate);
+      startDate = startDate.minus({ months: 12 });
+    }
+    endDate = startDate.plus({ months: 1 });
+    startDate = startDate.toString();
+    config.until = endDate;
+    config.since = startDate;
+
+    let is = isActive(config, anOctokit);
+    let was = wasActive(config, anOctokit);
+
+    Promise.allSettled([was, is]).then(function (values) {
+      resolve({
+        is: values[0],
+        was: values[1]
       });
+    }).catch(function (someError) {
+      console.error(`A thing went wrong: ${someError}`);
+      reject(someError);
     });
   });
 }
 
-module.exports = { countCommits: countCommits };
+module.exports = { stillAlive }

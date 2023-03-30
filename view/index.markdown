@@ -5,6 +5,10 @@
 layout: home
 ---
 
+# Surveys
+
+[Survey results](/surveys)
+
 ## Attention needed
 
 <table>

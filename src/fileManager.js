@@ -141,6 +141,7 @@ function getFileNameSingleMethod(config, fileType) {
   let c = config; //sugar to keep our lines shorter. 
   let isConfigValid = propertyExists(["filePath", "method"], config);
   if (!isConfigValid) {
+    console.log(`👾 invalid config, missing property filePath "${c.filePath}" or method "${c.method}"`);
     errorHandler.generalError(config, `🙃 ${fileType} error`)
   }
   try {

@@ -8,9 +8,10 @@ function isActive(config, anOctokit) {
   return results = new Promise(function (resolve, reject) {
 
     //skip the repo is there's a reason to
-    if (!config.repo) { 
-      console.log('👾 config', config);
-      reject("no repo") }
+    if (!config.repo) {
+      console.error('👾 config', config);
+      reject("no repo")
+    }
 
     //otherwise. continue.
     config.owner = config.org;
@@ -24,7 +25,6 @@ function isActive(config, anOctokit) {
 
     config.since = startDate;
     config.octokit = anOctokit || initOcto();
-
     checkNoOfResults(config, "commits").then(function (response) {
       countPaginatedResults(config, response, "commits").then(function (count) {
         //consider adding date of first and last commit in this window. 
@@ -37,7 +37,7 @@ function isActive(config, anOctokit) {
         });
       }).catch(function (e) { errorHandler.generalError(e, "<-- count paginatedResults") })
     }).catch(function (e) { errorHandler.generalError(e, "<-- checknoofResults") });
-  });
+  }).catch(function (e) { errorHandler.generalError(e, "<-- 🧜🏼") });
 }
 
 function wasActive(config, anOctokit) {

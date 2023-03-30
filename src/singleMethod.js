@@ -6,7 +6,7 @@ const fm = require('./fileManager.js'),
     { DateTime } = require("luxon"),
     { countCommits } = require('./countCommits.js'),
     { isActive, wasActive } = require('./isActive.js'),
-    {stillAlive} = require('./stillAlive.js');
+    { stillAlive } = require('./stillAlive.js');
 
 /** 
  * we don't want ppl to be able to run any random method. this is the "approved" list
@@ -17,7 +17,7 @@ const publicMethods = {
     "isActive": isActive,
     "wasActive": wasActive,
     "countCommits": countCommits,
-    "stillAlive" : stillAlive
+    "stillAlive": stillAlive
 };
 
 const aggregateSummaries = {
@@ -66,7 +66,26 @@ const aggregateSummaries = {
         //we want a numerically sorted list, not a string-sorted list. 
         return commitCount.sort((a, b) => (a - b));
     },
-    wasActive: function (results, data) { return aggregateSummaries.isActive(results, data); }
+    wasActive: function (results, data) { return aggregateSummaries.isActive(results, data); },
+    /**
+   * Function to summarise results from a SET of stillAlive queries. 
+   * @param {Array.<Object>} results an array of stillAlive results
+   * @param {null} data
+   * @returns {Array.<number>} sorted Array showing how many commits in the repo for the given period. 
+   * **/
+    stillAlive: function (results) {
+        var commitCount = [];
+        results.map(function (result) {
+            if (result.commitCount) {
+                commitCount.push(parseInt(result.commitCount, 10));
+            }
+            else {
+                console.log('👾 error for ', result.config.org, result.config.repo);
+            }
+        });
+        //we want a numerically sorted list, not a string-sorted list. 
+        return commitCount.sort((a, b) => (a - b));
+    }
 };
 
 /**
@@ -92,7 +111,6 @@ const singleRepo = function (url, argv, filePath, anOctokit) {
             // idk why, I felt like it
             // I'm learning some Spanish words, so respuesta = response. 
             let respuesta = publicMethods[method](config, anOctokit).then(function (result) {
-
                 if (!result) {
                     console.debug(`No response for ${config.url}`);
                     reject();
@@ -109,7 +127,7 @@ const singleRepo = function (url, argv, filePath, anOctokit) {
         }
         catch (e) {
             errorHandler.generalError(e, errors.general);
-            reject(e); // does this ever happen? 
+            reject(e.message); // does this ever happen? 
         }
     });
 }
@@ -183,6 +201,7 @@ const runSingleMethod = function (config, anOctokit, filePath) {
         let finalReport;
 
         const pathForReports = fm.initFilePath(null, filePath);
+        config.filePath = pathForReports;
         if (config.url) {
             //run checks on one repo
             singleRepo(config.url, config, pathForReports, anOctokit);
@@ -199,6 +218,7 @@ const runSingleMethod = function (config, anOctokit, filePath) {
         finalReport.then(function (results) {
             let thePath = fm.getFileNameSingleMethod(config, "report");
             fm.saveFile(results, thePath);
+            console.log(`😎😎😎😎😎 Saved report for ${config.method} at ${thePath}`);
         }).catch(function (result) {
             reject(`Something went wrong ${result}`);
         });
@@ -217,12 +237,14 @@ const checkType = {
         // it's driving me lightly bonkers. As you can probable see from 
         // multiple rejects and catch blocks. 
         try {
-            if (!argv.tsvFile) { throw `SOMETHING BAD HAPPENED, file is null` } else {
+            if (!argv.tsvFile) {
+                throw `SOMETHING BAD HAPPENED, file is null`;
+            } else {
                 return fm.readTsv(argv.tsvFile).then(function (tsv) {
                     let results = processMultipleRows(tsv.data, pathForReports, argv.method, anOctokit);
                     //if this has multiple promises in an array, good. 
                     if (Symbol.iterator in Object(results)) {
-                        return Promise.all(results).then(function (response, x, y) {
+                        return Promise.allSettled(results).then(function (response) {
                             let report = aggregateReportFromResults(response, tsv.data, argv.method);
                             return report;
                         }).catch(function (e) {
@@ -293,7 +315,6 @@ function prepareConfig(url, argv, months, method, filePath) {
     if (config.since.invalid) {
         errorHandler.generalError(config.since, `start date was invalid: ${argv.start}`);
     }
-
     //end is optional - and if it's missing, we just want up to N months since the start date, which can't be missing. 
     if (config.end) {
         config.until = DateTime.fromISO(sanitiseDate(argv.until));

@@ -1,5 +1,7 @@
-//I'm so proud of this file name. Let's fake Octokit responses for our tests.
+//Mocktokit. I'm so proud of this file name. 
+//Let's fake Octokit responses for our tests.
 
+//these are all fake data to be used for responses in the test. 
 const mockData = require("./processedmockData.json"),
   mock_issue = require("./data_prep/mock_issue.js"),
   mock_pull = require("./data_prep/mock_pr.js"),
@@ -12,7 +14,7 @@ const mockData = require("./processedmockData.json"),
 
 
 
-//this response object  maps the serialised object (which is a modified real
+//this response object maps the serialised object (which is a modified real
 // http response) to our mock octokit.
 
 const responses = {
@@ -121,8 +123,6 @@ const request = function (url, params) {
     if (isSingleMethodTest) {
       let year = new Date(params.since);
       year = year.getFullYear();
-    //  console.log('👾 params', params);
-    //  console.log('👾 responses.singleMethods', responses.singleMethods);
       response = responses.singleMethods[params.owner][year][params.repo];
     }
 
