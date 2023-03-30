@@ -6,7 +6,8 @@ const fm = require('./fileManager.js'),
     { DateTime } = require("luxon"),
     { countCommits } = require('./countCommits.js'),
     { isActive, wasActive } = require('./isActive.js'),
-    { stillAlive } = require('./stillAlive.js');
+    { stillAlive } = require('./stillAlive.js'),
+    Statuses = require('./statuses.js');
 
 /** 
  * we don't want ppl to be able to run any random method. this is the "approved" list
@@ -74,17 +75,25 @@ const aggregateSummaries = {
    * @returns {Array.<number>} sorted Array showing how many commits in the repo for the given period. 
    * **/
     stillAlive: function (results) {
-        var commitCount = [];
+        //set up vars to store the report
+        //including a counting var for the four status types
+        var repoSummary = {}, statusCounts = {};
+        Object.keys(Statuses).map(function(aStatus) {
+            statusCounts[aStatus] = 0;
+        });
         results.map(function (result) {
-            if (result.commitCount) {
-                commitCount.push(parseInt(result.commitCount, 10));
-            }
-            else {
-                console.log('👾 error for ', result.config.org, result.config.repo);
-            }
+            let thisResult = result.value,
+            activityStatus = thisResult.activityStatus,
+            repoId = `${thisResult.repo.org}_${thisResult.repo.repo}`
+
+            statusCounts[activityStatus]++;
+            repoSummary[repoId] = activityStatus;
         });
         //we want a numerically sorted list, not a string-sorted list. 
-        return commitCount.sort((a, b) => (a - b));
+        return {
+            statusCounts : statusCounts,
+            repoSummary : repoSummary
+        };
     }
 };
 

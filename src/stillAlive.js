@@ -6,6 +6,29 @@ const { initOcto, checkNoOfResults, countPaginatedResults, splitUrl } = require(
 const messages = require("./messages.js");
 const errorHandler = require("./errorHandler.js");
 const { isActive, wasActive } = require("./isActive.js");
+const Statuses = require("./statuses.js");
+
+function prepareStatus(is, was) {
+  // console.log('👾 is', is);
+  // console.log('👾 wass', was);
+  let status,
+    isActive = is.isActive,
+    wasActive = was.isActive;
+
+  if (wasActive && isActive) {
+    status = Statuses.ONGOING;
+  }
+  else if (wasActive && !isActive) {
+    status = Statuses.DECLINED;
+  }
+  else if (!wasActive && !isActive) {
+    status = Statuses.INACTIVE;
+  }
+  else if (!wasActive && isActive) {
+    status = Statuses.ACTIVATED;
+  }
+  return status;
+}
 
 function stillAlive(config, anOctokit) {
   return new Promise(function (resolve, reject) {
@@ -28,9 +51,19 @@ function stillAlive(config, anOctokit) {
     let was = wasActive(config, anOctokit);
 
     Promise.allSettled([was, is]).then(function (values) {
+      let resolvedIs = values[0], resolvedWas = values[1];
+      let theStatus = prepareStatus(resolvedIs, resolvedWas);
       resolve({
-        is: values[0],
-        was: values[1]
+        repo: {
+          org: config.org,
+          repo: config.repo
+        },
+        activityStatus: theStatus,
+        details: {
+          is: resolvedIs,
+          was: resolvedWas,
+          config: config
+        }
       });
     }).catch(function (someError) {
       console.error(`A thing went wrong: ${someError}`);
