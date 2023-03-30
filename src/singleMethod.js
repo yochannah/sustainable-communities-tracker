@@ -31,10 +31,10 @@ const aggregateSummaries = {
     isActive: function (results, data) {
         let active = 0, quiet = 0;
         results.map(function (result) {
-            if (result.isActive) {
+            if (result.value.isActive) {
                 active++;
             } else {
-                if (!result.isActive) {
+                if (!result.value.isActive) {
                     quiet++;
                 } else {
                     console.log("something weird happened. Maybe an error?", result);

@@ -111,7 +111,7 @@ describe('Single Method Test Suite', function () {
       assert.notEqual(aggregateReport.urlsSubmitted, 4);
     });
 
-    it('should save an aggregate report on the results', function (done) {
+    it('should save an aggregate report on the results we read from the file', function (done) {
       let reportName = getFileNameSingleMethod(fakeParams, "report"),
         tempFakeReport = Object.assign({}, fakeReport);
       fm.readFile(reportName).then(function (result) {
