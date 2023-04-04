@@ -3,6 +3,7 @@ const ghGetter = require("../src/app.js"),
   fs = require("fs"),
   path = require('path'),
   urlList = require('./data_prep/fake_urllist.txt'),
+  clone = require('../src/clone.js'),
   methodRunner = require("../src/singleMethod.js").methodRunner,
   { DateTime } = require("luxon"),
   mocktokit = require("./mocktokit");
@@ -134,7 +135,7 @@ describe('Single Method Test Suite', function () {
 
     it('should save an aggregate report on the results we read from the file', function (done) {
       let reportName = getFileNameSingleMethod(fakeParams, "report"),
-        tempFakeReport = Object.assign({}, fakeReport);
+        tempFakeReport = clone(fakeReport);
       fm.readFile(reportName).then(function (result) {
 
         // dateGathered will always be different (it's set to NOW), 
@@ -173,7 +174,7 @@ describe('Single Method Test Suite', function () {
   describe('Date handlers', function () {
     before(function (done) {
       //clone fakeparams, don't modify the original in case we re-use it later
-      wasParams = Object.assign({}, fakeParams);
+      wasParams = clone(fakeParams);
       wasParams.method = "wasActive";
       result = runner.runSingleMethod(wasParams);
       result.then(function (report) {
@@ -181,11 +182,11 @@ describe('Single Method Test Suite', function () {
 
         // setup the filenames we'll be checking. 
         singleParams = {
-          kc: Object.assign({}, wasParams),
-          km: Object.assign({}, wasParams),
-          ob: Object.assign({}, wasParams),
-          on: Object.assign({}, wasParams),
-          bad: Object.assign({}, wasParams)
+          kc: clone(wasParams),
+          km: clone(wasParams),
+          ob: clone(wasParams),
+          on: clone(wasParams),
+          bad: clone(wasParams)
         }
 
         singleParams.kc.org = "kitten";
@@ -217,7 +218,7 @@ describe('Single Method Test Suite', function () {
 
       //a fun bug is that the tests will fail if you're in a different timezone, 
       //if we don't take the timezone out of the equation. 
-      let expectedReport = Object.assign({}, fakeReport),
+      let expectedReport = clone(fakeReport),
 
         testedStart = DateTime.fromISO(aggregateReport.dateChecksCovered.start),
         testedEnd = DateTime.fromISO(aggregateReport.dateChecksCovered.end),
@@ -431,7 +432,7 @@ describe('Single Method Test Suite', function () {
   describe("Still Alive?", function () {
 
     var aggregateReport, result;
-    let config = Object.assign({}, fakeParams);
+    let config = clone(fakeParams);
     config.method = "stillAlive";
     let fileName = getFileNameSingleMethod(config, "report");
 
