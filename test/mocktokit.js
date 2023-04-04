@@ -7,10 +7,8 @@ const mockData = require("./processedmockData.json"),
   mock_pull = require("./data_prep/mock_pr.js"),
   mock_commit = require("./data_prep/mock_commit.js"),
   mock_labels = require("./data_prep/mock_labels.js"),
-  mock_commit_2021_active = require("./data_prep/mock_commit_2021_active.js"),
-  mock_commit_2021_inactive = require("./data_prep/mock_commit_2021_inactive.js"),
-  mock_commit_2022_inactive = require("./data_prep/mock_commit_2022_active.js"),
-  mock_commit_2022_active = require("./data_prep/mock_commit_2022_inactive.js");
+  mock_commit_inactive = require("./data_prep/mock_commit_active.js"),
+  mock_commit_active = require("./data_prep/mock_commit_inactive.js");
 
 
 
@@ -43,32 +41,32 @@ const responses = {
     "/commit": mock_commit
   },
   singleMethods: {
-        //kitten_catten -     1,0
-        //kitten_mitten -     0,1
-        //ooga_bmaagal -      0,0
-        //ooga_nistoveva -    1,1
-        //ooga_nachuga -      1,1 //this goes through the default 334 commits route
-        //sevivon_sovsovsov - 1,1 //this goes through the default 334 commits route
-        //total_active        4,4
-        //total_quiet         2,2
+    //kitten_catten -     1,0 //decline
+    //kitten_mitten -     0,1 //activated
+    //ooga_bmaagal -      0,0 //inactive
+    //ooga_nistoveva -    1,1 //ongoing
+    //ooga_nachuga -      1,1 //this goes through the default 334 commits route
+    //sevivon_sovsovsov - 1,1 //this goes through the default 334 commits route
+    //total_active        4,4
+    //total_quiet         2,2
     kitten: {
       2021: {
-        catten: mock_commit_2021_active,
-        mitten: mock_commit_2021_inactive
+        catten: mock_commit_active,
+        mitten: mock_commit_inactive
       },
       2022: {
-        catten: mock_commit_2022_inactive,
-        mitten: mock_commit_2022_active
+        catten: mock_commit_inactive,
+        mitten: mock_commit_active
       }
     },
     ooga: {
       2021: {
-        bmaagal: mock_commit_2021_inactive,
-        nistoveva: mock_commit_2021_active,
+        bmaagal: mock_commit_active,
+        nistoveva: mock_commit_inactive,
       },
       2022: {
-        bmaagal: mock_commit_2022_inactive,
-        nistoveva: mock_commit_2022_active
+        bmaagal: mock_commit_active,
+        nistoveva: mock_commit_inactive
       }
     }
   }

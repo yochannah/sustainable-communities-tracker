@@ -87,8 +87,8 @@ let expectedStillAliveReport = {
       kitten_mitten: 'ACTIVATED',
       ooga_bmaagal: 'INACTIVE',
       ooga_nachuga: 'ONGOING',
-      ooga_nistoveva: 'ONGOING',
-      sevivon_sovssovsov: 'ONGOING'
+      ooga_nistoveva: 'ONGOING', 
+      sevivon_sovssovsov: 'ONGOING' 
     },
     statusCounts: {
       ACTIVATED: 1,
@@ -107,8 +107,9 @@ let wasParams, isParams, singleParams, files;
  * Prevents silent fails, thanks to https://adamcoster.com/blog/silently-skipped-async-tests-mochajs
  * */
 function onUncaught(err) {
-  console.log(err);
-  process.exit(1);
+  // console.log(err);
+  // process.exit(1);
+  assert.fail(`Fail, ${err}`);
 }
 process.on('unhandledRejection', onUncaught);
 
@@ -171,6 +172,7 @@ describe('Single Method Test Suite', function () {
       });
     });
   });
+
   describe('Date handlers', function () {
     before(function (done) {
       //clone fakeparams, don't modify the original in case we re-use it later
@@ -270,7 +272,7 @@ describe('Single Method Test Suite', function () {
 
       it("should show active when active", function (done) {
 
-        fm.readFile(files.kc).then(function (result) {
+        fm.readFile(files.km).then(function (result) {
           result = JSON.parse(result);
 
           let start = result.config.since;
@@ -295,7 +297,7 @@ describe('Single Method Test Suite', function () {
 
       it("should show inactive when inactive", function (done) {
 
-        fm.readFile(files.km).then(function (result) {
+        fm.readFile(files.kc).then(function (result) {
           result = JSON.parse(result);
 
           let start = result.config.since;
