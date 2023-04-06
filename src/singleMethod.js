@@ -77,9 +77,10 @@ const aggregateSummaries = {
     stillAlive: function (results) {
         //set up vars to store the report
         //including a counting var for the four status types
-        var repoSummary = {}, statusCounts = {};
+        var repoSummary = {}, statusCounts = {}, byStatus = {};
         Object.keys(Statuses).map(function(aStatus) {
             statusCounts[aStatus] = 0;
+            byStatus[aStatus] = [];
         });
         results.map(function (result) {
             let thisResult = result.value,
@@ -88,11 +89,14 @@ const aggregateSummaries = {
 
             statusCounts[activityStatus]++;
             repoSummary[repoId] = activityStatus;
+            byStatus[activityStatus].push(repoId);
+
         });
         //we want a numerically sorted list, not a string-sorted list. 
         return {
             statusCounts : statusCounts,
-            repoSummary : repoSummary
+            repoSummary : repoSummary, 
+            byStatus : byStatus
         };
     }
 };
