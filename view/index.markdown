@@ -28,7 +28,7 @@ layout: home
   {% if info.community.health_percentage %}
   {% else %}
   <tr>
-    <td><a href="/repos#{{reponame | strip}}">{{ reponame }}</a></td>
+    <td><a href="/repos/{{reponame | strip}}">{{ reponame }}</a></td>
     <td>{{ info.status }}</td>
     <td>{{ info.request.url }}</td>
   </tr>
@@ -57,12 +57,13 @@ layout: home
 
     {% if info.community.health_percentage %}
       <tr>
-        <td><a href="/repos#{{reponame | strip}}">{{ reponame }}</a></td>
+        <td><a href="/repos/{{reponame | strip}}">{{ reponame }}</a></td>
         <td>{{ info.dateSnapshotTaken }}</td>
         <!-- This is a proxy for whether or not the api method worked... -->
         <td>{{info.community.health_percentage}}</td>
         <td>{{info.timeToMerge.timeToClose.pr.mean.humanReadable}}</td>
         <td>{{info.timeToMerge.timeToClose.issue.mean.humanReadable}}</td>
+        <td></td>
       </tr>
 
     {% endif %}

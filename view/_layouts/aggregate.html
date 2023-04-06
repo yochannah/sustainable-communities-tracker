@@ -15,7 +15,11 @@
 
       {{page.content}}
 
-      ## Aggregate stats
+      {%- include still_alive.html -%}
+
+      {%- include commits_by_repo.html -%}
+
+      Aggregate stats
 
       {%- include survey_aggregate.html -%}
 
