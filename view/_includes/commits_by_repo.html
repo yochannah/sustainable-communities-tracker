@@ -1,7 +1,40 @@
 <div>
     {% assign commits = site.data.aggregate.report_countCommits %}
     <h3>Commit count breakdown by repo</h3>
-    {{commits}}
+    {{ commits | jsonify }}
+    <canvas id="commitSummary"></canvas>
     //todo, Bar chart: name / # of commits / alphabetic?
-    <div>URLs queried: {{commits.urlsSubmitted}},  Successful results retrieved for: {{commits.successfulResults}} repos.</div>
+    <div>URLs queried: {{commits.urlsSubmitted}}, Successful results retrieved for: {{commits.successfulResults}} repos.
+    </div>
 </div>
+
+<script>
+
+    let commitArr = {{ commits.checks.commits | jsonify }},
+    repoNameArr = {{ commits.checks.repoName | jsonify }};
+
+    const commitData = {
+
+        labels: repoNameArr,
+        datasets: [{
+            //label: 'Number of commits per repo, mid 2021 to mid/late 2022.',
+            data: commitArr
+        }]
+    };
+
+    const commitConfig = {
+        type: 'bar',
+        data: commitData,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        },
+    };
+
+    new Chart(
+        document.getElementById('commitSummary'), commitConfig);
+
+</script>

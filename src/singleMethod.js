@@ -55,17 +55,43 @@ const aggregateSummaries = {
    * @returns {Array.<number>} sorted Array showing how many commits in the repo for the given period. 
    * **/
     countCommits: function (results, data) {
-        var commitCount = [];
-        results.map(function (result) {
-            if (result.commitCount) {
-                commitCount.push(parseInt(result.commitCount, 10));
+        var commits = [], repoName = [], byName = {}, sorted;
+
+        //convert non-numerric answers to "0"
+        //because a few NaNs made the sort order VERY broken... 
+        results = results.map(function (aResult) {
+            if (!aResult.value.commitCount) {
+                aResult.value.commitCount = 0;
+            }
+            return aResult;
+        });
+
+        sorted = results.sort(function (a, b) {
+            let preva = parseInt(a.value.commitCount, 10);
+            let prevb = parseInt(b.value.commitCount, 10);
+            return prevb - preva; // this sorts from big to small
+            //it looks better in a graph that way
+        });
+
+        sorted.map(function (result) {
+            let r = result.value, //sugar to shorten
+                repoId = `${r.config.org}_${r.config.repo}`;
+            if (r.commitCount) {
+                let commitCount = parseInt(r.commitCount, 10);
+                commits.push(commitCount);
+                repoName.push(repoId);
+                byName[repoId] = commitCount;
             }
             else {
-                console.log('👾 error for ', result.config.org, result.config.repo);
+                console.error('👾 error for ', result);
             }
         });
         //we want a numerically sorted list, not a string-sorted list. 
-        return commitCount.sort((a, b) => (a - b));
+        return {
+            commits: commits,
+            repoName: repoName,
+            byName: byName
+        };
     },
     wasActive: function (results, data) { return aggregateSummaries.isActive(results, data); },
     /**
@@ -78,14 +104,14 @@ const aggregateSummaries = {
         //set up vars to store the report
         //including a counting var for the four status types
         var repoSummary = {}, statusCounts = {}, byStatus = {};
-        Object.keys(Statuses).map(function(aStatus) {
+        Object.keys(Statuses).map(function (aStatus) {
             statusCounts[aStatus] = 0;
             byStatus[aStatus] = [];
         });
         results.map(function (result) {
             let thisResult = result.value,
-            activityStatus = thisResult.activityStatus,
-            repoId = `${thisResult.repo.org}_${thisResult.repo.repo}`
+                activityStatus = thisResult.activityStatus,
+                repoId = `${thisResult.repo.org}_${thisResult.repo.repo}`
 
             statusCounts[activityStatus]++;
             repoSummary[repoId] = activityStatus;
@@ -94,9 +120,9 @@ const aggregateSummaries = {
         });
         //we want a numerically sorted list, not a string-sorted list. 
         return {
-            statusCounts : statusCounts,
-            repoSummary : repoSummary, 
-            byStatus : byStatus
+            statusCounts: statusCounts,
+            repoSummary: repoSummary,
+            byStatus: byStatus
         };
     }
 };
