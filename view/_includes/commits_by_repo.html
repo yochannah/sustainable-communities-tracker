@@ -2,6 +2,7 @@
     {% assign commits = site.data.aggregate.report_countCommits %}
     <h3>Commit count breakdown by repo</h3>
     {{ commits | jsonify }}
+    <div id="legend-container"></div>
     <canvas id="commitSummary"></canvas>
     //todo, Bar chart: name / # of commits / alphabetic?
     <div>URLs queried: {{commits.urlsSubmitted}}, Successful results retrieved for: {{commits.successfulResults}} repos.
@@ -10,28 +11,133 @@
 
 <script>
 
-    let commitArr = {{ commits.checks.commits | jsonify }},
-    repoNameArr = {{ commits.checks.repoName | jsonify }};
+    let commitArr = {{ commits.checks.byCommits | jsonify }},
+    aliveArr = {{ site.data.aggregate.report_stillAlive.checks.repoSummary | jsonify }};
+    const backgroundColors = {
+        ONGOING: 'rgba(54, 162, 235, 0.2)', //blue
+        DECLINED: 'rgba(255, 99, 132, 0.2)', //penk
+        INACTIVE: 'rgba(153, 102, 255, 0.2)', //purple
+        ACTIVATED: 'rgba(255, 205, 86, 0.2)', //yeller
+        // 'rgba(75, 192, 192, 0.2)' //blueagain?
+        // 'rgba(201, 203, 207, 0.2)', //greey
+        // 'rgba(255, 159, 64, 0.2)', // orange? idk
+    };
+    let bgColors = function (commits, alive) {
 
-    const commitData = {
+        return commits.map(function (commit) {
+            console.log('😲 commit', commit);
+            let r = commit.repoName,
+                isAlive = alive[r]
+            return backgroundColors[isAlive];
+        });
+    }
 
-        labels: repoNameArr,
-        datasets: [{
-            //label: 'Number of commits per repo, mid 2021 to mid/late 2022.',
-            data: commitArr
-        }]
+    const getOrCreateLegendList = (chart, id) => {
+        const legendContainer = document.getElementById(id);
+        let listContainer = legendContainer.querySelector('ul');
+
+        if (!listContainer) {
+            listContainer = document.createElement('ul');
+            listContainer.style.display = 'flex';
+            listContainer.style.flexDirection = 'row';
+            listContainer.style.margin = 0;
+            listContainer.style.padding = 0;
+
+            legendContainer.appendChild(listContainer);
+        }
+
+        return listContainer;
+    };
+
+    const htmlLegendPlugin = {
+        id: 'htmlLegend',
+        afterUpdate(chart, args, options) {
+            const ul = getOrCreateLegendList(chart, options.containerID);
+
+            // Remove old legend items
+            while (ul.firstChild) {
+                ul.firstChild.remove();
+            }
+
+            // Reuse the built-in legendItems generator
+            //const items = chart.options.plugins.legend.labels.generateLabels(chart);
+            const items = Object.keys(backgroundColors);
+
+            console.log('👾 items', items);
+
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.style.alignItems = 'center';
+                li.style.cursor = 'pointer';
+                li.style.display = 'flex';
+                li.style.flexDirection = 'row';
+                li.style.marginLeft = '10px';
+
+                li.onclick = () => {
+                    const { type } = chart.config;
+
+                    chart.setDatasetVisibility(item.datasetIndex, !chart.isDatasetVisible(item.datasetIndex));
+
+                    chart.update();
+                };
+
+                // Color box
+                const boxSpan = document.createElement('span');
+                boxSpan.style.background = backgroundColors[item];
+                // boxSpan.style.borderColor = item.strokeStyle;
+                // boxSpan.style.borderWidth = item.lineWidth + 'px';
+                boxSpan.style.display = 'inline-block';
+                boxSpan.style.height = '20px';
+                boxSpan.style.marginRight = '10px';
+                boxSpan.style.width = '20px';
+
+                // Text
+                const textContainer = document.createElement('p');
+                // textContainer.style.color = item.fontColor;
+                textContainer.style.margin = 0;
+                textContainer.style.padding = 0;
+                // textContainer.style.textDecoration = item.hidden ? 'line-through' : '';
+
+                const text = document.createTextNode(item);
+                textContainer.appendChild(text);
+
+                li.appendChild(boxSpan);
+                li.appendChild(textContainer);
+                ul.appendChild(li);
+            });
+        }
     };
 
     const commitConfig = {
         type: 'bar',
-        data: commitData,
+        data: {
+            datasets: [{
+                data: commitArr,
+                backgroundColor: bgColors(commitArr, aliveArr)
+            }]
+        },
         options: {
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    type: 'logarithmic'
+                }
+            },
+            parsing: {
+                xAxisKey: 'repoName',
+                yAxisKey: 'commitCount'
+            },
+            plugins: {
+                htmlLegend: {
+                    // ID of the container to put the legend in
+                    containerID: 'legend-container',
+                },
+                legend: {
+                    display: false,
                 }
             }
         },
+        plugins: [htmlLegendPlugin]
     };
 
     new Chart(

@@ -55,7 +55,7 @@ const aggregateSummaries = {
    * @returns {Array.<number>} sorted Array showing how many commits in the repo for the given period. 
    * **/
     countCommits: function (results, data) {
-        var commits = [], repoName = [], byName = {}, sorted;
+        var byName = {}, byCommits = [], sorted;
 
         //convert non-numerric answers to "0"
         //because a few NaNs made the sort order VERY broken... 
@@ -69,7 +69,8 @@ const aggregateSummaries = {
         sorted = results.sort(function (a, b) {
             let preva = parseInt(a.value.commitCount, 10);
             let prevb = parseInt(b.value.commitCount, 10);
-            return prevb - preva; // this sorts from big to small
+            return prevb - preva; 
+            // this sorts from big to small
             //it looks better in a graph that way
         });
 
@@ -78,9 +79,11 @@ const aggregateSummaries = {
                 repoId = `${r.config.org}_${r.config.repo}`;
             if (r.commitCount) {
                 let commitCount = parseInt(r.commitCount, 10);
-                commits.push(commitCount);
-                repoName.push(repoId);
                 byName[repoId] = commitCount;
+                byCommits.push({
+                    repoName: repoId,
+                    commitCount: commitCount
+                });
             }
             else {
                 console.error('👾 error for ', result);
@@ -88,8 +91,7 @@ const aggregateSummaries = {
         });
         //we want a numerically sorted list, not a string-sorted list. 
         return {
-            commits: commits,
-            repoName: repoName,
+            byCommits: byCommits,
             byName: byName
         };
     },
