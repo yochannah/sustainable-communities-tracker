@@ -1,0 +1,21 @@
+<script>
+    const backgroundColors = {
+        ONGOING: 'rgba(54, 162, 235, 0.2)', //blue
+        DECLINED: 'rgba(255, 99, 132, 0.2)', //penk
+        INACTIVE: 'rgba(153, 102, 255, 0.2)', //purple
+        ACTIVATED: 'rgba(255, 205, 86, 0.2)' //yeller
+    }, bgColorsArray = function (commits, alive) {
+        return commits.map(function (commit) {
+            let r = commit.repoName,
+                isAlive = alive[r]
+            return backgroundColors[isAlive];
+        });
+    },
+        bgColorsSingle = function (x) {
+            console.log('😲 1', 1, x);
+            return function (ctx) {
+                console.log('👾 context', ctx);
+                return 'red';
+            }
+        }
+</script>

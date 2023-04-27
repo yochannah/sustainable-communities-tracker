@@ -4,7 +4,7 @@
 
     {% assign alive = site.data.aggregate.report_stillAlive %}
     <h3>Still Alive breakdown by repo</h3>
-    <h4>Status counts </h4>
+    <h4>Counts </h4>
     <canvas id="stillAliveSummary"></canvas>
     <h4>Status meanings</h4>
     <dl>
@@ -37,22 +37,45 @@
 
 <script>
 
-    const data = {
-        datasets: [{
-            label: 'Repo activity, mid 2021 to mid/late 2022.',
-            data: {{ alive.checks.statusCounts | jsonify }}}]
+    const statusCounts = {{ alive.checks.statusCounts | jsonify }},
+    aliveArr = {{ alive.checks.repoSummary | jsonify }};
+
+    let statusColors = sc = { // sugar so it doesn't get too long
+        counts : [],
+        colors : []
     };
+
+    //format the data so we can colour the bars nicely. 
+    for (status in statusCounts) {
+        color = backgroundColors[status];
+        sc.counts.push({
+            status : status,
+            count : statusCounts[status]
+        });
+        sc.colors.push(color)
+    }
 
     const config = {
         type: 'bar',
-        data: data,
+        data: {
+            datasets: [{
+                label: 'Repo activity, mid 2021 to mid/late 2022.',
+                data: sc.counts,
+                backgroundColor: sc.colors
+            }]
+        },
         options: {
+            parsing:{
+                xAxisKey : "status",
+                yAxisKey : "count"
+            },
             scales: {
                 y: {
                     beginAtZero: true
                 }
             }
         },
+        plugins: { legend: false }
     };
 
     let chart = new Chart(

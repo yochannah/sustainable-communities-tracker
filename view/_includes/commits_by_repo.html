@@ -1,36 +1,14 @@
 <div>
     {% assign commits = site.data.aggregate.report_countCommits %}
-    <h3>Commit count breakdown by repo</h3>
-    {{ commits | jsonify }}
+    <h3>Commit count breakdown by repo (logarithmic scale)</h3>
     <div id="legend-container"></div>
     <canvas id="commitSummary"></canvas>
-    //todo, Bar chart: name / # of commits / alphabetic?
     <div>URLs queried: {{commits.urlsSubmitted}}, Successful results retrieved for: {{commits.successfulResults}} repos.
     </div>
 </div>
 
 <script>
-
-    let commitArr = {{ commits.checks.byCommits | jsonify }},
-    aliveArr = {{ site.data.aggregate.report_stillAlive.checks.repoSummary | jsonify }};
-    const backgroundColors = {
-        ONGOING: 'rgba(54, 162, 235, 0.2)', //blue
-        DECLINED: 'rgba(255, 99, 132, 0.2)', //penk
-        INACTIVE: 'rgba(153, 102, 255, 0.2)', //purple
-        ACTIVATED: 'rgba(255, 205, 86, 0.2)', //yeller
-        // 'rgba(75, 192, 192, 0.2)' //blueagain?
-        // 'rgba(201, 203, 207, 0.2)', //greey
-        // 'rgba(255, 159, 64, 0.2)', // orange? idk
-    };
-    let bgColors = function (commits, alive) {
-
-        return commits.map(function (commit) {
-            console.log('😲 commit', commit);
-            let r = commit.repoName,
-                isAlive = alive[r]
-            return backgroundColors[isAlive];
-        });
-    }
+    let commitArr = {{ commits.checks.byCommits | jsonify }};
 
     const getOrCreateLegendList = (chart, id) => {
         const legendContainer = document.getElementById(id);
@@ -59,11 +37,7 @@
                 ul.firstChild.remove();
             }
 
-            // Reuse the built-in legendItems generator
-            //const items = chart.options.plugins.legend.labels.generateLabels(chart);
             const items = Object.keys(backgroundColors);
-
-            console.log('👾 items', items);
 
             items.forEach(item => {
                 const li = document.createElement('li');
@@ -93,11 +67,9 @@
 
                 // Text
                 const textContainer = document.createElement('p');
-                // textContainer.style.color = item.fontColor;
                 textContainer.style.margin = 0;
                 textContainer.style.padding = 0;
-                // textContainer.style.textDecoration = item.hidden ? 'line-through' : '';
-
+       
                 const text = document.createTextNode(item);
                 textContainer.appendChild(text);
 
@@ -113,7 +85,7 @@
         data: {
             datasets: [{
                 data: commitArr,
-                backgroundColor: bgColors(commitArr, aliveArr)
+                backgroundColor: bgColorsArray(commitArr, aliveArr)
             }]
         },
         options: {
