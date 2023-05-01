@@ -11,15 +11,9 @@
   <main class="page-content" aria-label="Content">
     <div class="wrapper">
 
-      <h1>{{page.name}}</h1>
+      <h1>{{page.title}}</h1>
 
       {{page.content}}
-
-      {%- include still_alive.html -%}
-
-      {%- include commits_by_repo.html -%}
-
-      Aggregate stats
 
       {%- include survey_aggregate.html -%}
 

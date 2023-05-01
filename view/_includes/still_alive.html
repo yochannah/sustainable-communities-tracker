@@ -1,7 +1,4 @@
 <div>
-
-
-
     {% assign alive = site.data.aggregate.report_stillAlive %}
     <h3>Still Alive breakdown by repo</h3>
     <h4>Counts </h4>
@@ -17,22 +14,6 @@
         <dt>Inactive: </dt>
         <dd>Was inactive at start and end of study</dd>
     </dl>
-
-    <div>
-        {%for status in alive.checks.byStatus %}
-
-        <h4>{{status[0]}}</h4>
-        <div class="column">
-            {% assign repos = status[1] | sort_natural %}
-            {% for repo in repos %}
-            <div><a href="/repo/{{repo}}">{{repo}}</a></div>
-            {% endfor %}
-        </div>
-        {% endfor %}
-    </div>
-
-    <div>URLs queried: {{alive.urlsSubmitted}}, Successful results retrieved for: {{alive.successfulResults}} repos.
-    </div>
 </div>
 
 <script>

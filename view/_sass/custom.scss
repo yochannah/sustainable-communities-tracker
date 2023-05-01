@@ -37,3 +37,15 @@ h2 {
   column-width:16em;
   column-count: 3 ;
 }
+
+.sidebar_style {
+  display:flex;
+  flex-wrap:reverse;
+  flex-direction: row;
+}
+
+.sidebar {
+  margin:1em;
+  width: 30%;
+}
+.vis {width:60%}
