@@ -1,21 +1,43 @@
 <script>
-    const backgroundColors = {
-        ONGOING: 'rgba(54, 162, 235, 0.2)', //blue
-        DECLINED: 'rgba(255, 99, 132, 0.2)', //penk
-        INACTIVE: 'rgba(153, 102, 255, 0.2)', //purple
-        ACTIVATED: 'rgba(255, 205, 86, 0.2)' //yeller
-    }, bgColorsArray = function (commits, alive) {
-        return commits.map(function (commit) {
-            let r = commit.repoName,
-                isAlive = alive[r]
-            return backgroundColors[isAlive];
-        });
-    },
-        bgColorsSingle = function (x) {
-            console.log('😲 1', 1, x);
-            return function (ctx) {
-                console.log('👾 context', ctx);
-                return 'red';
-            }
+    const colors = { // using chart.js colours :D 
+        solid: {
+            red: 'rgba(255, 99, 132,1)',
+            orange: 'rgba(255, 159, 64,1)',
+            yellow: 'rgba(255, 205, 86,1)',
+            green: 'rgba(75, 192, 192,1)',
+            blue: 'rgba(54, 162, 235,1)',
+            purple: 'rgba(153, 102, 255,1)',
+            grey: 'rgba(201, 203, 207,1)'
+        },
+        faded: {
+            red: 'rgba(255, 99, 132,0.2)',
+            orange: 'rgba(255, 159, 64,0.2)',
+            yellow: 'rgba(255, 205, 86,0.2)',
+            green: 'rgba(75, 192, 192,0.2)',
+            blue: 'rgba(54, 162, 235,0.2)',
+            purple: 'rgba(153, 102, 255,0.2)',
+            grey: 'rgba(201, 203, 207,0.2)'
         }
+    },
+        backgroundColors = {
+            ONGOING: colors.faded.blue,
+            DECLINED: colors.faded.red,
+            INACTIVE: colors.faded.purple,
+            ACTIVATED: colors.faded.yellow
+        }, borderColors = {
+            ONGOING: colors.solid.blue,
+            DECLINED: colors.solid.red,
+            INACTIVE: colors.solid.purple,
+            ACTIVATED: colors.solid.yellow
+        }, bgColorsArray = function (commits, alive, border) {
+            return commits.map(function (commit) {
+                let r = commit.repoName,
+                    isAlive = alive[r];
+                if (border) {
+                    return borderColors[isAlive];
+                } else {
+                    return backgroundColors[isAlive];
+                }
+            });
+        };
 </script>

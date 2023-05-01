@@ -3,17 +3,7 @@
     <h3>Still Alive breakdown by repo</h3>
     <h4>Counts </h4>
     <canvas id="stillAliveSummary"></canvas>
-    <h4>Status meanings</h4>
-    <dl>
-        <dt>Declined: </dt>
-        <dd>Was active, now inactive</dd>
-        <dt>Activated: </dt>
-        <dd>Was inactive, now active</dd>
-        <dt>Ongoing: </dt>
-        <dd>Was active at start and end of study</dd>
-        <dt>Inactive: </dt>
-        <dd>Was inactive at start and end of study</dd>
-    </dl>
+
 </div>
 
 <script>
@@ -23,17 +13,20 @@
 
     let statusColors = sc = { // sugar so it doesn't get too long
         counts : [],
-        colors : []
+        colors : [],
+        borders : []
     };
 
     //format the data so we can colour the bars nicely. 
     for (status in statusCounts) {
-        color = backgroundColors[status];
+        let color = backgroundColors[status],
+        border= borderColors[status];
         sc.counts.push({
             status : status,
             count : statusCounts[status]
         });
-        sc.colors.push(color)
+        sc.colors.push(color);
+        sc.borders.push(border);
     }
 
     const config = {
@@ -42,7 +35,9 @@
             datasets: [{
                 label: 'Repo activity, mid 2021 to mid/late 2022.',
                 data: sc.counts,
-                backgroundColor: sc.colors
+                backgroundColor: sc.colors,
+                borderColor : sc.borders,
+                borderWidth:1
             }]
         },
         options: {

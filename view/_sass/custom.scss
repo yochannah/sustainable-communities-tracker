@@ -1,11 +1,18 @@
+@use "sass:color";
+
 body {
   background-color: #f4f4f9
 }
 
 dt {
   font-weight: bold;
-  float: left;
   margin-right: 1em;
+  background-color: #f7f7fc
+}
+
+dd {
+  margin-left: 1em;
+  font-size: 90%;
 }
 
 h3,
@@ -14,6 +21,9 @@ h4 {
   border-bottom: dotted #80DEEA 2px;
   background-color: #ECEFF1;
   padding: 0.25em 0.5em;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  border-radius: 1em 0em 1em 0em;
 }
 
 h2 {
@@ -23,6 +33,9 @@ h2 {
   color: #fff;
   border-radius: 2px 2px 0px 0px;
   box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  border-radius: 1em 0em 1em 0em;
 }
 
 .aggGraph {
@@ -34,18 +47,106 @@ h2 {
 }
 
 .column {
-  column-width:16em;
-  column-count: 3 ;
+  column-width: 16em;
+  column-count: 3;
 }
 
 .sidebar_style {
-  display:flex;
-  flex-wrap:reverse;
+  display: flex;
+  flex-wrap: reverse;
   flex-direction: row;
 }
 
 .sidebar {
-  margin:1em;
+  margin: 1em;
   width: 30%;
+
+  h1,
+  h2,
+  h3,
+  h4.status {
+    border-style: solid;
+    margin-bottom: 0.2em;
+  }
 }
-.vis {width:60%}
+
+.vis {
+  width: 60%
+}
+
+$color-solid-red: rgba(255, 99, 132, 1);
+$color-solid-orange: rgba(255, 159, 64, 1);
+$color-solid-yellow: rgba(255, 205, 86, 1);
+$color-solid-green: rgba(75, 192, 192, 1);
+$color-solid-blue: rgba(54, 162, 235, 1);
+$color-solid-purple: rgba(153, 102, 255, 1);
+$color-solid-grey: rgba(201, 203, 207, 1);
+$color-faded-red: rgba(255, 99, 132, 0.2);
+$color-faded-orange: rgba(255, 159, 64, 0.2);
+$color-faded-yellow: rgba(255, 205, 86, 0.2);
+$color-faded-green: rgba(75, 192, 192, 0.2);
+$color-faded-blue: rgba(54, 162, 235, 0.2);
+$color-faded-purple: rgba(153, 102, 255, 0.2);
+$color-faded-grey: rgba(201, 203, 207, 0.2);
+
+$color-ongoing: $color-faded-blue;
+$color-declined: $color-faded-red; 
+$color-inactive: $color-faded-purple;
+$color-activated: $color-faded-yellow;
+
+
+
+
+.status {
+  border: solid 1px;
+  border-left: solid 1em transparent; //this is to make the shape right
+  border-right: solid 1em transparent;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  border-radius: 1em 0em 1em 0em;
+
+  &:before {
+    content: "🏷 ";
+  }
+}
+
+.statuses {
+  margin-left: 0.5em;
+  font-size: 90%;
+  display: block;
+}
+
+.repo {
+  border-left: solid 2px transparent;
+  background-color: transparent;
+  margin-bottom: 2px;
+  padding-left: 2px;
+}
+
+.ongoing,
+.ONGOING {
+  border-color: scale-color($color-ongoing, $alpha: 100%);
+  background-color: $color-ongoing
+}
+
+.declined,
+.DECLINED {
+  border-color: scale-color($color-declined, $alpha: 100%);
+  background-color: $color-declined;
+}
+
+.inactive,
+.INACTIVE {
+  border-color: scale-color($color-inactive, $alpha: 100%);
+  background-color: $color-inactive;
+}
+
+.activated,
+.ACTIVATED {
+  border-color: scale-color($color-activated, $alpha: 100%);
+  background-color: $color-activated;
+}
+
+.repo {
+  background-color: transparent;
+}

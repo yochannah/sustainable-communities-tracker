@@ -86,7 +86,9 @@
         data: {
             datasets: [{
                 data: commitArr,
-                backgroundColor: bgColors(commitArr, aliveArr)
+                backgroundColor: bgColorsArray(commitArr, aliveArr),
+                borderColor:bgColorsArray(commitArr, aliveArr, true),
+                borderWidth:1
             }]
         },
         options: {
