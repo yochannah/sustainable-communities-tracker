@@ -162,3 +162,10 @@ $color-activated: $color-faded-yellow;
   &:before {content:none;}
   border-radius:2px
 }
+
+.projectName {
+  font-family: monospace;
+    width:6em;
+    display:inline-block;
+    font-size:90%;
+}

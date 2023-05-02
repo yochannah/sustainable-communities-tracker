@@ -12,7 +12,12 @@
     {% assign is_active = activity[project].activity_status_summary %}
     {% assign is_active = is_active | split: "|" | join: " " %}
     <div class="aggGraph statusList">
-      <h2 class="status {{is_active}}">{{ survey.ProjectPseudonym }}</h2>
+      <h2 class="status {{is_active}}">
+        {% capture projectName %}
+          {{ survey.ProjectPseudonym }}
+        {% endcapture %}
+        {{ projectName }}
+      </h2>
       <div class="subtitle status {{is_active}}">Repo status(es) at end of study: {{ is_active }}</div>
 
       {% assign interesting_keys = site.data.surveys.interesting_keys %}
