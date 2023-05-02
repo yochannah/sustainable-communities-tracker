@@ -1,6 +1,5 @@
 @use "sass:color";
 
-
 $color-solid-red: rgba(255, 99, 132, 1);
 $color-solid-orange: rgba(255, 159, 64, 1);
 $color-solid-yellow: rgba(255, 205, 86, 1);
@@ -16,9 +15,10 @@ $color-faded-blue: rgba(54, 162, 235, 0.2);
 $color-faded-purple: rgba(153, 102, 255, 0.2);
 $color-faded-grey: rgba(201, 203, 207, 0.2);
 $text-color: rgba(0,0,0, 0.76);
+$main-bg-color: #f4f4f9;
 
 body {
-  background-color: #f4f4f9;
+  background-color: $main-bg-color;
   color:$text-color;
 }
 
@@ -61,7 +61,7 @@ h2 {
   margin: 1em;
   padding: 1em;
   box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-  border-radius: 2px;
+  border-radius: 1em 1.1em 2px 2px;
 }
 
 .column {
