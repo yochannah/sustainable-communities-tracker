@@ -1,0 +1,91 @@
+{%- include sidebar_page_head.liquid -%}
+
+{% assign activity = site.data.still-active-checks-with-url-columns.rows %}
+<!-- About 100 rows of the survey are blank. We don't need to see 'em. -->
+{% for survey in site.data.surveys.OSS0 %}
+  {% assign project = survey.ProjectPseudonym %}
+  {% assign participating_project = activity[project] %}
+
+  {% comment %}
+  this `if` filters out the empties mentioned in the html comment above
+  {% endcomment %}{% if participating_project != nil %}
+    {% assign is_active = activity[project].activity_status_summary %}
+    {% assign is_active = is_active | split: "|" | join: " " %}
+    <div class="aggGraph statusList">
+      <h2 class="status {{is_active}}">{{ survey.ProjectPseudonym }}</h2>
+      <div class="subtitle status {{is_active}}">Repo status(es) at end of study: {{ is_active }}</div>
+
+      {% assign interesting_keys = site.data.surveys.interesting_keys %}
+        <table>
+        <thead>
+          <tr>
+            <th>Question</th>
+            <th>A: Start</th>
+            <th>A: Midpoint</th>
+            <th>A: End</th>
+          </tr>
+        </thead>
+
+        {% comment %}
+        Standardised questions first.
+        {% endcomment %}
+        {% for question in survey %}
+
+          {% assign k = question[0] %}
+          {% assign v = question[1] %}
+
+            {% if interesting_keys.fixed_responses contains k %}
+
+            {% comment %}Get later months responses: {% endcomment %}
+            {% assign m6 = site.data.surveys.OSS6 | where: "ProjectPseudonym", project %}
+            {% assign m6 = m6[0] %}
+            {% assign m12 = site.data.surveys.OSS12 | where: "ProjectPseudonym", project %}
+            {% assign m12 = m12[0] %}
+
+            <tr>
+              <td>{{ k }}</td>
+              <td>{{ v }}</td>
+              <td>{{ m6[k] }}</td>
+              <td>{{ m12[k] }}</td>
+            </tr>
+          {% endif %}
+
+        {% endfor %}
+
+        {% comment %}
+        Free text, but output only if there IS some.  
+        {% endcomment %}
+        <tr>
+          <td colspan="4">✍🏾 Free Text answers (empty fields are omitted).</td>
+        </tr>
+        {% for question in survey %}
+
+          {% assign k = question[0] %}
+          {% assign v = question[1] %}
+
+            {% if interesting_keys.free_text_responses contains k %}
+
+            {% comment %}Get later months responses: {% endcomment %}
+            {% assign m6 = site.data.surveys.OSS6 | where: "ProjectPseudonym", project %}
+            {% assign m6 = m6[0] %}
+            {% assign m12 = site.data.surveys.OSS12 | where: "ProjectPseudonym", project %}
+            {% assign m12 = m12[0] %}
+
+            {% comment %}Output only if there's any content... {% endcomment %}
+            {% if m6[k] or m12[k] or v %}
+
+              <tr>
+                <td>{{ k }}</td>
+                <td>{{ v }}</td>
+                <td>{{ m6[k] }}</td>
+                <td>{{ m12[k] }}</td>
+              </tr>
+            {% endif %}
+          {% endif %}
+
+        {% endfor %}
+      </table>
+    </div>
+  {% endif %}
+
+{% endfor %}

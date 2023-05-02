@@ -126,13 +126,6 @@ $color-activated: $color-faded-yellow;
   padding-left: 2px;
 }
 
-.ongoing,
-.ONGOING {
-  border-color: scale-color($color-ongoing, $alpha: 100%);
-  background-color: $color-ongoing;
-  color:$text-color;
-}
-
 .declined,
 .DECLINED {
   border-color: scale-color($color-declined, $alpha: 100%);
@@ -153,7 +146,19 @@ $color-activated: $color-faded-yellow;
   background-color: $color-activated;
   color:$text-color;
 }
+// This needs to be last, as it then cascades to the main status, if the project has multiple repos.
+.ongoing,
+.ONGOING {
+  border-color: scale-color($color-ongoing, $alpha: 100%);
+  background-color: $color-ongoing;
+  color:$text-color;
+}
 
 .repo {
   background-color: transparent;
+}
+
+.subtitle {
+  &:before {content:none;}
+  border-radius:2px
 }

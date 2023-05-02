@@ -1,32 +1,38 @@
 <div class="sidebar">
-    <div>
-        <h4>Status meanings</h4>
-        <dl>
-            <dt class="declined status">Declined: </dt>
-            <dd>Was active, now inactive</dd>
-            <dt class="activated status">Activated: </dt>
-            <dd>Was inactive, now active</dd>
-            <dt class="ongoing status">Ongoing: </dt>
-            <dd>Was active at start and end of study</dd>
-            <dt class="inactive status">Inactive: </dt>
-            <dd>Was inactive at start and end of study</dd>
-        </dl>
-        {% assign alive = site.data.aggregate.report_stillAlive %}
+  <div>
+    <h4>Status meanings</h4>
+    <dl>
+      <dt class="declined status">Declined:
+      </dt>
+      <dd>Was active, now inactive</dd>
+      <dt class="activated status">Activated:
+      </dt>
+      <dd>Was inactive, now active</dd>
+      <dt class="ongoing status">Ongoing:
+      </dt>
+      <dd>Was active at start and end of study</dd>
+      <dt class="inactive status">Inactive:
+      </dt>
+      <dd>Was inactive at start and end of study</dd>
+    </dl>
+    {% assign alive = site.data.aggregate.report_stillAlive %}
 
-        {% assign statuses = "ACTIVATED, DECLINED, INACTIVE, ONGOING" | split: ", "  %}
+    {% assign statuses = "ACTIVATED, DECLINED, INACTIVE, ONGOING" | split: ", " %}
 
-        {% for status in statuses %}
+    {% for status in statuses %}
 
-        <h4 class="status {{status}}">{{status}}</h4>
-        <div class="statuses">
-            {% assign repos = alive.checks.byStatus[status] | sort_natural %}
-            {% for repo in repos %}
-            <div class="repo {{status}}"><a href="/repo/{{repo}}">{{repo}}</a></div>
-            {% endfor %}
-        </div>
+      <h4 class="status {{status}}">{{ status }}</h4>
+      <div class="statuses">
+        {% assign repos = alive.checks.byStatus[status] | sort_natural %}
+        {% for repo in repos %}
+          <div class="repo {{status}}">
+            <a href="/repo/{{repo}}">{{ repo }}</a>
+          </div>
         {% endfor %}
-    </div>
+      </div>
+    {% endfor %}
+  </div>
 
-    <div>URLs queried: {{alive.urlsSubmitted}}, Successful results retrieved for: {{alive.successfulResults}} repos.
-    </div>
+  <div>URLs queried: {{ alive.urlsSubmitted }}, Successful results retrieved for: {{ alive.successfulResults }} repos.
+  </div>
 </div>
