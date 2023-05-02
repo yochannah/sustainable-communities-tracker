@@ -17,22 +17,6 @@
 
       {%- include survey_aggregate.html -%}
 
-      {% for survey in site.data.surveys.OSS0 %}
-      {% if survey.ProjectPseudonym != nil and survey.project-open-contrib != nil %}
-      <div class="aggGraph">
-        <h2>{{survey.ProjectPseudonym}}</h2>😇
-        {% for question in survey %}
-        {% assign k = question[0] %}
-        {% assign v = question[1] %}
-
-        <b>{{k}}</b>
-        {{v}}<br>
-
-        {% endfor %}
-        {%endif%}
-      </div>
-      {% endfor %}
-
     </div>
 
   </main>

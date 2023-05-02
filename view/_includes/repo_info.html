@@ -57,17 +57,17 @@
   <td>{%- include changed_value_num.html v1=info.commitCount v2=info12.commitCount -%}</td>
 </tr>
 <tr>
-  <td>totalBytes</td>
-  <td>{{info.locCount.totalBytes}}</td>
-  <td>{{info12.locCount.totalBytes}}</td>
-  <td>{%- include changed_value_num.html v1=info.locCount.totalBytes v2=info12.locCount.totalBytes -%}</td>
-</tr>
-<tr>
   <td>contributors</td>
   <td>{{info.contributors.size}}</td>
   <td>{{info12.contributors.size}}</td>
   <td>{%- include changed_value_num.html v1=info.contributors.size v2=info12.contributors.size -%}</td>
 </tr>
+<!--tr> // THIS IS SOMETIMES RIGHT AND SOMETIMES A COMPLETE DUD. I DON'T KNOW WHY. DO NOT USE. 
+  <td>totalBytes</td>
+  <td>{{info.locCount.totalBytes}}</td>
+  <td>{{info12.locCount.totalBytes}}</td>
+  <td>{%- include changed_value_num.html v1=info.locCount.totalBytes v2=info12.locCount.totalBytes -%}</td>
+</tr-->
 </table>
 
-{%- include bytes_of_code.html -%}
+<!-- {%- include bytes_of_code.html -%} //Same as above, don't trust this measurement. -->

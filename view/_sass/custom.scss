@@ -1,7 +1,25 @@
 @use "sass:color";
 
+
+$color-solid-red: rgba(255, 99, 132, 1);
+$color-solid-orange: rgba(255, 159, 64, 1);
+$color-solid-yellow: rgba(255, 205, 86, 1);
+$color-solid-green: rgba(75, 192, 192, 1);
+$color-solid-blue: rgba(54, 162, 235, 1);
+$color-solid-purple: rgba(153, 102, 255, 1);
+$color-solid-grey: rgba(201, 203, 207, 1);
+$color-faded-red: rgba(255, 99, 132, 0.2);
+$color-faded-orange: rgba(255, 159, 64, 0.2);
+$color-faded-yellow: rgba(255, 205, 86, 0.2);
+$color-faded-green: rgba(75, 192, 192, 0.2);
+$color-faded-blue: rgba(54, 162, 235, 0.2);
+$color-faded-purple: rgba(153, 102, 255, 0.2);
+$color-faded-grey: rgba(201, 203, 207, 0.2);
+$text-color: rgba(0,0,0, 0.76);
+
 body {
-  background-color: #f4f4f9
+  background-color: #f4f4f9;
+  color:$text-color;
 }
 
 dt {
@@ -74,25 +92,10 @@ h2 {
   width: 60%
 }
 
-$color-solid-red: rgba(255, 99, 132, 1);
-$color-solid-orange: rgba(255, 159, 64, 1);
-$color-solid-yellow: rgba(255, 205, 86, 1);
-$color-solid-green: rgba(75, 192, 192, 1);
-$color-solid-blue: rgba(54, 162, 235, 1);
-$color-solid-purple: rgba(153, 102, 255, 1);
-$color-solid-grey: rgba(201, 203, 207, 1);
-$color-faded-red: rgba(255, 99, 132, 0.2);
-$color-faded-orange: rgba(255, 159, 64, 0.2);
-$color-faded-yellow: rgba(255, 205, 86, 0.2);
-$color-faded-green: rgba(75, 192, 192, 0.2);
-$color-faded-blue: rgba(54, 162, 235, 0.2);
-$color-faded-purple: rgba(153, 102, 255, 0.2);
-$color-faded-grey: rgba(201, 203, 207, 0.2);
-
 $color-ongoing: $color-faded-blue;
 $color-declined: $color-faded-red; 
 $color-inactive: $color-faded-purple;
-$color-activated: $color-faded-yellow;
+$color-activated: $color-faded-yellow;  
 
 
 
@@ -126,25 +129,29 @@ $color-activated: $color-faded-yellow;
 .ongoing,
 .ONGOING {
   border-color: scale-color($color-ongoing, $alpha: 100%);
-  background-color: $color-ongoing
+  background-color: $color-ongoing;
+  color:$text-color;
 }
 
 .declined,
 .DECLINED {
   border-color: scale-color($color-declined, $alpha: 100%);
   background-color: $color-declined;
+  color:$text-color;
 }
 
 .inactive,
 .INACTIVE {
   border-color: scale-color($color-inactive, $alpha: 100%);
   background-color: $color-inactive;
+  color:$text-color;
 }
 
 .activated,
 .ACTIVATED {
   border-color: scale-color($color-activated, $alpha: 100%);
   background-color: $color-activated;
+  color:$text-color;
 }
 
 .repo {

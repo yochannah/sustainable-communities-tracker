@@ -1,5 +1,5 @@
 ---
-title: Aggregate Stats
+title: Aggregate info
 layout: aggregate
 ---
 

@@ -9,33 +9,42 @@
   {%- include header.html -%}
 
   <main class="page-content" aria-label="Content">
-    <div class="wrapper">
+    <div class="sidebar_style"> <!-- yes, I know this isn't very semantic at all-->
 
-      <h1>{{page.name}}</h1>
+      {%- include alive_sidebar.html -%}
 
-      {{page.content}}
+      <div class="vis">
 
-      ## Aggregate stats
+        <h1>{{page.title}}</h1>
 
-      {%- include survey_aggregate.html -%}
+        {{page.content}}
 
-      {% for survey in site.data.surveys.OSS0 %}
-      {% if survey.ProjectPseudonym != nil and survey.project-open-contrib != nil %}
-      <div class="aggGraph">
-        <h2>{{survey.ProjectPseudonym}}</h2>😇
-        {% for question in survey %}
-        {% assign k = question[0] %}
-        {% assign v = question[1] %}
+        {% assign activity = site.data.still-active-checks-with-url-columns.rows %}
+        {% for survey in site.data.surveys.OSS0 %}
 
-        <b>{{k}}</b>
-        {{v}}<br>
+          {% assign project = survey.ProjectPseudonym%}
+          {% assign participating_project = activity[project] %}
 
+          <!-- About 100 rows of the survey are blank. We don't need to see 'em. -->
+          {% if participating_project != nil %}
+            {% assign is_active = activity[project].activity_status_summary %}
+            <div class="aggGraph statusList">
+              <h2 class="status {{is_active}}">{{survey.ProjectPseudonym}}</h2>
+              <div class="subtitle {{is_active}}">{{is_active}}</div>
+              {% for question in survey %}
+                {% assign k = question[0] %}
+                {% assign v = question[1] %}
+
+                <b>{{k}}</b>
+                {{v}}<br>
+
+              {% endfor %}
+            </div>
+            {%endif%}
+          
         {% endfor %}
-        {%endif%}
+      
       </div>
-      {% endfor %}
-
-    </div>
 
   </main>
 
