@@ -2,18 +2,27 @@
   <div>
     <h4>Status meanings</h4>
     <dl>
-      <dt class="declined status">Declined:
-      </dt>
-      <dd>Was active, now inactive</dd>
-      <dt class="activated status">Activated:
-      </dt>
-      <dd>Was inactive, now active</dd>
-      <dt class="ongoing status">Ongoing:
-      </dt>
-      <dd>Was active at start and end of study</dd>
-      <dt class="inactive status">Inactive:
-      </dt>
-      <dd>Was inactive at start and end of study</dd>
+      <div class="declined">
+        <dt class="declined status">Declined:
+        </dt>
+        <dd>Was active, now inactive</dd>
+      </div>
+      <div class="activated">
+        <dt class="activated status">Activated:
+        </dt>
+        <dd>Was inactive, now active</dd>
+      </div>
+
+      <div class="ongoing">
+        <dt class="ongoing status">Ongoing:
+        </dt>
+        <dd>Was active at start and end of study</dd>
+      </div>
+      <div class="inactive">
+        <dt class="inactive status">Inactive:
+        </dt>
+        <dd>Was inactive at start and end of study</dd>
+      </div>
     </dl>
     {% assign alive = site.data.aggregate.report_stillAlive %}
 

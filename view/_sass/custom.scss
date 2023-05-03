@@ -14,23 +14,54 @@ $color-faded-green: rgba(75, 192, 192, 0.2);
 $color-faded-blue: rgba(54, 162, 235, 0.2);
 $color-faded-purple: rgba(153, 102, 255, 0.2);
 $color-faded-grey: rgba(201, 203, 207, 0.2);
-$text-color: rgba(0,0,0, 0.76);
+
+$text-color: rgba(0, 0, 0, 0.76);
 $main-bg-color: #f4f4f9;
+
+$color-ongoing: $color-faded-blue;
+$color-declined: $color-faded-red;
+$color-inactive: $color-faded-purple;
+$color-activated: $color-faded-yellow;
+
 
 body {
   background-color: $main-bg-color;
-  color:$text-color;
+  color: $text-color;
+}
+
+dl {
+  background-color: #f7f7fc;
+
+  div {
+
+    &.declined,
+    &.DECLINED,
+    &.activated,
+    &.ACTIVATED,
+    &.INACTIVE,
+    &.inactive,
+    &.ongoing,
+    &.ONGOING {
+      background-color: lighten($main-bg-color,10%);
+      margin-top:2px;
+      border-radius: 1em 0em 1em 0em;
+
+      &:before {
+        content: none
+      }
+    }
+  }
 }
 
 dt {
   font-weight: bold;
-  margin-right: 1em;
   background-color: #f7f7fc
 }
 
 dd {
-  margin-left: 1em;
   font-size: 90%;
+  margin-bottom: 2px;
+  padding-left: 0.5em;
 }
 
 h3,
@@ -77,7 +108,7 @@ h2 {
 
 .sidebar {
   margin: 1em;
-  width: 30%;
+  width: 25%;
 
   h1,
   h2,
@@ -89,14 +120,8 @@ h2 {
 }
 
 .vis {
-  width: 60%
+  width: 65%
 }
-
-$color-ongoing: $color-faded-blue;
-$color-declined: $color-faded-red; 
-$color-inactive: $color-faded-purple;
-$color-activated: $color-faded-yellow;  
-
 
 
 
@@ -130,28 +155,45 @@ $color-activated: $color-faded-yellow;
 .DECLINED {
   border-color: scale-color($color-declined, $alpha: 100%);
   background-color: $color-declined;
-  color:$text-color;
+  color: $text-color;
+
+  &:before {
+    content: "⤵️ ";
+  }
 }
 
 .inactive,
 .INACTIVE {
   border-color: scale-color($color-inactive, $alpha: 100%);
   background-color: $color-inactive;
-  color:$text-color;
+  color: $text-color;
+
+  &:before {
+    content: "⏹ ";
+  }
 }
 
 .activated,
 .ACTIVATED {
   border-color: scale-color($color-activated, $alpha: 100%);
   background-color: $color-activated;
-  color:$text-color;
+  color: $text-color;
+
+  &:before {
+    content: "⤴️ ";
+  }
 }
+
 // This needs to be last, as it then cascades to the main status, if the project has multiple repos.
 .ongoing,
 .ONGOING {
   border-color: scale-color($color-ongoing, $alpha: 100%);
   background-color: $color-ongoing;
-  color:$text-color;
+  color: $text-color;
+
+  &:before {
+    content: "➡️ ";
+  }
 }
 
 .repo {
@@ -159,13 +201,16 @@ $color-activated: $color-faded-yellow;
 }
 
 .subtitle {
-  &:before {content:none;}
+  &:before {
+    content: none;
+  }
+
   border-radius:2px
 }
 
 .projectName {
   font-family: monospace;
-    width:6em;
-    display:inline-block;
-    font-size:90%;
+  width: 6em;
+  display: inline-block;
+  font-size: 90%;
 }
