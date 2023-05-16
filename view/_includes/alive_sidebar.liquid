@@ -33,22 +33,26 @@
       <h4 class="status {{status}}">{{ status }}</h4>
       <div class="statuses">
         {% assign repos = alive.checks.byStatus[status] | sort_natural %}
-          {% for repo in repos %}
+        {% for repo in repos %}
 
-          {% comment %} 
-          don't output the project id unless we know it  
-          {% endcomment %}
-          {% assign theName = site.data.project-name-to-pseudonym[repo] %}
+          {% assign projectName = repo %}
+          {% assign projectPseudonym = site.data.project-name-to-pseudonym[repo] %}
 
           {% capture pseudonymAndName %}
-            {% if theName %}
+
+            {% if projectName and projectPseudonym %}
               <span class="projectName">
-                {{ theName }}
+                {{ projectPseudonym }}
               </span>
               |
+              {{ projectName }}
+            {% elsif projectName %}
+              {{ projectName }}
+            {% elsif projectPseudonym %}
+              {{ projectPseudonym }}
+            {% else %}
+              🐞 No project name.
             {% endif %}
-
-            {{ repo }}
 
           {% endcapture %}
 

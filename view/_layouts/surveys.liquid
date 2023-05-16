@@ -4,6 +4,7 @@
 <!-- About 100 rows of the survey are blank. We don't need to see 'em. -->
 {% for survey in site.data.surveys.OSS0 %}
   {% assign project = survey.ProjectPseudonym %}
+  {% assign projectPseudonym = project %}
   {% assign participating_project = activity[project] %}
 
   {% comment %}
@@ -11,12 +12,33 @@
   {% endcomment %}{% if participating_project != nil %}
     {% assign is_active = activity[project].activity_status_summary %}
     {% assign is_active = is_active | split: "|" | join: " " %}
+
+    {% assign projectName = participating_project.non_anon_project_ids %}
+
+    {% capture pseudonymAndName %}
+
+      {% if projectName and projectPseudonym %}
+        <span class="projectName">
+          {{ projectPseudonym }}
+        </span>
+        |
+        {{ projectName }}
+      {% elsif projectName %}
+        {{ projectName }}
+      {% elsif projectPseudonym %}
+        {{ projectPseudonym }}
+      {% else %}
+        🐞 No project name.
+      {% endif %}
+
+    {% endcapture %}
+
     <div class="aggGraph statusList">
       <h2 class="status {{is_active}}">
-        {% capture projectName %}
-          {{ survey.ProjectPseudonym }}
-        {% endcapture %}
-        {{ projectName }}
+
+
+        {{ pseudonymAndName }}
+
       </h2>
       <div class="subtitle status {{is_active}}">Repo status(es) at end of study: {{ is_active }}</div>
 

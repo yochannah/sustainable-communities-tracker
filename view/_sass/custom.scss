@@ -42,8 +42,8 @@ dl {
     &.inactive,
     &.ongoing,
     &.ONGOING {
-      background-color: lighten($main-bg-color,10%);
-      margin-top:2px;
+      background-color: lighten($main-bg-color, 10%);
+      margin-top: 2px;
       border-radius: 1em 0em 1em 0em;
 
       &:before {
@@ -117,6 +117,17 @@ h2 {
     border-style: solid;
     margin-bottom: 0.2em;
   }
+
+  .projectName {
+    font-family: monospace;
+    width: 6em;
+    display: inline-block;
+    font-size: 90%;
+  }
+}
+
+.projectName {
+  width: auto;
 }
 
 .vis {
@@ -206,11 +217,4 @@ h2 {
   }
 
   border-radius:2px
-}
-
-.projectName {
-  font-family: monospace;
-  width: 6em;
-  display: inline-block;
-  font-size: 90%;
 }
