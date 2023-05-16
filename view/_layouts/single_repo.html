@@ -11,11 +11,12 @@
   <main class="page-content" aria-label="Content">
     <div class="wrapper">
 
-      <h1>{{page.title}}</h1>
+      <h1>{{reponame}}</h1>
 
       <div class="community">
 
         {% assign info = site.data.month0[reponame] %}
+        {% assign info6 = site.data.month6[reponame] %}        
         {% assign info12 = site.data.month12[reponame] %}
 
         <div class="card people-card" id="{{reponame}}">
