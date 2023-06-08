@@ -10,19 +10,24 @@
 
   <main class="page-content" aria-label="Content">
     <div class="wrapper">
-
-      <h1>{{reponame}}</h1>
-
-      <div class="community">
-
+      {% assign reponame = page.reponame %}
+      {% assign url = reponame | split: "_" %}
+      {% assign activity = site.data.still-active-checks-with-url-columns.rows %}
+      {% assign project = site.data.project-name-to-pseudonym[reponame] %}
+      {% assign is_active = activity[project].activity_status_summary %}
+      {% assign is_active = is_active | split: "|" | join: " " %}
+      <h1 class="status {{is_active}}">{{reponame}}: GitHub info</h1>
+      {%- include repo_quicklinks.html -%}
+      
+      <div class="community aggGraph">
+        {%- include repo_info.html -%}
         {% assign info = site.data.month0[reponame] %}
         {% assign info6 = site.data.month6[reponame] %}        
         {% assign info12 = site.data.month12[reponame] %}
 
         <div class="card people-card" id="{{reponame}}">
-          <h2>{{reponame}}</h2>
 
-          {%- include repo_info.html -%}
+          
 
         <h3>Issues</h3>
         {%- include issues.html-%}        

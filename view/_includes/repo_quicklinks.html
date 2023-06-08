@@ -1,0 +1,23 @@
+{% assign reponame = page.reponame %}
+{% assign url = reponame | split: "_" %}
+
+{% assign pseudo = site.data.project-name-to-pseudonym[reponame] %}
+
+{% assign annotation = site.data.annotations[pseudo] %}
+
+<div class="repoLinks pageType{{page.layout}}">
+  <a class="repoInfo repo" href="/repo/{{reponame}}">🐙🐈‍⬛ View GitHub results </a>
+  <a class="repoInfo survey" href="/survey/{{reponame}}">📝 View survey results </a>
+  <a class="repoInfo" href="http://www.github.com/{{url[0]}}/{{url[1]}}">🌍 Visit Repo</a>
+</div>
+
+<div id="annotations">
+  <h4>Notes: </h4>
+  {{annotation.notes}}
+  <div id="archetypes">
+    {% for archetype in annotation.archetypes %}
+    <span>{{archetype}}</span>
+    {%endfor%}
+  </div>
+</div>
+

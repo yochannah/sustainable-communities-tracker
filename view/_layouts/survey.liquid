@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+
+  {%- include head.html -%}
+
+  <body>
+
+    {%- include scripts.html -%}
+    {%- include header.html -%}
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        {% assign reponame = page.reponame %}
+        <h1>{{ reponame }}: Survey</h1>
+        <div class="community">
+
+          {% assign info = site.data.month0[reponame] %}
+          {% assign info6 = site.data.month6[reponame] %}
+          {% assign info12 = site.data.month12[reponame] %}
+          {% assign surveys = site.data.surveys %}
+
+            <div class="card people-card" id="{{reponame}}">
+
+            {%- include repo_quicklinks.html -%}
+
+            {% comment %} These vars are needed for the single survey {% endcomment %}
+            {% assign project = site.data.project-name-to-pseudonym[reponame] %}
+            {% assign projectPseudonym = project %}
+            {% assign activity = site.data.still-active-checks-with-url-columns.rows %}
+            {% assign participating_project = activity[project] %}
+            {% assign survey = "Error, no survey found" %}
+            {% for aSurvey in site.data.surveys.OSS0 %}
+              {% if aSurvey.ProjectPseudonym == project %}
+                {% assign survey = aSurvey %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+
+            {%- include single_survey.liquid -%}
+
+
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+    {%- include footer.html -%}
+
+  </body>
+</html>

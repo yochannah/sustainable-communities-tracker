@@ -4,8 +4,6 @@
 
 {% assign url = reponame | split: "_" %}
 
-<a href="http://www.github.com/{{url[0]}}/{{url[1]}}">Visit Repo</a>
-
 <h3>Repo info</h3>
 <table>
   <thead>
@@ -14,55 +12,56 @@
     <th>Month 12</th>
     <th>Change</th>
   </thead>
-<tr>
-  <td>Date taken:</td>
-  <td>{{info.dateSnapshotTaken}}</td>
-  <td>{{info12.dateSnapshotTaken}}</td>
-</tr>
+  <tr>
+    <td>Date taken:</td>
+    <td>{{info.dateSnapshotTaken}}</td>
+    <td>{{info12.dateSnapshotTaken}}</td>
+  </tr>
   <tr>
     <td>
-    License
-  </td>
-  <td>
-    {%include licence.html url=info.repoInfo.license.url name=info.repoInfo.license.name  %}
-  </td>
-  <td>
-    {%include licence.html url=info12.repoInfo.license.url name=info12.repoInfo.license.name  %}
-  </td>
-  <td>
-    {%- include changed_value_bool.html v1=info.repoInfo.license.name v2=info12.repoInfo.license.name -%}
-  </td>
-</tr>
- 
-{% include coc.html %}
+      License
+    </td>
+    <td>
+      {%include licence.html url=info.repoInfo.license.url name=info.repoInfo.license.name %}
+    </td>
+    <td>
+      {%include licence.html url=info12.repoInfo.license.url name=info12.repoInfo.license.name %}
+    </td>
+    <td>
+      {%- include changed_value_bool.html v1=info.repoInfo.license.name v2=info12.repoInfo.license.name -%}
+    </td>
+  </tr>
+
+  {% include coc.html %}
 
   <tr>
     <td>
-    Stars
+      Stars
     </td>
     <td>{{info.repoInfo.stargazers_count | default : "None"}}</td>
     <td>{{info12.repoInfo.stargazers_count | default : "None"}}</td>
-    <td>{%- include changed_value_num.html v1=info.repoInfo.stargazers_count v2=info12.repoInfo.stargazers_count -%}</td>
+    <td>{%- include changed_value_num.html v1=info.repoInfo.stargazers_count v2=info12.repoInfo.stargazers_count -%}
+    </td>
   </tr>
   <tr>
-  <td>Forks</td>
-  <td>{{info.repoInfo.forks_count | default : "None"}}</td>
-  <td>{{info12.repoInfo.forks_count | default : "None"}}</td>
-  <td>{%- include changed_value_num.html v1=info.repoInfo.forks_count v2=info12.repoInfo.forks_count -%}</td>
-</tr>
-<tr>
-  <td>Commits</td>
-  <td>{{info.commitCount}}</td>
-  <td>{{info12.commitCount}}</td>
-  <td>{%- include changed_value_num.html v1=info.commitCount v2=info12.commitCount -%}</td>
-</tr>
-<tr>
-  <td>contributors</td>
-  <td>{{info.contributors.size}}</td>
-  <td>{{info12.contributors.size}}</td>
-  <td>{%- include changed_value_num.html v1=info.contributors.size v2=info12.contributors.size -%}</td>
-</tr>
-<!--tr> // THIS IS SOMETIMES RIGHT AND SOMETIMES A COMPLETE DUD. I DON'T KNOW WHY. DO NOT USE. 
+    <td>Forks</td>
+    <td>{{info.repoInfo.forks_count | default : "None"}}</td>
+    <td>{{info12.repoInfo.forks_count | default : "None"}}</td>
+    <td>{%- include changed_value_num.html v1=info.repoInfo.forks_count v2=info12.repoInfo.forks_count -%}</td>
+  </tr>
+  <tr>
+    <td>Commits</td>
+    <td>{{info.commitCount}}</td>
+    <td>{{info12.commitCount}}</td>
+    <td>{%- include changed_value_num.html v1=info.commitCount v2=info12.commitCount -%}</td>
+  </tr>
+  <tr>
+    <td>contributors</td>
+    <td>{{info.contributors.size}}</td>
+    <td>{{info12.contributors.size}}</td>
+    <td>{%- include changed_value_num.html v1=info.contributors.size v2=info12.contributors.size -%}</td>
+  </tr>
+  <!--tr> // THIS IS SOMETIMES RIGHT AND SOMETIMES A COMPLETE DUD. I DON'T KNOW WHY. DO NOT USE. 
   <td>totalBytes</td>
   <td>{{info.locCount.totalBytes}}</td>
   <td>{{info12.locCount.totalBytes}}</td>

@@ -1,13 +1,12 @@
+<div class="aggGraph statusList">
+    {%- include expectations.liquid -%}
+  </div>
+
 <div id="aggregateAnchor"></div>
 
 <script>
     // (function(){
-    var survey0 = {{ site.data.surveys.OSS0 | jsonify}};
-    var survey6 = {{ site.data.surveys.OSS6 | jsonify}};
-    var survey12 = {{ site.data.surveys.OSS12 | jsonify}};
-    const questionText = {{ site.data.surveys.OSS12[0] | jsonify}};
-    const dt = luxon.DateTime;
-    const dur = luxon.Duration;
+    
     const backgroundColor = [
         'rgba(54, 162, 235, 0.2)',
         'rgba(153, 102, 255, 0.2)',
@@ -61,7 +60,7 @@
                 }
             } else {
                 if (!(answer[variable] in newVal)) {
-                   // console.debug('null value, not adding', answer, answer[variable]);
+                    // console.debug('null value, not adding', answer, answer[variable]);
                 } else {
                     newVal[answer[variable]]++;
                 }
@@ -85,41 +84,52 @@
     };
 
     const generateChart = function (variable) {
-        return new Chart(document.getElementById('chart' + variable), {
-            type: 'bar',
-            data: {
-                datasets: generateDataSet(variable)
-            },
-            options: {
-                plugins: {
-                    title: {
-                        text: questionText[variable],
-                        display: true
-                    }
+        try {
+            return new Chart(document.getElementById('chart' + variable), {
+                type: 'bar',
+                data: {
+                    datasets: generateDataSet(variable)
                 },
-                backgroundColor: backgroundColor,
-                borderColor: borderColor
-            }
-        });
+                options: {
+   
+                    plugins: {
+                        title: {
+                            text: questionText[variable],
+                            display: true
+                        }
+                    },
+                    backgroundColor: backgroundColor,
+                    borderColor: borderColor
+                }
+            });
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     const generateNumChart = function (variable) {
-        return new Chart(document.getElementById('chart' + variable), {
-            type: 'bar',
-            data: {
-                datasets: generateDataSet(variable)
-            },
-            options: {
-                plugins: {
-                    title: {
-                        text: questionText[variable],
-                        display: true
-                    }
+        try {
+            return new Chart(document.getElementById('chart' + variable), {
+                type: 'bar',
+                data: {
+                    datasets: generateDataSet(variable)
                 },
-                backgroundColor: backgroundColor,
-                borderColor: borderColor
-            }
-        });
+                options: {
+                    indexAxis: 'x',
+                    plugins: {
+                        title: {
+                            text: questionText[variable],
+                            display: true
+                        }
+                    },
+                    backgroundColor: backgroundColor,
+                    borderColor: borderColor
+                }
+
+            });
+        } catch (e) {
+            console.log(e);
+        }
     }
 
 

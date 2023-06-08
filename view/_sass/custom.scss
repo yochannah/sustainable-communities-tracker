@@ -17,6 +17,8 @@ $color-faded-grey: rgba(201, 203, 207, 0.2);
 
 $text-color: rgba(0, 0, 0, 0.76);
 $main-bg-color: #f4f4f9;
+$highlight-color:#00BCD4;
+$contrast-color:#f2ae0f;
 
 $color-ongoing: $color-faded-blue;
 $color-declined: $color-faded-red;
@@ -75,13 +77,13 @@ h4 {
   border-radius: 1em 0em 1em 0em;
 }
 
-h2 {
-  background-color: #00BCD4;
+h1 {
+  background-color: scale-color($highlight-color, $alpha: -60%);
   margin: -0.75em -0.7em 0.5em -0.7em;
   padding: 0.25em 0.5em;
   color: #fff;
-  border-radius: 2px 2px 0px 0px;
   box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
   padding-left: 0.5em;
   padding-right: 0.5em;
   border-radius: 1em 0em 1em 0em;
@@ -93,6 +95,15 @@ h2 {
   padding: 1em;
   box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
   border-radius: 1em 1.1em 2px 2px;
+
+  page-break-after: always;
+
+  h2 {
+    border-style: solid;
+    margin-top: -0.75em;
+    margin-left: -0.75em;
+    margin-right: -0.75em;
+  }
 }
 
 .column {
@@ -217,4 +228,83 @@ h2 {
   }
 
   border-radius:2px
+}
+
+.repoInfo,
+.repoInfo:visited {
+  background-color: scale-color($highlight-color);
+  border: solid 1px scale-color($highlight-color, $saturation: 40%);
+  color: #f4f4f9;
+  text-shadow: 1px 1px 1px scale-color($text-color, $alpha: -20%);
+  display: inline-block;
+  border-radius: 4px 4px 0px 0px;
+  margin: 2px 4px 0 2px;
+  padding: 2px 6px;
+
+  &:hover {
+    background-color: scale-color($highlight-color, $alpha: -30%);
+    color: #f4f4f9;
+    text-shadow: 1px 1px 1px scale-color($text-color, $alpha: -20%);
+    box-shadow: 1px 1px 1px 1px scale-color($highlight-color, $saturation: -20%);
+  }
+}
+
+.repoLinks {
+  border-bottom: solid 1px $contrast-color;
+  margin-bottom: 1em;
+}
+
+.pageTypesurvey .survey,
+.pageTyperepo .repo {
+  border-radius: 4px 4px 0px 0px;
+  border: solid 1px scale-color($contrast-color, $saturation: 40%);
+
+  &:hover {
+    background-color: $contrast-color;
+    box-shadow: none;
+    text-decoration: none;
+  }
+
+  background-color: $contrast-color;
+}
+
+table.status {
+  background-color: $main-bg-color;
+  border-width: 2px;
+
+  &:before {
+    content: none;
+  }
+}
+
+.archetypes span {
+  border: #ECEFF1;
+  border-radius: 2px;
+  padding: 2px 4px;
+}
+
+
+@media print {
+
+  // print 
+  .sidebar {
+    display: none;
+  }
+
+  .vis {
+    width: 100%;
+    min-width:95%;
+    font-size: 8pt;
+    margin-left:0;
+    padding-left:0;
+    margin-right:0;
+    padding-right:0;
+    h2 {    margin-left:0;
+      padding-left:0;
+      margin-right:0;
+      padding-right:0;}
+  }
+  .aggGraph {padding:0;}
+  h1 {margin-left:0;}
+  table td {padding:2px;}
 }

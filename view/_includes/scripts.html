@@ -2,4 +2,18 @@
 <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.4/build/global/luxon.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.2.0/dist/chartjs-adapter-luxon.min.js"></script>
 
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+
 {%- include bg_colors.html -%}
+
+<script>
+    var survey0 = {{ site.data.surveys.OSS0 | jsonify}};
+    var survey6 = {{ site.data.surveys.OSS6 | jsonify}};
+    var survey12 = {{ site.data.surveys.OSS12 | jsonify}};
+    const questionText = {{ site.data.surveys.OSS12[0] | jsonify}};
+    const dt = luxon.DateTime;
+    const dur = luxon.Duration;
+</script>
