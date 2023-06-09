@@ -1,7 +1,5 @@
-<div id="expectations">😘</div>
+<div id="expectations"></div>
 <script>
-
-
   let contribs = {}
   survey0.map(function(row) {
     let proj = row.ProjectPseudonym.trim();
@@ -40,23 +38,31 @@
     }
   };
 
+  var colForBool = {
+    "Yes": {
+      border: colors.solid.blue,
+      bg: colors.faded.blue
+    },
+    "No": {
+      border: colors.solid.yellow,
+      bg: colors.faded.yellow
+    },
+    "No answer": {
+      border: colors.solid.grey,
+      bg: colors.faded.grey
+    }
+  }
+
 // I know it's not a real bool, but functionally it's a bool!
   const colorForBool = function(bool, bg) {
-    if (bg) {
-      if (bool == "Yes") {
-        return backgroundColors["INACTIVE"];
-      }
-      if (bool == "No") {
-        return backgroundColors["ONGOING"];
-      }
+    if (! bool) {
+      return colors.faded.grey; // grey for null values
+    }if (bg) {
+      return colForBool[bool].bg;
     } else {
-      if (bool == "Yes") {
-        return borderColors["INACTIVE"];
-      }
-      if (bool == "No") {
-        return borderColors["ONGOING"];
-      }
+      return colForBool[bool].border;
     }
+
   }
 
   Object.values(contribs).map(function(e) {
@@ -95,16 +101,18 @@
       .push(colorForBool(e.m12));
   });
 
-  const generateMyElem = function(variable) {
-    let chartElemHtml = `<canvas id="chart${variable}" width="400" height="400" class="aggGraph"></canvas>`;
-    let anchor = document.getElementById("expectations");
-    anchor.innerHTML += chartElemHtml;
-  }
   const generateExpChart = function(variable) {
     try {
 
       let fill = Array(contribsStriped.m0.length).fill(1);
-      let months = ["Month 0", "Month 6", "Month 12"];
+      let months = [
+        null,
+        "Month 0",
+        null,
+        "Month 6",
+        null,
+        "Month 12"
+      ];
 
       return new Chart(document.getElementById('chart' + variable), {
         type: 'bar',
@@ -133,9 +141,9 @@
         options: {
           scales: {
             x: {
-              ticks: { // Include a dollar sign in the ticks
+              ticks: {
                 callback: function(value, index, ticks) {
-                  return months[value];
+                  return months[index];
                 }
               }
             }
@@ -143,16 +151,24 @@
           indexAxis: 'y',
           plugins: {
             title: {
-              text: "Helloooo!!",
+              text: questionText["project-open-contrib"],
               display: true
+            },
+            htmlLegend: {
+              containerID: 'legendhola',
+              boxes: colForBool
+            },
+            legend: {
+              display: false
             }
           }
-        }
+        },
+        plugins: [htmlLegendPlugin]
       });
     } catch (e) {
       console.log(e);
     }
   }
-  generateMyElem("hola");
+  generateElem("hola", "expectations", true);
   generateExpChart("hola");
 </script>

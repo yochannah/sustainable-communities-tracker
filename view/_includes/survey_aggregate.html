@@ -6,25 +6,6 @@
 
 <script>
     // (function(){
-    
-    const backgroundColor = [
-        'rgba(54, 162, 235, 0.2)',
-        'rgba(153, 102, 255, 0.2)',
-        'rgba(255, 205, 86, 0.2)',
-        'rgba(75, 192, 192, 0.2)',
-        'rgba(255, 99, 132, 0.2)',
-        'rgba(201, 203, 207, 0.2)',
-        'rgba(255, 159, 64, 0.2)',
-    ];
-    const borderColor = [
-        'rgb(54, 162, 235)',
-        'rgb(153, 102, 255)',
-        'rgb(255, 205, 86)',
-        'rgb(75, 192, 192)',
-        'rgb(255, 99, 132)',
-        'rgb(201, 203, 207)',
-        'rgb(255, 159, 64)',
-    ];
     const datasetLabels = [
         "Month 0",
         "Month 6",
@@ -130,13 +111,6 @@
         } catch (e) {
             console.log(e);
         }
-    }
-
-
-    const generateElem = function (variable) {
-        let chartElemHtml = `<canvas id="chart${variable}" width="400" height="400" class="aggGraph"></canvas>`;
-        let anchor = document.getElementById("aggregateAnchor");
-        anchor.innerHTML += chartElemHtml;
     }
 
     //this has to be done before we generate the graphs or it doesn't render, idk why

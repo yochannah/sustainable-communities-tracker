@@ -15,7 +15,7 @@
 <script>
     //Default chart js: 
     Chart.defaults.elements.bar.borderWidth = 2;
-    Chart.defaults.elements.bar.borderRadius = 8;
+    Chart.defaults.elements.bar.borderRadius = 1;
     Chart.defaults.elements.bar.borderSkipped= false;
 
     //strip out empty vars.
@@ -24,8 +24,7 @@
     var survey6 = {{ site.data.surveys.OSS6 | where_exp:"item",
   "item.project-open-contrib != nil and item.project-open-contrib.size < 4 "|jsonify}};
     var survey12 = {{survey12}};
-    const questionText = {{ site.data.surveys.OSS12[0] | where_exp:"item",
-  "item.project-open-contrib != nil and item.project-open-contrib.size < 4 "| jsonify}};
+    const questionText = {{ site.data.surveys.OSS12[0] | jsonify}};
     const dt = luxon.DateTime;
     const dur = luxon.Duration;
 </script>
