@@ -57,6 +57,8 @@ defaults:
 
 exclude:
   - old_repos
+keep_files: 
+  - scripts.js
 
 #jekyll feed... I don't need a feed! 
 feed:
