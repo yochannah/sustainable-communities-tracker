@@ -1,3 +1,158 @@
-<div id="hola">😘</div>
+<div id="expectations">😘</div>
+<script>
 
-<script></script>
+
+  let contribs = {}
+  survey0.map(function(row) {
+    let proj = row.ProjectPseudonym.trim();
+    contribs[proj] = {
+      m0: row["project-open-contrib"]
+    };
+  });
+
+  survey6.map(function(row) {
+    let proj = row.ProjectPseudonym.trim();
+    contribs[proj].m6 = row["project-open-contrib"];
+
+  });
+  survey12.map(function(row) {
+    let proj = row.ProjectPseudonym.trim();
+    contribs[proj].m12 = row["project-open-contrib"];
+  });
+
+// stripe the data, so the chart likes it.
+  let contribsStriped = {
+    names: Object.keys(contribs),
+    m0: [],
+    m6: [],
+    m12: [],
+    colors: {
+      bg: {
+        m0: [],
+        m6: [],
+        m12: []
+      },
+      border: {
+        m0: [],
+        m6: [],
+        m12: []
+      }
+    }
+  };
+
+// I know it's not a real bool, but functionally it's a bool!
+  const colorForBool = function(bool, bg) {
+    if (bg) {
+      if (bool == "Yes") {
+        return backgroundColors["INACTIVE"];
+      }
+      if (bool == "No") {
+        return backgroundColors["ONGOING"];
+      }
+    } else {
+      if (bool == "Yes") {
+        return borderColors["INACTIVE"];
+      }
+      if (bool == "No") {
+        return borderColors["ONGOING"];
+      }
+    }
+  }
+
+  Object.values(contribs).map(function(e) {
+    contribsStriped.m0.push(e.m0);
+    contribsStriped.m6.push(e.m6);
+    contribsStriped.m12.push(e.m12);
+    contribsStriped
+      .colors
+      .bg
+      .m0
+      .push(colorForBool(e.m0, true));
+    contribsStriped
+      .colors
+      .bg
+      .m6
+      .push(colorForBool(e.m6, true));
+    contribsStriped
+      .colors
+      .bg
+      .m12
+      .push(colorForBool(e.m12, true));
+    contribsStriped
+      .colors
+      .border
+      .m0
+      .push(colorForBool(e.m0));
+    contribsStriped
+      .colors
+      .border
+      .m6
+      .push(colorForBool(e.m6));
+    contribsStriped
+      .colors
+      .border
+      .m12
+      .push(colorForBool(e.m12));
+  });
+
+  const generateMyElem = function(variable) {
+    let chartElemHtml = `<canvas id="chart${variable}" width="400" height="400" class="aggGraph"></canvas>`;
+    let anchor = document.getElementById("expectations");
+    anchor.innerHTML += chartElemHtml;
+  }
+  const generateExpChart = function(variable) {
+    try {
+
+      let fill = Array(contribsStriped.m0.length).fill(1);
+      let months = ["Month 0", "Month 6", "Month 12"];
+
+      return new Chart(document.getElementById('chart' + variable), {
+        type: 'bar',
+        data: {
+          labels: contribsStriped.names,
+          datasets: [
+            {
+
+              data: fill,
+              backgroundColor: contribsStriped.colors.bg.m0,
+              borderColor: contribsStriped.colors.border.m0,
+              stack: 'Stack 0'
+            }, {
+              data: fill,
+              backgroundColor: contribsStriped.colors.bg.m6,
+              borderColor: contribsStriped.colors.border.m6,
+              stack: 'Stack 0'
+            }, {
+              data: fill,
+              backgroundColor: contribsStriped.colors.bg.m12,
+              borderColor: contribsStriped.colors.border.m12,
+              stack: 'Stack 0'
+            }
+          ]
+        },
+        options: {
+          scales: {
+            x: {
+              ticks: { // Include a dollar sign in the ticks
+                callback: function(value, index, ticks) {
+                  return months[value];
+                }
+              }
+            }
+          },
+          indexAxis: 'y',
+          plugins: {
+            title: {
+              text: "Helloooo!!",
+              display: true
+            }
+          }
+        }
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  }
+  generateMyElem("hola");
+  generateExpChart("hola");
+</script>

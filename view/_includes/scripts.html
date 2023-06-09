@@ -9,6 +9,9 @@
 
 {%- include bg_colors.html -%}
 
+{% assign survey12 = site.data.surveys.OSS12 | where_exp:"item",
+  "item.project-open-contrib != nil and item.project-open-contrib.size < 4 "|jsonify %}
+
 <script>
     //Default chart js: 
     Chart.defaults.elements.bar.borderWidth = 2;
@@ -20,8 +23,7 @@
   "item.project-open-contrib != nil and item.project-open-contrib.size < 4 "| jsonify}};
     var survey6 = {{ site.data.surveys.OSS6 | where_exp:"item",
   "item.project-open-contrib != nil and item.project-open-contrib.size < 4 "|jsonify}};
-    var survey12 = {{ site.data.surveys.OSS12 | where_exp:"item",
-  "item.project-open-contrib != nil and item.project-open-contrib.size < 4 "|jsonify}};
+    var survey12 = {{survey12}};
     const questionText = {{ site.data.surveys.OSS12[0] | where_exp:"item",
   "item.project-open-contrib != nil and item.project-open-contrib.size < 4 "| jsonify}};
     const dt = luxon.DateTime;
