@@ -4,7 +4,7 @@ const generateElem = function (variable, anAnchor, legend) {
     chartBox.classList = "aggGraph";
 
     if (anAnchor) { a = anAnchor; } else { a = "aggregateAnchor" }
-    
+
     let anchor = document.getElementById(a);
     let chartElemHtml = `<canvas id="chart${variable}" width="400" height="400"></canvas>`;
 
@@ -74,9 +74,8 @@ const htmlLegendPlugin = {
     }
 };
 
-function prepData(variable, sortBy) {
+function prepData(variable, sortBy, dataType) {
     let responses = {};
-
     if (sortBy) {
         survey0.sort(function (a, b) {
             if (sortBy == "age") {
@@ -148,37 +147,37 @@ function prepData(variable, sortBy) {
             .colors
             .bg
             .m0
-            .push(colorForBool(e.m0, true));
+            .push(colorForChart(e.m0, true));
         visData
             .colors
             .bg
             .m6
-            .push(colorForBool(e.m6, true));
+            .push(colorForChart(e.m6, true));
         visData
             .colors
             .bg
             .m12
-            .push(colorForBool(e.m12, true));
+            .push(colorForChart(e.m12, true));
         visData
             .colors
             .border
             .m0
-            .push(colorForBool(e.m0));
+            .push(colorForChart(e.m0));
         visData
             .colors
             .border
             .m6
-            .push(colorForBool(e.m6));
+            .push(colorForChart(e.m6));
         visData
             .colors
             .border
             .m12
-            .push(colorForBool(e.m12));
+            .push(colorForChart(e.m12));
     });
     return visData;
 }
 
-var colForBool = {
+var colForChart = {
     "Yes": {
         border: colors.solid.blue,
         bg: colors.faded.blue
@@ -190,19 +189,71 @@ var colForBool = {
     "No answer": {
         border: colors.solid.grey,
         bg: colors.faded.grey
+    },
+    "1-10": {
+        border: colors.scaled.c30,
+        bg: colors.scaled.c20
+    },
+    "10-20": {
+        border: colors.scaled.c40,
+        bg: colors.scaled.c30
+    },
+    "20-50": {
+        border: colors.scaled.c50,
+        bg: colors.scaled.c40
+    },
+    "50-100": {
+        border: colors.scaled.c60,
+        bg: colors.scaled.c50
+    },
+    "100-1000": {
+        border: colors.scaled.c70,
+        bg: colors.scaled.c60
+    },
+    "1000-10,000": {
+        border: colors.scaled.c80,
+        bg: colors.scaled.c70
+    },
+    "Other, please specify": {
+        border: colors.solid.grey,
+        bg: colors.faded.grey
+    },
+    "still active and being maintained/updated, me still contributing": {
+        border: colors.solid.red,
+        bg: colors.faded.red
+    },
+    "still active and being maintained/updated by my colleagues": {
+        border: colors.solid.orange,
+        bg: colors.faded.orange
+    },
+    "still active and being maintained/updated by my community": {    
+        border: colors.solid.yellow,
+        bg: colors.faded.yellow
+    },
+    "finalised with occasional updates": {
+        border: colors.solid.green,
+        bg: colors.faded.green
+    },
+    "wrapped up and no longer active": {
+        border: colors.solid.blue,
+        bg: colors.faded.blue
     }
 }
 
-// I know it's not a real bool, but functionally it's a bool!
-const colorForBool = function (bool, bg) {
-    if (!bool) {
+const colorForChart = function (value, bg) {
+    if (!value) {
         return colors.faded.grey; // grey for null values
-    } if (bg) {
-        return colForBool[bool].bg;
-    } else {
-        return colForBool[bool].border;
     }
-
+    try {
+        if (bg) {
+            return colForChart[value.trim()].bg;
+        } else {
+            return colForChart[value.trim()].border;
+        }
+    }
+    catch (e) {
+        console.error(`probably, we were unable to find a colour value for the chart item '${value}'.`, e);
+    }
 }
 
 const generateExpChart = function (variable, sortBy) {
@@ -297,7 +348,7 @@ const generateExpChart = function (variable, sortBy) {
                     },
                     htmlLegend: {
                         containerID: `legend${variable}`,
-                        boxes: colForBool
+                        boxes: colForChart
                     },
                     legend: {
                         display: false
