@@ -1,15 +1,21 @@
 const generateElem = function (variable, anAnchor, legend) {
-    let chartElemHtml = `<canvas id="chart${variable}" width="400" height="400" class="aggGraph"></canvas>`;
-    let a;
+    let chartBox, a, legendHtml;
+    chartBox = document.createElement("div");
+    chartBox.classList = "aggGraph";
+
     if (anAnchor) { a = anAnchor; } else { a = "aggregateAnchor" }
+    
     let anchor = document.getElementById(a);
+    let chartElemHtml = `<canvas id="chart${variable}" width="400" height="400"></canvas>`;
+
+    chartBox.innerHTML = chartElemHtml;
 
     if (legend) {
         legendHtml = `<div id="legend${variable}" class="legend"></div>`;
-        chartElemHtml = legendHtml + chartElemHtml;
+        chartBox.innerHTML += legendHtml;
     }
 
-    anchor.innerHTML += chartElemHtml;
+    anchor.appendChild(chartBox);
 }
 
 const getOrCreateLegendList = (chart, id) => {
@@ -233,7 +239,7 @@ const generateExpChart = function (variable, sortBy) {
                         data: fill,
                         backgroundColor: visData.colors.bg.m0,
                         borderColor: visData.colors.border.m0,
-                        stack: 'Stack 0',                        datalabels: {
+                        stack: 'Stack 0', datalabels: {
                             formatter: datalabelsFormatter(visData.m0)
                         }
                     }, {
@@ -241,8 +247,8 @@ const generateExpChart = function (variable, sortBy) {
                         backgroundColor: visData.colors.bg.m6,
                         borderColor: visData.colors.border.m6,
                         stack: 'Stack 0',
-                        datalabels: { 
-                            formatter: datalabelsFormatter(visData.m6) 
+                        datalabels: {
+                            formatter: datalabelsFormatter(visData.m6)
                         }
                     }, {
                         data: fill,
@@ -278,6 +284,16 @@ const generateExpChart = function (variable, sortBy) {
                     title: {
                         text: questionText[variable],
                         display: true
+                    },
+                    subtitle: {
+                        display: true,
+                        text: function () {
+                            if (sortBy) {
+                                return `Sorted by ${sortBy}, high to low`;
+                            } else {
+                                return `Sorted by order of response to month0 surveys, most recent to earliest`;
+                            }
+                        }
                     },
                     htmlLegend: {
                         containerID: `legend${variable}`,
