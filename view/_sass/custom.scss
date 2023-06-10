@@ -283,6 +283,41 @@ table.status {
   padding: 2px 4px;
 }
 
+.legend {
+  align-items: center;
+  display: flex;
+
+  ul {
+    display: flex;
+    flex-direction: row;
+    list-style-type:none;
+    align-items:center;
+    flex-grow:1;
+    justify-content: center;
+  }
+
+  li {
+    display: flex;
+    flex-direction: row;
+    align-items:center;
+    margin-left:10px;
+  }
+
+  .box {
+    border-width: 2px;
+    border-style: solid;
+    height: 20px;
+    margin-right: 10px;
+    width: 20px;
+
+  }
+
+  p {
+    margin: 0;
+    padding: 0;
+  }
+}
+
 
 @media print {
 
@@ -293,18 +328,30 @@ table.status {
 
   .vis {
     width: 100%;
-    min-width:95%;
+    min-width: 95%;
     font-size: 8pt;
-    margin-left:0;
-    padding-left:0;
-    margin-right:0;
-    padding-right:0;
-    h2 {    margin-left:0;
-      padding-left:0;
-      margin-right:0;
-      padding-right:0;}
+    margin-left: 0;
+    padding-left: 0;
+    margin-right: 0;
+    padding-right: 0;
+
+    h2 {
+      margin-left: 0;
+      padding-left: 0;
+      margin-right: 0;
+      padding-right: 0;
+    }
   }
-  .aggGraph {padding:0;}
-  h1 {margin-left:0;}
-  table td {padding:2px;}
+
+  .aggGraph {
+    padding: 0;
+  }
+
+  h1 {
+    margin-left: 0;
+  }
+
+  table td {
+    padding: 2px;
+  }
 }
