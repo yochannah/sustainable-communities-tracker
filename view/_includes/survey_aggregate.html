@@ -9,7 +9,7 @@
     const datasetLabels = [
         "Month 0",
         "Month 6",
-        "Month12"
+        "Month 12"
     ];
 
     const boolGraphs = [
@@ -117,19 +117,18 @@
     boolGraphs.map(function (graph) {
         generateElem(graph, null, true);
     });
+    
 
-    numericGraphs.map(function (graph) {
-        generateElem(graph);
-    });
+    // numericGraphs.map(function (graph) {
+    //     generateElem(graph);
+    // });
 
     boolGraphs.map(function (graph) {
-        generateExpChart(graph);
+        generateExpChart(graph, "age");
     });
 
-    numericGraphs.map(function (graph) {
-        generateNumChart(graph);
-    });
+    // numericGraphs.map(function (graph) {
+    //     generateNumChart(graph);
+    // });
 
-
-//  })();
 </script>

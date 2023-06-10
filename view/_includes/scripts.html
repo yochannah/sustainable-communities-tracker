@@ -1,6 +1,7 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.4/build/global/luxon.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.2.0/dist/chartjs-adapter-luxon.min.js"></script>
+<script src=" https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js "></script>
 
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -18,13 +19,23 @@
     Chart.defaults.elements.bar.borderRadius = 1;
     Chart.defaults.elements.bar.borderSkipped= false;
 
+    //adding a nice chartjs plugin for labelling datapoints: 
+    Chart.register(ChartDataLabels);
+
     //strip out empty vars.
     var survey0 = {{ site.data.surveys.OSS0 | where_exp:"item",
   "item.project-open-contrib != nil and item.project-open-contrib.size < 4 "| jsonify}};
     var survey6 = {{ site.data.surveys.OSS6 | where_exp:"item",
   "item.project-open-contrib != nil and item.project-open-contrib.size < 4 "|jsonify}};
     var survey12 = {{survey12}};
+
+    //set up useful vars
     const questionText = {{ site.data.surveys.OSS12[0] | jsonify}};
+    const ages = {{site.data.surveys.project_founding_dates | jsonify}};
+    const agesByProjName = {};
+    ages.map(function(proj){
+      agesByProjName[proj.ProjectPseudonym] = proj["project-founded"];
+    });
     const dt = luxon.DateTime;
     const dur = luxon.Duration;
 </script>
