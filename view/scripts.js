@@ -99,11 +99,20 @@ function prepData(variable, sortBy, dataType) {
                 }
             }
             else if (sortBy == "scale") {
-
+                console.log("SCALE sort");
                 let scale = orderOfThings.scale;
-                aScaleIndex = scale.indexOf(a[variable]);
-                bScaleIndex = scale.indexOf(b[variable]);
-                //grab the index of each item in the colours order
+                aScaleIndex = scale.indexOf(a["project-user-count"]);
+                bScaleIndex = scale.indexOf(b["project-user-count"]);
+                console.log('👾>>🅰️ a[variable]', a[variable]);
+                console.log('👾>>🅱️ b[variable]', b[variable]);
+                //handle nulls
+                if (!aScaleIndex && bScaleIndex) {
+                    return 1; //b is "bigger"
+                }
+                if (!bScaleIndex && aScaleIndex) {
+                    return -1; //a is "bigger" 
+                }
+                //normal non-null sort
                 if (aScaleIndex > bScaleIndex) {
                     return -1;
                 }
@@ -111,6 +120,7 @@ function prepData(variable, sortBy, dataType) {
                     return 1;
                 }
             } else {
+                console.log("fallthrough sort");
                 if (a[sortBy] < b[sortBy]) {
                     return -1;
                 }
@@ -118,7 +128,10 @@ function prepData(variable, sortBy, dataType) {
                     return 1;
                 }
             }
+            
+
             //if all else failed, they're equal: 
+            console.log('😲 All else failed, it is equal');
             return 0;
         });
     }
@@ -305,7 +318,7 @@ const colForLegend = {
 }
 
 const orderOfThings = {
-    scale: ["1-10", "10-20", "20-50", "50-100", "100-1000", "1000-10,000", "No answer"]
+    scale: [ "No answer", "1-10", "10-20", "20-50", "50-100", "100-1000", "1000-10,000", "Other, please specify"]
 }
 
 const colorForChart = function (value, bg) {
