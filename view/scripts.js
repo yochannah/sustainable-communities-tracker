@@ -63,9 +63,9 @@ const htmlLegendPlugin = {
             // Color box
             const boxSpan = document.createElement('canvas');
             boxSpan.ctx = boxSpan.getContext('2d');
-            boxSpan.backgroundColor = boxes[item].border;   
+            boxSpan.backgroundColor = boxes[item].border;
             boxSpan.ctx.fillStyle = boxes[item].bg;
-            boxSpan.ctx.fillRect(0,0,300,300);
+            boxSpan.ctx.fillRect(0, 0, 300, 300);
             boxSpan.style.borderColor = boxes[item].border;
             boxSpan.classList = "box";
 
@@ -99,7 +99,7 @@ function prepData(variable, sortBy, dataType) {
                 }
             }
             else if (sortBy == "scale") {
-                
+
                 let scale = orderOfThings.scale;
                 aScaleIndex = scale.indexOf(a[variable]);
                 bScaleIndex = scale.indexOf(b[variable]);
@@ -110,7 +110,7 @@ function prepData(variable, sortBy, dataType) {
                 if (bScaleIndex > aScaleIndex) {
                     return 1;
                 }
-            }else {
+            } else {
                 if (a[sortBy] < b[sortBy]) {
                     return -1;
                 }
@@ -124,9 +124,20 @@ function prepData(variable, sortBy, dataType) {
     }
 
     survey0.map(function (row) {
+        let y2Val;
         let proj = row.ProjectPseudonym.trim();
+
+        if (sortBy == "scale") {
+            y2Val = row["project-user-count"];
+        } else if ("age") {
+            y2Val = new Date(agesByProjName[proj]).getFullYear();
+        } else {
+            //this might not be the default at some point
+            y2Val = new Date(agesByProjName[proj]).getFullYear();
+        }        
         responses[proj] = {
-            m0: row[variable]
+            m0: row[variable],
+            y2: y2Val
         };
     });
 
@@ -143,9 +154,11 @@ function prepData(variable, sortBy, dataType) {
     // stripe the data, so the chart likes it.
     let visData = {
         names: Object.keys(responses),
-        m0: [],
-        m6: [],
-        m12: [],
+        m0: [], // data for month 0
+        m6: [], // data for month 6...
+        m12: [], // data for month 12
+        y2 : [], // but of course, this is data for
+                 // axis y2, not a year 
         colors: {
             bg: {
                 m0: [],
@@ -164,6 +177,7 @@ function prepData(variable, sortBy, dataType) {
         visData.m0.push(e.m0);
         visData.m6.push(e.m6);
         visData.m12.push(e.m12);
+        visData.y2.push(e.y2);
         visData
             .colors
             .bg
@@ -280,7 +294,7 @@ const colForLegend = {
         "No answer": colForChart["No answer"]
     },
     activity: {
-       "still active and being maintained/updated, me still contributing": colForChart["still active and being maintained/updated, me still contributing"],
+        "still active and being maintained/updated, me still contributing": colForChart["still active and being maintained/updated, me still contributing"],
         "still active and being maintained/updated by my colleagues": colForChart["still active and being maintained/updated by my colleagues"],
         "still active and being maintained/updated by my community": colForChart["still active and being maintained/updated by my community"],
         "finalised with occasional updates": colForChart["finalised with occasional updates"],
@@ -291,7 +305,7 @@ const colForLegend = {
 }
 
 const orderOfThings = {
-    scale : [ "1-10", "10-20", "20-50", "50-100", "100-1000", "1000-10,000", "No answer" ]
+    scale: ["1-10", "10-20", "20-50", "50-100", "100-1000", "1000-10,000", "No answer"]
 }
 
 const colorForChart = function (value, bg) {
@@ -314,7 +328,7 @@ const generateExpChart = function (config, sortBy, elem) {
     try {
         let visData = prepData(config.name, sortBy);
         let fill = Array(visData.m0.length).fill(1);
-
+        let fill1 = Array(visData.m0.length).fill(0);
         // this positions the labels on half-ticks, which looks a lot better.
         let months = [
             null,
@@ -334,7 +348,7 @@ const generateExpChart = function (config, sortBy, elem) {
                     return "";
                 }
             } else {
-                return function(){return ""}; // no label
+                return function () { return "" }; // no label
             }
         }
 
@@ -349,7 +363,7 @@ const generateExpChart = function (config, sortBy, elem) {
                         borderColor: visData.colors.border.m0,
                         stack: 'Stack 0', datalabels: {
                             formatter: datalabelsFormatter(visData.m0)
-                        }
+                        }, yAxisID: 'y'
                     }, {
                         data: fill,
                         backgroundColor: visData.colors.bg.m6,
@@ -357,7 +371,7 @@ const generateExpChart = function (config, sortBy, elem) {
                         stack: 'Stack 0',
                         datalabels: {
                             formatter: datalabelsFormatter(visData.m6)
-                        }
+                        }, yAxisID: 'y'
                     }, {
                         data: fill,
                         datalabels: {
@@ -365,7 +379,16 @@ const generateExpChart = function (config, sortBy, elem) {
                         },
                         backgroundColor: visData.colors.bg.m12,
                         borderColor: visData.colors.border.m12,
-                        stack: 'Stack 0'
+                        stack: 'Stack 0', 
+                        yAxisID: 'y'
+                    },
+                    {
+                        data: fill1, 
+                        labels: visData.y2,
+                        yAxisID: 'y2',
+                        datalabels: {
+                            display:false
+                        }
                     }
                 ]
             },
@@ -379,9 +402,24 @@ const generateExpChart = function (config, sortBy, elem) {
                         }
                     },
                     y: {
+   
+                        position: 'left',
                         ticks: {
                             callback: function (value, index, ticks) {
                                 return this.getLabelForValue(value);
+                            },
+                            autoSkip: false
+                        }
+                    },
+                    y2: {
+     
+                        position: 'right',
+                        grid: {
+                            drawOnChartArea: false // only want the grid lines for one axis to show up
+                        },
+                        ticks: {
+                            callback: function (value, index, ticks) {
+                                return visData.y2[index];
                             },
                             autoSkip: false
                         }
