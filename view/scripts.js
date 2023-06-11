@@ -1,15 +1,20 @@
 const generateElem = function (config, anAnchor) {
-    let chartBox, a, legendHtml;
+    let chartBox, a, legendHtml, header, txt;
     chartBox = document.createElement("div");
     chartBox.classList = "aggGraph";
 
-    if (anAnchor) { a = anAnchor; } else { a = "aggregateAnchor" }
+    header = document.createElement("div");
+    header.classList = "questionText";
+    txt = document.createTextNode(questionText[config.name]);
+    header.appendChild(txt);
 
+    if (anAnchor) { a = anAnchor; } else { a = "aggregateAnchor" }
 
     let anchor = document.getElementById(a);
     let chartElemHtml = `<canvas id="chart${config.name}${a}" width="400" height="400"></canvas>`;
 
     chartBox.innerHTML = chartElemHtml;
+    chartBox.prepend(header);
 
     if (config.type) {
         legendHtml = `<div id="legend${config.name}${a}" class="legend"></div>`;
@@ -99,10 +104,10 @@ function prepData(variable, sortBy, dataType) {
                 aScaleIndex = scale.indexOf(a[variable]);
                 bScaleIndex = scale.indexOf(b[variable]);
                 //grab the index of each item in the colours order
-                if (aScaleIndex < bScaleIndex) {
+                if (aScaleIndex > bScaleIndex) {
                     return -1;
                 }
-                if (bScaleIndex < aScaleIndex) {
+                if (bScaleIndex > aScaleIndex) {
                     return 1;
                 }
             }else {
@@ -384,10 +389,10 @@ const generateExpChart = function (config, sortBy, elem) {
                 },
                 indexAxis: 'y',
                 plugins: {
-                    title: {
-                        text: questionText[config.name],
-                        display: true
-                    },
+                    // title: {
+                    //     text: questionText[config.name],
+                    //     display: true
+                    // },
                     subtitle: {
                         display: true,
                         text: function () {
