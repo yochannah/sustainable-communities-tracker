@@ -294,6 +294,10 @@ table.status {
     align-items:center;
     flex-grow:1;
     justify-content: center;
+    flex-wrap: wrap;
+    border:solid $color-solid-grey 1px;
+    border-radius: 8px;
+    padding:0.4em;
   }
 
   li {

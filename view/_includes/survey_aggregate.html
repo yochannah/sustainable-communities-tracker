@@ -12,15 +12,15 @@
         "Month 12"
     ];
 
-    const boolGraphs = [
-        "project-open-contrib",
-        "funds-grant-funds",
-        "funds-others-pick-up",
-        "future-funding-plans",
-        "project-user-count",
-        "project-user-potentl",
-        "future-one-year",
-        "future-five-years"
+    const graphs = [
+        {name : "project-open-contrib", type : "bool"},
+        {name :  "funds-grant-funds",type : "bool"},
+        {name :  "funds-others-pick-up",type : "bool"},
+        {name :  "future-funding-plans",type : "bool"},
+        {name :   "project-user-count",type : "scale"},
+        {name :  "project-user-potentl",type : "scale"},
+        {name :  "future-one-year",type : "activity"},
+        {name :  "future-five-years",type : "activity"},
     ];
 
     const numericGraphs = [
@@ -118,21 +118,11 @@
     }
 
     //this has to be done before we generate the graphs or it doesn't render, idk why
-    boolGraphs.map(function (graph) {
-        generateElem(graph, null, true);
+    graphs.map(function (graph) {
+        generateElem(graph.name, null, true);
     });
-    
-
-    // numericGraphs.map(function (graph) {
-    //     generateElem(graph);
-    // });
-
-    boolGraphs.map(function (graph) {
-        generateExpChart(graph, "age");
+    graphs.map(function (graph) {
+        generateExpChart(graph.name, "age", graph.type);
     });
-
-    // numericGraphs.map(function (graph) {
-    //     generateNumChart(graph);
-    // });
 
 </script>

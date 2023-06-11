@@ -177,7 +177,7 @@ function prepData(variable, sortBy, dataType) {
     return visData;
 }
 
-var colForChart = {
+const colForChart = {
     "Yes": {
         border: colors.solid.blue,
         bg: colors.faded.blue
@@ -226,7 +226,7 @@ var colForChart = {
         border: colors.solid.orange,
         bg: colors.faded.orange
     },
-    "still active and being maintained/updated by my community": {    
+    "still active and being maintained/updated by my community": {
         border: colors.solid.yellow,
         bg: colors.faded.yellow
     },
@@ -237,6 +237,34 @@ var colForChart = {
     "wrapped up and no longer active": {
         border: colors.solid.blue,
         bg: colors.faded.blue
+    },
+}
+
+//never update this directly, please update by reference to colForChart.
+//kthx 
+const colForLegend = {
+    scale: {
+        "1-10": colForChart["1-10"],
+        "10-20": colForChart["10-20"],
+        "20-50": colForChart["20-50"],
+        "50-100": colForChart["50-100"],
+        "100-1000": colForChart["100-1000"],
+        "1000-10,000": colForChart["1000-10,000"],
+        "No answer": colForChart["No answer"]
+    },
+    bool: {
+        "Yes": colForChart["Yes"],
+        "No": colForChart["No"],
+        "No answer": colForChart["No answer"]
+    },
+    activity: {
+        "Other, please specify": colForChart["Other, please specify"],
+        "No answer": colForChart["No answer"],
+        "still active and being maintained/updated, me still contributing": colForChart["still active and being maintained/updated, me still contributing"],
+        "still active and being maintained/updated by my colleagues": colForChart["still active and being maintained/updated by my colleagues"],
+        "still active and being maintained/updated by my community": colForChart["still active and being maintained/updated by my community"],
+        "finalised with occasional updates": colForChart["finalised with occasional updates"],
+        "wrapped up and no longer active": colForChart["wrapped up and no longer active"]
     }
 }
 
@@ -256,7 +284,7 @@ const colorForChart = function (value, bg) {
     }
 }
 
-const generateExpChart = function (variable, sortBy) {
+const generateExpChart = function (variable, sortBy, colorType) {
     try {
         let visData = prepData(variable, sortBy);
         let fill = Array(visData.m0.length).fill(1);
@@ -348,7 +376,7 @@ const generateExpChart = function (variable, sortBy) {
                     },
                     htmlLegend: {
                         containerID: `legend${variable}`,
-                        boxes: colForChart
+                        boxes: colForLegend[colorType]
                     },
                     legend: {
                         display: false
