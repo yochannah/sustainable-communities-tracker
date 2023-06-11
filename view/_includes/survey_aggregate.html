@@ -3,6 +3,7 @@
   </div>
 
 <div id="aggregateAnchor"></div>
+<div id="scaleGraphs"></div>
 
 <script>
     // (function(){
@@ -119,10 +120,16 @@
 
     //this has to be done before we generate the graphs or it doesn't render, idk why
     graphs.map(function (config) {
-        generateElem(config);
+        generateElem(config, "aggregateAnchor");
     });
     graphs.map(function (config) {
-        generateExpChart(config, "age");
+        generateExpChart(config, "age","aggregateAnchor");
+    });
+    graphs.map(function (config) {
+        generateElem(config, "scaleGraphs");
+    });
+    graphs.map(function (config) {
+        generateExpChart(config, "scale", "scaleGraphs");
     });
 
 </script>

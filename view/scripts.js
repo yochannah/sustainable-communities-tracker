@@ -5,13 +5,14 @@ const generateElem = function (config, anAnchor) {
 
     if (anAnchor) { a = anAnchor; } else { a = "aggregateAnchor" }
 
+
     let anchor = document.getElementById(a);
-    let chartElemHtml = `<canvas id="chart${config.name}" width="400" height="400"></canvas>`;
+    let chartElemHtml = `<canvas id="chart${config.name}${a}" width="400" height="400"></canvas>`;
 
     chartBox.innerHTML = chartElemHtml;
 
     if (config.type) {
-        legendHtml = `<div id="legend${config.name}" class="legend"></div>`;
+        legendHtml = `<div id="legend${config.name}${a}" class="legend"></div>`;
         chartBox.innerHTML += legendHtml;
     }
 
@@ -55,8 +56,11 @@ const htmlLegendPlugin = {
             };
 
             // Color box
-            const boxSpan = document.createElement('span');
-            boxSpan.style.background = boxes[item].bg;
+            const boxSpan = document.createElement('canvas');
+            boxSpan.ctx = boxSpan.getContext('2d');
+            boxSpan.backgroundColor = boxes[item].border;   
+            boxSpan.ctx.fillStyle = boxes[item].bg;
+            boxSpan.ctx.fillRect(0,0,300,300);
             boxSpan.style.borderColor = boxes[item].border;
             boxSpan.classList = "box";
 
@@ -89,7 +93,19 @@ function prepData(variable, sortBy, dataType) {
                     return 1;
                 }
             }
-            else {
+            else if (sortBy == "scale") {
+                
+                let scale = orderOfThings.scale;
+                aScaleIndex = scale.indexOf(a[variable]);
+                bScaleIndex = scale.indexOf(b[variable]);
+                //grab the index of each item in the colours order
+                if (aScaleIndex < bScaleIndex) {
+                    return -1;
+                }
+                if (bScaleIndex < aScaleIndex) {
+                    return 1;
+                }
+            }else {
                 if (a[sortBy] < b[sortBy]) {
                     return -1;
                 }
@@ -269,6 +285,10 @@ const colForLegend = {
     }
 }
 
+const orderOfThings = {
+    scale : [ "1-10", "10-20", "20-50", "50-100", "100-1000", "1000-10,000", "No answer" ]
+}
+
 const colorForChart = function (value, bg) {
     if (!value) {
         return colors.faded.grey; // grey for null values
@@ -285,7 +305,7 @@ const colorForChart = function (value, bg) {
     }
 }
 
-const generateExpChart = function (config, sortBy) {
+const generateExpChart = function (config, sortBy, elem) {
     try {
         let visData = prepData(config.name, sortBy);
         let fill = Array(visData.m0.length).fill(1);
@@ -313,7 +333,7 @@ const generateExpChart = function (config, sortBy) {
             }
         }
 
-        return new Chart(document.getElementById('chart' + config.name), {
+        return new Chart(document.getElementById('chart' + config.name + elem), {
             type: 'bar',
             data: {
                 labels: visData.names,
@@ -379,7 +399,7 @@ const generateExpChart = function (config, sortBy) {
                         }
                     },
                     htmlLegend: {
-                        containerID: `legend${config.name}`,
+                        containerID: `legend${config.name}${elem}`,
                         boxes: colForLegend[config.type]
                     },
                     legend: {
