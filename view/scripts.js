@@ -99,12 +99,10 @@ function prepData(variable, sortBy, dataType) {
                 }
             }
             else if (sortBy == "scale") {
-                console.log("SCALE sort");
                 let scale = orderOfThings.scale;
                 aScaleIndex = scale.indexOf(a["project-user-count"]);
                 bScaleIndex = scale.indexOf(b["project-user-count"]);
-                console.log('👾>>🅰️ a[variable]', a[variable]);
-                console.log('👾>>🅱️ b[variable]', b[variable]);
+
                 //handle nulls
                 if (!aScaleIndex && bScaleIndex) {
                     return 1; //b is "bigger"
@@ -120,7 +118,6 @@ function prepData(variable, sortBy, dataType) {
                     return 1;
                 }
             } else {
-                console.log("fallthrough sort");
                 if (a[sortBy] < b[sortBy]) {
                     return -1;
                 }
@@ -128,10 +125,8 @@ function prepData(variable, sortBy, dataType) {
                     return 1;
                 }
             }
-            
 
             //if all else failed, they're equal: 
-            console.log('😲 All else failed, it is equal');
             return 0;
         });
     }
