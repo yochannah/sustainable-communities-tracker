@@ -291,9 +291,9 @@ table.status {
     display: flex;
     flex-direction: row;
     list-style-type:none;
-    align-items:center;
+    align-items:flex-start;
     flex-grow:1;
-    justify-content: center;
+    justify-content: flex-start;
     flex-wrap: wrap;
     border:solid $color-solid-grey 1px;
     border-radius: 8px;
@@ -305,6 +305,7 @@ table.status {
     flex-direction: row;
     align-items:center;
     margin-left:10px;
+    flex-grow:1;
   }
 
   .box {
@@ -313,12 +314,14 @@ table.status {
     height: 20px;
     margin-right: 10px;
     width: 20px;
-
   }
 
   p {
     margin: 0;
     padding: 0;
+    &::first-letter{
+      text-transform: capitalize;
+    }
   }
 }
 

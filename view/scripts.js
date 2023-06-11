@@ -1,4 +1,4 @@
-const generateElem = function (variable, anAnchor, legend) {
+const generateElem = function (config, anAnchor) {
     let chartBox, a, legendHtml;
     chartBox = document.createElement("div");
     chartBox.classList = "aggGraph";
@@ -6,12 +6,12 @@ const generateElem = function (variable, anAnchor, legend) {
     if (anAnchor) { a = anAnchor; } else { a = "aggregateAnchor" }
 
     let anchor = document.getElementById(a);
-    let chartElemHtml = `<canvas id="chart${variable}" width="400" height="400"></canvas>`;
+    let chartElemHtml = `<canvas id="chart${config.name}" width="400" height="400"></canvas>`;
 
     chartBox.innerHTML = chartElemHtml;
 
-    if (legend) {
-        legendHtml = `<div id="legend${variable}" class="legend"></div>`;
+    if (config.type) {
+        legendHtml = `<div id="legend${config.name}" class="legend"></div>`;
         chartBox.innerHTML += legendHtml;
     }
 
@@ -214,30 +214,31 @@ const colForChart = {
         border: colors.scaled.c80,
         bg: colors.scaled.c70
     },
-    "Other, please specify": {
-        border: colors.solid.grey,
-        bg: colors.faded.grey
-    },
     "still active and being maintained/updated, me still contributing": {
-        border: colors.solid.red,
-        bg: colors.faded.red
+        border: colors.solid.purple,
+        bg: colors.faded.purple
     },
     "still active and being maintained/updated by my colleagues": {
-        border: colors.solid.orange,
-        bg: colors.faded.orange
-    },
-    "still active and being maintained/updated by my community": {
-        border: colors.solid.yellow,
-        bg: colors.faded.yellow
-    },
-    "finalised with occasional updates": {
-        border: colors.solid.green,
-        bg: colors.faded.green
-    },
-    "wrapped up and no longer active": {
         border: colors.solid.blue,
         bg: colors.faded.blue
     },
+    "still active and being maintained/updated by my community": {
+        border: colors.solid.green,
+        bg: colors.faded.green
+    },
+    "finalised with occasional updates": {
+
+        border: colors.solid.orange,
+        bg: colors.faded.orange
+    },
+    "wrapped up and no longer active": {
+        border: colors.solid.red,
+        bg: colors.faded.red
+    },
+    "Other, please specify": {
+        border: colors.solid.grey,
+        bg: colors.faded.grey
+    }
 }
 
 //never update this directly, please update by reference to colForChart.
@@ -258,13 +259,13 @@ const colForLegend = {
         "No answer": colForChart["No answer"]
     },
     activity: {
-        "Other, please specify": colForChart["Other, please specify"],
-        "No answer": colForChart["No answer"],
-        "still active and being maintained/updated, me still contributing": colForChart["still active and being maintained/updated, me still contributing"],
+       "still active and being maintained/updated, me still contributing": colForChart["still active and being maintained/updated, me still contributing"],
         "still active and being maintained/updated by my colleagues": colForChart["still active and being maintained/updated by my colleagues"],
         "still active and being maintained/updated by my community": colForChart["still active and being maintained/updated by my community"],
         "finalised with occasional updates": colForChart["finalised with occasional updates"],
-        "wrapped up and no longer active": colForChart["wrapped up and no longer active"]
+        "wrapped up and no longer active": colForChart["wrapped up and no longer active"],
+        "Other, please specify": colForChart["Other, please specify"],
+        "No answer": colForChart["No answer"]
     }
 }
 
@@ -284,9 +285,9 @@ const colorForChart = function (value, bg) {
     }
 }
 
-const generateExpChart = function (variable, sortBy, colorType) {
+const generateExpChart = function (config, sortBy) {
     try {
-        let visData = prepData(variable, sortBy);
+        let visData = prepData(config.name, sortBy);
         let fill = Array(visData.m0.length).fill(1);
 
         // this positions the labels on half-ticks, which looks a lot better.
@@ -300,21 +301,24 @@ const generateExpChart = function (variable, sortBy, colorType) {
         ];
 
         function datalabelsFormatter(dataset) {
-            return function (value, context) {
-                if (dataset[context.dataIndex]) {
-                    return dataset[context.dataIndex]
+            if (config.datalabels) {
+                return function (value, context) {
+                    if (dataset[context.dataIndex]) {
+                        return dataset[context.dataIndex]
+                    }
+                    return "";
                 }
-                return "";
+            } else {
+                return function(){return ""}; // no label
             }
         }
 
-        return new Chart(document.getElementById('chart' + variable), {
+        return new Chart(document.getElementById('chart' + config.name), {
             type: 'bar',
             data: {
                 labels: visData.names,
                 datasets: [
                     {
-
                         data: fill,
                         backgroundColor: visData.colors.bg.m0,
                         borderColor: visData.colors.border.m0,
@@ -361,7 +365,7 @@ const generateExpChart = function (variable, sortBy, colorType) {
                 indexAxis: 'y',
                 plugins: {
                     title: {
-                        text: questionText[variable],
+                        text: questionText[config.name],
                         display: true
                     },
                     subtitle: {
@@ -375,8 +379,8 @@ const generateExpChart = function (variable, sortBy, colorType) {
                         }
                     },
                     htmlLegend: {
-                        containerID: `legend${variable}`,
-                        boxes: colForLegend[colorType]
+                        containerID: `legend${config.name}`,
+                        boxes: colForLegend[config.type]
                     },
                     legend: {
                         display: false
@@ -386,6 +390,6 @@ const generateExpChart = function (variable, sortBy, colorType) {
             plugins: [htmlLegendPlugin]
         });
     } catch (e) {
-        console.log(e);
+        console.error(e);
     }
 }

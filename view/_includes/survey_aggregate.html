@@ -13,14 +13,14 @@
     ];
 
     const graphs = [
-        {name : "project-open-contrib", type : "bool"},
-        {name :  "funds-grant-funds",type : "bool"},
-        {name :  "funds-others-pick-up",type : "bool"},
-        {name :  "future-funding-plans",type : "bool"},
-        {name :   "project-user-count",type : "scale"},
-        {name :  "project-user-potentl",type : "scale"},
-        {name :  "future-one-year",type : "activity"},
-        {name :  "future-five-years",type : "activity"},
+        {name : "project-open-contrib", type : "bool", datalabels : true},
+        {name :  "funds-grant-funds",type : "bool", datalabels : true},
+        {name :  "funds-others-pick-up",type : "bool", datalabels : true},
+        {name :  "future-funding-plans",type : "bool", datalabels : true},
+        {name :   "project-user-count",type : "scale", datalabels : true},
+        {name :  "project-user-potentl",type : "scale", datalabels : true},
+        {name :  "future-one-year",type : "activity", datalabels : false},
+        {name :  "future-five-years",type : "activity", datalabels : false}
     ];
 
     const numericGraphs = [
@@ -88,7 +88,7 @@
                 }
             });
         } catch (e) {
-            console.log(e);
+            console.error(e);
         }
     }
 
@@ -113,16 +113,16 @@
 
             });
         } catch (e) {
-            console.log(e);
+            console.error(e);
         }
     }
 
     //this has to be done before we generate the graphs or it doesn't render, idk why
-    graphs.map(function (graph) {
-        generateElem(graph.name, null, true);
+    graphs.map(function (config) {
+        generateElem(config);
     });
-    graphs.map(function (graph) {
-        generateExpChart(graph.name, "age", graph.type);
+    graphs.map(function (config) {
+        generateExpChart(config, "age");
     });
 
 </script>
