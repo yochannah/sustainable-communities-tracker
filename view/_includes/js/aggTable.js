@@ -16,13 +16,21 @@ function title(config) {
 }
 
 function tableHead(config) {
-    let table, thead;
+    let table, thead, captionr, captiond;
     let headers = ["Answer",
         "# of projects M0",
         "# of projects M06",
         "# of projects M12"];
+
     table = document.createElement("table");
     thead = document.createElement("thead");
+
+    captionr = document.createElement("tr");
+    captiond = document.createElement("td");
+    captiond.setAttribute("colspan","4");
+    captiond.appendChild(document.createTextNode(questionText[config.name]));
+    captionr.appendChild(captiond);
+    thead.appendChild(captionr);
 
     table.appendChild(thead);
     thead = thead.appendChild(document.createElement("tr"));
@@ -149,8 +157,8 @@ function aggTable(config) {
             if(val > 0) {
                 //round to two decimals first, pls
                 valAsPercent = Math.round(valAsPercent*100)/100;
-                td2.appendChild(document.createElement("br"));
-                td2.appendChild(document.createTextNode(`(${valAsPercent}%)`));
+              //  td2.appendChild(document.createElement("br"));
+                td2.appendChild(document.createTextNode(` (${valAsPercent}%)`));
             }
             r.appendChild(td2)
   

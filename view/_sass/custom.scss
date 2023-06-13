@@ -105,6 +105,7 @@ h1 {
     margin-right: -0.75em;
   }
   table td {text-align: center;}
+  tbody tr:nth-child(1) {font-style: italic;}
 }
 
 .column {
