@@ -104,6 +104,7 @@ h1 {
     margin-left: -0.75em;
     margin-right: -0.75em;
   }
+  table td {text-align: center;}
 }
 
 .column {
@@ -356,9 +357,10 @@ table.status {
 
   h1 {
     margin-left: 0;
-  }
+  } 
 
   table td {
     padding: 2px;
+    text-align: center;
   }
 }
