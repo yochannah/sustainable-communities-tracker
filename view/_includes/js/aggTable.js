@@ -70,6 +70,11 @@ function getAllKeys(column) {
 
 function calcAggRows(config) {
     let data = {
+        "Total" : {
+            m0: 0,
+            m6: 0,
+            m12: 0
+        }
     };
     let keys = getAllKeys(config.name);
     keys.map(function (k) {
@@ -96,6 +101,7 @@ function countEntries(config, month, arr, data) {
         } else {
             response[item][month] = 0;
         }
+        response.Total[month] ++;
     });
     return response;
 }
@@ -120,8 +126,10 @@ function aggTable(config) {
     sortedResponse.map(function ([rowName, months]) {
         let td1 = document.createElement("td");
         let txt = rowName;
-        if (rowName == "null") {rowName = "No answer"}
-        td1.appendChild(document.createTextNode(rowName));
+        //how did null become a string? oy vey
+        if (rowName == "null") {txt = "No answer"}
+        
+        td1.appendChild(document.createTextNode(txt));
 
         let r = document.createElement("tr");
         tbody.appendChild(r);
@@ -131,9 +139,21 @@ function aggTable(config) {
 
         order.map(function (month) {
             let val = months[month];
+            let total = rows.Total[month];
+          
+            let valAsPercent = val/total*100;
+
             let td2 = document.createElement("td");
             td2.appendChild(document.createTextNode(val));
+            //add percent, if it's not 0. 
+            if(val > 0) {
+                //round to two decimals first, pls
+                valAsPercent = Math.round(valAsPercent*100)/100;
+                td2.appendChild(document.createElement("br"));
+                td2.appendChild(document.createTextNode(`(${valAsPercent}%)`));
+            }
             r.appendChild(td2)
+  
         });
     });
 
