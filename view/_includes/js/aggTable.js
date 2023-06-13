@@ -82,11 +82,6 @@ function calcAggRows(config) {
     countEntries(config, "m0", survey0, data);
     countEntries(config, "m6", survey6, data);
     countEntries(config, "m12", survey12, data);
-    // survey0.map(function(x){
-    //     console.log('😲 survey0',  x[config.name]);
-    // });
-    // data.m6 = countEntries("m6", config, data.m6);
-    // data.m12 = countEntries("m12", config, data.m12);
     return data;
 }
 
@@ -96,16 +91,12 @@ function countEntries(config, month, arr, data) {
     arr.map(function (row) {
         let item = row[col];
         if (item) { item = item.trim() }
-        //     console.log('CCCCCCCCCC item', item);
         if (response.hasOwnProperty(item)) {
-            //      console.log('😲 Incrementing', item, response[item][month]);
             response[item][month]++;
         } else {
-            //        console.log('INITTTTTTTTTTT', item);
             response[item][month] = 0;
         }
     });
-    //    console.log('👾 ersponse', response);
     return response;
 }
 
@@ -117,8 +108,19 @@ function aggTable(config) {
 
     // can't iterate over the rows object, because it might
     // come back with the wrong order.
-    Object.entries(rows).map(function ([rowName, months]) {
+
+    let sortedResponse = Object.entries(rows);
+
+    sortedResponse = sortedResponse.sort(function([k1,v1],[k2,v2]){
+        let order1 = orderOfThings[config.type].indexOf(k1),
+        order2 = orderOfThings[config.type].indexOf(k2);
+        return(order1-order2);
+    });
+    
+    sortedResponse.map(function ([rowName, months]) {
         let td1 = document.createElement("td");
+        let txt = rowName;
+        if (rowName == "null") {rowName = "No answer"}
         td1.appendChild(document.createTextNode(rowName));
 
         let r = document.createElement("tr");
@@ -126,14 +128,13 @@ function aggTable(config) {
         r.appendChild(td1);
 
         let order = ["m0", "m6", "m12"];
-        
+
         order.map(function (month) {
             let val = months[month];
             let td2 = document.createElement("td");
-            td2.appendChild(document.createTextNode(val + "::" + month));
+            td2.appendChild(document.createTextNode(val));
             r.appendChild(td2)
         });
-
     });
 
     table.appendChild(tbody);
