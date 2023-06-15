@@ -3,7 +3,6 @@ const sortLabels = {
     "age": "Project Age"
 };
 
-
 const colForChart = {
     "Yes": {
         border: colors.solid.blue,
@@ -54,7 +53,6 @@ const colForChart = {
         bg: colors.faded.green
     },
     "finalised with occasional updates": {
-
         border: colors.solid.orange,
         bg: colors.faded.orange
     },
@@ -65,6 +63,26 @@ const colForChart = {
     "Other, please specify": {
         border: colors.solid.grey,
         bg: colors.faded.grey
+    },
+    "My community members would keep this project running.": {
+        border: colors.solid.green,
+        bg: colors.faded.green
+    },
+    "My colleagues/employees would continue to work on this": {
+        border: colors.solid.blue,
+        bg: colors.faded.blue
+    },
+    "I would continue to provide updates in my free time": {
+        border: colors.solid.purple,
+        bg: colors.faded.purple
+    },
+    "I would provide periodic but rare updates when I could.": {
+        border: colors.solid.orange,
+        bg: colors.faded.orange
+    },
+    "I would close the project down": {
+        border: colors.solid.red,
+        bg: colors.faded.red
     }
 }
 
@@ -93,13 +111,19 @@ const colForLegend = {
         "wrapped up and no longer active": colForChart["wrapped up and no longer active"],
         "Other, please specify": colForChart["Other, please specify"],
         "No answer": colForChart["No answer"]
+    }, maintenance: {
+        "My community members would keep this project running.": colForChart["My community members would keep this project running."],
+        "My colleagues/employees would continue to work on this": colForChart["My colleagues/employees would continue to work on this"],
+        "I would continue to provide updates in my free time": colForChart["I would continue to provide updates in my free time"],
+        "I would provide periodic but rare updates when I could.": colForChart["I would provide periodic but rare updates when I could."],
+        "I would close the project down": colForChart["I would close the project down"]
     }
 }
 
 const orderOfThings = {
-    scale: ["1-10", "10-20", "20-50", "50-100", "100-1000", "1000-10,000", "Other, please specify","No answer", "null"],
-    bool : ["Yes", "No","No answer","null"],
-    activity : [
+    scale: ["1-10", "10-20", "20-50", "50-100", "100-1000", "1000-10,000", "Other, please specify", "No answer", "null"],
+    bool: ["Yes", "No", "No answer", "null"],
+    activity: [
         "still active and being maintained/updated, me still contributing",
         "still active and being maintained/updated by my colleagues",
         "still active and being maintained/updated by my community",
@@ -108,7 +132,13 @@ const orderOfThings = {
         "Other, please specify",
         "No answer",
         "null"
-    ],
+    ], maintenance: [
+        "My community members would keep this project running.",
+        "My colleagues/employees would continue to work on this",
+        "I would continue to provide updates in my free time",
+        "I would provide periodic but rare updates when I could.",
+        "I would close the project down", "Other, please specify", null
+    ]
 }
 
 const sortSurveyData = function (anArray, sortBy) {
@@ -159,4 +189,38 @@ const sortSurveyData = function (anArray, sortBy) {
         return 0;
     });
     return response;
+}
+
+//right now all our separators are tabs. 
+//also, mcstring was intended to mean "M C string", as in 
+// multiple choice string, but now it's making me laugh
+// like M C hammer or boaty mcboatface. 
+const multichoiceToArr = function (mcString) {
+    let separator = /[\t,]+/gm;
+    let separated;
+    if (mcString && mcString != "Other, please specify") {
+        separated = mcString.trim().split(separator);
+        //sometimes an other might still get in here, 
+        //if it's part of a longer string. This is infuriating, 
+        //but I don't want to ddo a massively complex regex to fix it
+        // so we'll just nip it out of the array. 
+        //we snip two items out. 
+        //One is "Other" and the other is " please specify"
+        if (separated.indexOf("Other") >= 0) {
+            // console.log('👾 separated:B', separated);
+            let indexToSnip = separated.indexOf("Other");
+            separated.splice(indexToSnip, 2);
+            // console.log('👾 separated:A', separated);
+        }
+        if (separated.length > 1) {
+            return separated;
+        } else {
+            return mcString.trim();
+        }
+    } else if (mcString == "Other, please specify") {
+        return mcString;
+    }
+    else {
+        return null;
+    }
 }

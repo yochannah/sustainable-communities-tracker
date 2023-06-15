@@ -27,7 +27,8 @@ function tableHead(config) {
 
     captionr = document.createElement("tr");
     captiond = document.createElement("td");
-    captiond.setAttribute("colspan","4");
+    captiond.setAttribute("colspan", "4");
+
     captiond.appendChild(document.createTextNode(questionText[config.name]));
     captionr.appendChild(captiond);
     thead.appendChild(captionr);
@@ -78,13 +79,20 @@ function getAllKeys(column) {
 
 function calcAggRows(config) {
     let data = {
-        "Total" : {
+        "Total": {
             m0: 0,
             m6: 0,
             m12: 0
         }
     };
     let keys = getAllKeys(config.name);
+
+    //multichoice keys have multiple keys in he same string
+    //which is a mess. 
+    if(config.multichoice) {
+        keys = orderOfThings[config.type];
+    }
+
     keys.map(function (k) {
         data[k] = {
             m0: 0,
@@ -101,15 +109,43 @@ function calcAggRows(config) {
 function countEntries(config, month, arr, data) {
     let col = config.name;
     let response = data;
-    arr.map(function (row) {
-        let item = row[col];
-        if (item) { item = item.trim() }
+    let answerArr = [];
+
+
+    //sometimes we have multiple selections per answer
+    //this splits them and makes one big strrong arrray.
+    if (config.multichoice) {
+        arr.map(function (row) {
+            let item = row[col];
+            if (item) { item = item.trim(); }
+            answerArr = answerArr.concat(multichoiceToArr(item));
+        });
+    } else {
+        answerArr = arr;
+    }
+
+    //  console.log('👾 arr', arr);
+
+
+    answerArr.map(function (item) {
+        // console.log('👾 typeof item', typeof item);
+        if (item && typeof item == 'object') {
+           // console.log('😲😲😲 item', item);
+            if (item && item[col]) {
+                item = item[col].trim();
+            } else {
+                //this is probably a null, which you can't trim.
+               item = item[col]
+            }
+        } // else, item is item! 
+        console.log('😲 item', item);
         if (response.hasOwnProperty(item)) {
             response[item][month]++;
-        } else {
+        } else if (!config.multichoice) {
+
             response[item][month] = 0;
         }
-        response.Total[month] ++;
+        response.Total[month]++;
     });
     return response;
 }
@@ -120,23 +156,22 @@ function aggTable(config) {
     let tbody = document.createElement('tbody');
     let rows = calcAggRows(config);
 
-    // can't iterate over the rows object, because it might
+    // can't iterate over the rows object directly, because it might
     // come back with the wrong order.
-
     let sortedResponse = Object.entries(rows);
 
-    sortedResponse = sortedResponse.sort(function([k1,v1],[k2,v2]){
+    sortedResponse = sortedResponse.sort(function ([k1, v1], [k2, v2]) {
         let order1 = orderOfThings[config.type].indexOf(k1),
-        order2 = orderOfThings[config.type].indexOf(k2);
-        return(order1-order2);
+            order2 = orderOfThings[config.type].indexOf(k2);
+        return (order1 - order2);
     });
-    
+
     sortedResponse.map(function ([rowName, months]) {
         let td1 = document.createElement("td");
         let txt = rowName;
         //how did null become a string? oy vey
-        if (rowName == "null") {txt = "No answer"}
-        
+        if (rowName == "null") { txt = "No answer" }
+
         td1.appendChild(document.createTextNode(txt));
 
         let r = document.createElement("tr");
@@ -148,22 +183,24 @@ function aggTable(config) {
         order.map(function (month) {
             let val = months[month];
             let total = rows.Total[month];
-          
-            let valAsPercent = val/total*100;
+
+            let valAsPercent = val / total * 100;
 
             let td2 = document.createElement("td");
             td2.appendChild(document.createTextNode(val));
             //add percent, if it's not 0. 
-            if(val > 0) {
+            if (val > 0) {
                 //round to two decimals first, pls
-                valAsPercent = Math.round(valAsPercent*100)/100;
-              //  td2.appendChild(document.createElement("br"));
+                valAsPercent = Math.round(valAsPercent * 100) / 100;
+                //  td2.appendChild(document.createElement("br"));
                 td2.appendChild(document.createTextNode(` (${valAsPercent}%)`));
             }
             r.appendChild(td2)
-  
+
         });
     });
+
+
 
     table.appendChild(tbody);
     return table;

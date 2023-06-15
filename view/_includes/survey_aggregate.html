@@ -10,16 +10,20 @@
     ];
 
     const graphs = [
-        {name : "project-open-contrib", type : "bool", datalabels : true},
-        {name :  "funds-grant-funds",type : "bool", datalabels : true},
-        {name :  "funds-others-pick-up",type : "bool", datalabels : true},
-        {name :  "future-funding-plans",type : "bool", datalabels : true},
-        {name :   "project-user-count",type : "scale", datalabels : true},
-        {name :  "project-user-potentl",type : "scale", datalabels : true},
-        {name :  "future-one-year",type : "activity", datalabels : false},
-        {name :  "future-five-years",type : "activity", datalabels : false}
+        { name: "project-open-contrib", type: "bool", datalabels: true },
+        { name: "funds-grant-funds", type: "bool", datalabels: true },
+        { name: "funds-others-pick-up", type: "bool", datalabels: true },
+        { name: "future-funding-plans", type: "bool", datalabels: true },
+        { name: "project-user-count", type: "scale", datalabels: true },
+        { name: "project-user-potentl", type: "scale", datalabels: true },
+        { name: "future-one-year", type: "activity", datalabels: false },
+        { name: "future-five-years", type: "activity", datalabels: false }
     ];
 
+    const mcGraphs = [
+        { name: "future-cant-maintain", type: "maintenance", datalabels: false, multichoice : true }]
+
+        //these will require a tidy
     const numericGraphs = [
         "leadership-team-size"
     ];
@@ -72,7 +76,7 @@
                     datasets: generateDataSet(variable)
                 },
                 options: {
-   
+
                     plugins: {
                         title: {
                             text: questionText[variable],
@@ -119,9 +123,12 @@
         generateElem(config, "scaleGraphs");
     });
     graphs.map(function (config) {
-        generateExpChart(config, "age","aggregateAnchor");
+        generateExpChart(config, "age", "aggregateAnchor");
         generateAggTable(config, "aggregateAnchor");
         generateExpChart(config, "scale", "scaleGraphs");
     });
 
+    mcGraphs.map(function (config) {
+        generateAggTable(config, "aggregateAnchor");
+    });
 </script>

@@ -111,7 +111,7 @@ function sortData(variable, sortBy, dataType) {
     sortedSurvey0.map(function (row) {
         let y2Val;
         let proj = row.ProjectPseudonym.trim();
-
+        let val = row[variable];
         if (sortBy == "scale") {
             y2Val = row["project-user-count"];
         } else if ("age") {
@@ -121,20 +121,21 @@ function sortData(variable, sortBy, dataType) {
             y2Val = new Date(agesByProjName[proj]).getFullYear();
         }
         responses[proj] = {
-            m0: row[variable],
+            m0: val,
             y2: y2Val
         };
     });
 
-    survey6.map(function (row) {
-        let proj = row.ProjectPseudonym.trim();
-        responses[proj].m6 = row[variable];
+    let m6And12 = function (arr,month) {
+        arr.map(function (row) {
+            let proj = row.ProjectPseudonym.trim();
+            let val = row[variable];
+            responses[proj][month] = val;
+        });
+    }
 
-    });
-    survey12.map(function (row) {
-        let proj = row.ProjectPseudonym.trim();
-        responses[proj].m12 = row[variable];
-    });
+    m6And12(survey6, "m6");
+    m6And12(survey12, "m12");
 
     // stripe the data, so the chart likes it.
     let visData = {
