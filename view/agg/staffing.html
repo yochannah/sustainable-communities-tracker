@@ -7,12 +7,52 @@ layout: aggregate
 
 
 <script>
-    
-    function generateStaffChart(config, anchor){
-        generateAggTable(config, anchor);
+
+    function generateStaffChart(config, anchor) {
+        // generateAggTable(config, anchor);
+        //we don't actually need "m0" here, but countEntries expects it..
+        let data = {
+            m0: {
+            }, Respondents: { m0: 0 }
+        };
+
+        try {
+            // if (config.type == "free-text-job-role") {
+            keys = jobtitles;
+            keys.map(function (k) {
+                data[k] = { m0: 0 };
+            });
+
+            let roles = countEntries(config, "m0", survey0, data);
+            let rolesHtml = `<table>
+            <thead>
+                <tr>
+                    <th>Role name</th>
+                    <th># of respondents</th>
+                </tr>
+            </thead>
+            <tbody>
+            `;
+            let metaKeys = ["m0", "Respondents"];
+            Object.entries(roles).map(function ([roleName, roleVal]) {
+                if (metaKeys.indexOf(roleName) < 0) {
+                    //so long as it is a REAL response answer...
+                    let num = roleVal.m0;
+                    let asPercent = percent(roles.Respondents.m0, num);
+                    rolesHtml += `
+                <tr>
+                    <td>${roleName}</td>
+                    <td>${num} (${asPercent})</td>
+                </tr>
+                `;
+                }
+            });
+            rolesHtml += `</tbody></table>`;
+            document.getElementById(anchor).innerHTML += rolesHtml;
+        } catch (e) {
+            console.error(e);
+        }
     }
-
-
 
     //this has to be done before we generate the graphs or it doesn't render, idk why
     staffGraphs.map(function (config) {

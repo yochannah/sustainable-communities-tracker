@@ -87,12 +87,9 @@ function calcAggRows(config) {
     };
     let keys = getAllKeys(config.name);
 
-    //multichoice keys have multiple keys in he same string
+    //multichoice keys have multiple keys in the same string
     //which is a mess. 
-    if (config.type == "free-text-job-role") {
-        keys = jobtitles;
-    }
-    else if (config.multichoice) {
+    if (config.multichoice) {
         keys = orderOfThings[config.type];
     }
 
@@ -152,7 +149,8 @@ function countEntries(config, month, arr, data) {
         // thanks qualtrics. 
 
         if (config.multichoice) {
-            let caseInsensitive = false; 
+            let caseInsensitive = false;
+            //this helps us normalise free-text responses
             if (config.type === "free-text-job-role") {
                 caseInsensitive = true;
             }

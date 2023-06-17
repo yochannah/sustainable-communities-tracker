@@ -388,3 +388,11 @@ const generateElem = function (config, anAnchor, canvas) {
 
     anchor.appendChild(chartBox);
 }
+
+function percent(bigNum, littleNum) {
+    //cal the percentage...
+    let valAsPercent = littleNum / bigNum * 100;
+    //two decimals is enough, thx
+    valAsPercent = Math.round(valAsPercent * 100) / 100;
+    return `${valAsPercent}%`;
+}
