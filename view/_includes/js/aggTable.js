@@ -89,7 +89,10 @@ function calcAggRows(config) {
 
     //multichoice keys have multiple keys in he same string
     //which is a mess. 
-    if(config.multichoice) {
+    if (config.type == "free-text-job-role") {
+        keys = jobtitles;
+    }
+    else if (config.multichoice) {
         keys = orderOfThings[config.type];
     }
 
@@ -106,41 +109,63 @@ function calcAggRows(config) {
     return data;
 }
 
+function getMcEntry(data, item, caseInsensitive) {
+    let k = Object.keys(data);
+    let found = [];
+    k.map(function (entry) {
+        if (item) {
+
+            let tempI = item;
+            if (caseInsensitive) {
+                tempI = tempI.toLowerCase();
+            }
+            if (tempI.includes(entry)) {
+                found.push(entry);
+            }
+        }
+    });
+    return found;
+}
+
 function countEntries(config, month, arr, data) {
     let col = config.name;
     let response = data;
-    let answerArr = [];
 
-
-    //sometimes we have multiple selections per answer
-    //this splits them and makes one big strrong arrray.
-    if (config.multichoice) {
-        arr.map(function (row) {
-            let item = row[col];
-            if (item) { item = item.trim(); }
-            answerArr = answerArr.concat(multichoiceToArr(item));
-        });
-    } else {
-        answerArr = arr;
-    }
-
-    answerArr.map(function (item) {
-        //if we're provided with an array of qualtrics responses
-        //we need to select the right columns. 
-        //if it's alerady been htrrough multichoice questtion
-        //answer processing, that's not needed.
+    arr.map(function (item) {
+        //counting nulls
+        if (!item) {
+            console.log('👾 NULL BABAY', item);
+            response[item][month]++
+        }
+        //counting everything else
         if (item && typeof item == 'object') {
             if (item && item[col]) {
                 item = item[col].trim();
             } else {
                 //this is probably a null, which you can't trim.
-               item = item[col]
+                item = item[col]
             }
-        } // else,  this is a multichoice question. it doesn't need a col selected. 
-        if (response.hasOwnProperty(item)) {
-            response[item][month]++;
-        } else if (!config.multichoice) {
-            response[item][month] = 0;
+        }
+        // splitting out answers for multichoice is tricky
+        // because - omg - they're comma-separated but we also
+        // have commas INSIDE the answers, e.g. "yes, a student".
+        // thanks qualtrics. 
+
+        if (config.multichoice) {
+            let caseInsensitive = false; 
+            if (config.type === "free-text-job-role") {
+                caseInsensitive = true;
+            }
+            let entries = getMcEntry(data, item, caseInsensitive);
+            entries.map(function (entry) {
+                if (response.hasOwnProperty(entry)) {
+                    response[entry][month]++;
+                }
+            });
+        } else {
+            if (response.hasOwnProperty(item)) {
+                response[item][month]++;
+            }
         }
         response.Respondents[month]++;
     });
@@ -156,11 +181,16 @@ function aggTable(config) {
     // can't iterate over the rows object directly, because it might
     // come back with the wrong order.
     let sortedResponse = Object.entries(rows);
-    sortedResponse = sortedResponse.sort(function ([k1, v1], [k2, v2]) {
-        let order1 = orderOfThings[config.type].indexOf(k1),
-            order2 = orderOfThings[config.type].indexOf(k2);
-        return (order1 - order2);
-    });
+    if (orderOfThings[config.type]) {
+        sortedResponse = sortedResponse.sort(function ([k1, v1], [k2, v2]) {
+            let order1 = orderOfThings[config.type].indexOf(k1),
+                order2 = orderOfThings[config.type].indexOf(k2);
+            return (order1 - order2);
+        });
+    } else {
+        //if therre's a natural orrder, use itt, baby!
+        sortedResponse.sort();
+    }
 
     sortedResponse.map(function ([rowName, months]) {
         let td1 = document.createElement("td");
@@ -185,12 +215,13 @@ function aggTable(config) {
             let td2 = document.createElement("td");
             td2.appendChild(document.createTextNode(val));
             //add percent, if it's not 0. 
-            //andd if it's not a multichoice question, because
             //it REALLY doesn't work when the totals add up to too much. 
-            if ((val > 0) && (!config.multichoice)) {
+            if (
+                (val > 0) &&
+                (rowName !== "Respondents")
+            ) {
                 //round to two decimals first, pls
-                valAsPercent = Math.round(valAsPercent * 100) / 100;
-                //  td2.appendChild(document.createElement("br"));
+                valAsPercent = Math.round(valAsPercent * 100) / 100
                 td2.appendChild(document.createTextNode(` (${valAsPercent}%)`));
             }
             r.appendChild(td2)

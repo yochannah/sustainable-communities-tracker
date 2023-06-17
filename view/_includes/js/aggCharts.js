@@ -16,32 +16,6 @@ const colorForChart = function (value, bg) {
     }
 }
 
-const generateElem = function (config, anAnchor) {
-    let chartBox, a, legendHtml, header, txt;
-    chartBox = document.createElement("div");
-    chartBox.classList = "aggGraph";
-
-    header = document.createElement("div");
-    header.classList = "questionText";
-    txt = document.createTextNode(questionText[config.name]);
-    header.appendChild(txt);
-
-    if (anAnchor) { a = anAnchor; } else { a = "aggregateAnchor" }
-
-    let anchor = document.getElementById(a);
-    let chartElemHtml = `<canvas id="chart${config.name}${a}" width="300" height="400"></canvas>`;
-
-    chartBox.innerHTML = chartElemHtml;
-    chartBox.prepend(header);
-
-    if (config.type) {
-        legendHtml = `<div id="legend${config.name}${a}" class="legend"></div>`;
-        chartBox.innerHTML += legendHtml;
-    }
-
-    anchor.appendChild(chartBox);
-}
-
 const getOrCreateLegendList = (chart, id) => {
     const legendContainer = document.getElementById(id);
     let listContainer = legendContainer.querySelector('ul');

@@ -1,0 +1,18 @@
+---
+title: Age
+layout: aggregate
+---
+
+<div id="aggregateAnchor"></div>
+<script>
+    
+    //this has to be done before we generate the graphs or it doesn't render, idk why
+    graphs.map(function (config) {
+        generateElem(config, "aggregateAnchor", true);
+
+    });
+    graphs.map(function (config) {
+        generateExpChart(config, "age", "aggregateAnchor");
+    });
+
+</script>

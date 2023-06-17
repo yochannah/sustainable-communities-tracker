@@ -137,10 +137,18 @@ const orderOfThings = {
         "My colleagues/employees would continue to work on this",
         "I would continue to provide updates in my free time",
         "I would provide periodic but rare updates when I could.",
-        "I would close the project down", 
-        "Other, please specify", 
+        "I would close the project down",
+        "Other, please specify",
         null // apparently this works just as well as the string null does. 
-    ]
+    ],
+    permanence: [
+        "No",
+        "Other, please specify",
+        "Yes, as a staff member with a permanent contract",
+        "Yes, as a student",
+        "Yes, as a staff member with a temporary or fixed-term contract",
+        "Other, please specify",
+        null]
 }
 
 const sortSurveyData = function (anArray, sortBy) {
@@ -198,9 +206,9 @@ const sortSurveyData = function (anArray, sortBy) {
 // multiple choice string, but now it's making me laugh
 // like M C hammer or boaty mcboatface. 
 const multichoiceToArr = function (mcString) {
-    let separator = /[\t,]+/gm;
+    let separator = /[\t]+/gm;
     let separated;
-    if (mcString && mcString != "Other, please specify") {
+    if (mcString) {
         separated = mcString.trim().split(separator);
         //sometimes an other might still get in here, 
         //if it's part of a longer string. This is infuriating, 
@@ -208,12 +216,6 @@ const multichoiceToArr = function (mcString) {
         // so we'll just nip it out of the array. 
         //we snip two items out. 
         //One is "Other" and the other is " please specify"
-        if (separated.indexOf("Other") >= 0) {
-            // console.log('👾 separated:B', separated);
-            let indexToSnip = separated.indexOf("Other");
-            separated.splice(indexToSnip, 2);
-            // console.log('👾 separated:A', separated);
-        }
         if (separated.length > 1) {
             return separated;
         } else {
@@ -225,4 +227,164 @@ const multichoiceToArr = function (mcString) {
     else {
         return null;
     }
+}
+
+const graphs = [
+    { name: "project-open-contrib", type: "bool", datalabels: true },
+    { name: "funds-grant-funds", type: "bool", datalabels: true },
+    { name: "funds-others-pick-up", type: "bool", datalabels: true },
+    { name: "future-funding-plans", type: "bool", datalabels: true },
+    { name: "project-user-count", type: "scale", datalabels: true },
+    { name: "project-user-potentl", type: "scale", datalabels: true },
+    { name: "future-one-year", type: "activity", datalabels: false },
+    { name: "future-five-years", type: "activity", datalabels: false }
+];
+
+const mcGraphs = [
+    {
+        name: "future-cant-maintain",
+        type: "maintenance",
+        datalabels: false,
+        multichoice: true
+    },
+    {
+        name: "you-paid",
+        type: "permanence",
+        datalabels: false,
+        multichoice: true
+    }];
+
+const staffGraphs = [
+    {
+        name: "you-role",
+        type: "free-text-job-role",
+        datalabels: false,
+        multichoice: true,
+    }
+];
+
+//these will require a tidy
+const numericGraphs = [
+    "leadership-team-size"
+];
+
+//filter incomplete answers. I feel like there's a more concise way to do it. 
+survey0 = survey0.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
+survey6 = survey6.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
+survey12 = survey12.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
+
+const surveys = [survey0, survey6, survey12];
+
+//aggregate stats across rows
+function agg_completed_bool(survey, variable) {
+    return survey.reduce(function (newVal, answer, i) {
+        //init datastore object
+        if (i === 1) {
+            newVal = {
+                "Yes": 0,
+                "No": 0
+            }
+        } else {
+            if (!(answer[variable] in newVal)) {
+                // console.debug('null value, not adding', answer, answer[variable]);
+            } else {
+                newVal[answer[variable]]++;
+            }
+        }
+        return newVal;
+    });
+}
+
+//maybe this can be deletedd? idk? I liked some of these grraphs
+function generateDataSet(variable) {
+    return surveys.map(function (survey, i) {
+        return {
+            data: agg_completed_bool(survey, variable),
+            label: datasetLabels[i],
+            backgroundColor: backgroundColor[i],
+            borderColor: borderColor[i],
+            borderWidth: 1
+        }
+    });
+};
+
+const generateChart = function (variable) {
+    try {
+        return new Chart(document.getElementById('chart' + variable), {
+            type: 'bar',
+            data: {
+                datasets: generateDataSet(variable)
+            },
+            options: {
+
+                plugins: {
+                    title: {
+                        text: questionText[variable],
+                        display: true
+                    }
+                },
+                backgroundColor: backgroundColor,
+                borderColor: borderColor
+            }
+        });
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+const generateNumChart = function (variable) {
+    try {
+        return new Chart(document.getElementById('chart' + variable), {
+            type: 'bar',
+            data: {
+                datasets: generateDataSet(variable)
+            },
+            options: {
+                indexAxis: 'x',
+                plugins: {
+                    title: {
+                        text: questionText[variable],
+                        display: true
+                    }
+                },
+                backgroundColor: backgroundColor,
+                borderColor: borderColor
+            }
+
+        });
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+const generateElem = function (config, anAnchor, canvas) {
+    let chartBox, a, legendHtml, header, txt;
+    chartBox = document.createElement("div");
+    chartBox.classList = "aggGraph";
+
+    header = document.createElement("div");
+    header.classList = "questionText";
+    txt = document.createTextNode(questionText[config.name]);
+    header.appendChild(txt);
+
+    if (anAnchor) { a = anAnchor; } else { a = "aggregateAnchor" }
+
+    let anchor = document.getElementById(a);
+    let chartElemHtml;
+
+    if (canvas) {
+        chartElemHtml = `<canvas id="chart${config.name}${a}" width="300" height="400"></canvas>`;
+    } else {
+        chartElemHtml = `<div id="chart${config.name}${a}" width="300" height="400"></div>`;
+    }
+
+    chartBox.innerHTML = chartElemHtml;
+    chartBox.prepend(header);
+
+    if (config.type) {
+        legendHtml = `<div id="legend${config.name}${a}" class="legend"></div>`;
+        chartBox.innerHTML += legendHtml;
+    }
+
+    anchor.appendChild(chartBox);
 }

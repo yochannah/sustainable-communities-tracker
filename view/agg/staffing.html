@@ -1,0 +1,25 @@
+---
+title: Staffing
+layout: aggregate
+---
+
+<div id="staffGraphs"></div>
+
+
+<script>
+    
+    function generateStaffChart(config, anchor){
+        generateAggTable(config, anchor);
+    }
+
+
+
+    //this has to be done before we generate the graphs or it doesn't render, idk why
+    staffGraphs.map(function (config) {
+        generateElem(config, "staffGraphs", false);
+    });
+    staffGraphs.map(function (config) {
+        generateStaffChart(config, "staffGraphs");
+    });
+
+</script>

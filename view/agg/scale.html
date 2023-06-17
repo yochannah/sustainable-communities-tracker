@@ -1,0 +1,19 @@
+---
+title: Scale
+layout: aggregate
+---
+
+<div id="scaleGraphs"></div>
+
+<script>
+    
+
+    //this has to be done before we generate the graphs or it doesn't render, idk why
+    graphs.map(function (config) {
+        generateElem(config, "scaleGraphs", true);
+    });
+    graphs.map(function (config) {
+        generateExpChart(config, "scale", "scaleGraphs");
+    });
+
+</script>

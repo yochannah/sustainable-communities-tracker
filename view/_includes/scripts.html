@@ -32,8 +32,16 @@
 
     //set up useful vars
     const questionText = {{ site.data.surveys.OSS12[0] | jsonify}};
-    const ages = {{site.data.surveys.project_founding_dates | jsonify}};
+    const ages = timeData = {{site.data.surveys.project_founding_dates | jsonify}};
     const agesByProjName = {};
+
+    var jobtitles = {{site.data.surveys.jobtitles| jsonify}};
+    //why won't jekyll just give me an array? 
+    //this makes jobtitles the shape I need.
+    jobtitles = jobtitles.map(function(job){
+      return job.role;
+    });
+
     ages.map(function(proj){
       agesByProjName[proj.ProjectPseudonym] = proj["project-founded"];
     });
