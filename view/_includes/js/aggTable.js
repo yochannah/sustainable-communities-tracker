@@ -18,9 +18,9 @@ function title(config) {
 function tableHead(config) {
     let table, thead, captionr, captiond;
     let headers = ["Answer",
-        "# of projects M0",
-        "# of projects M06",
-        "# of projects M12"];
+        "M0",
+        "M06",
+        "M12"];
 
     table = document.createElement("table");
     thead = document.createElement("thead");
@@ -79,7 +79,7 @@ function getAllKeys(column) {
 
 function calcAggRows(config) {
     let data = {
-        "Total": {
+        "Respondents": {
             m0: 0,
             m6: 0,
             m12: 0
@@ -124,28 +124,25 @@ function countEntries(config, month, arr, data) {
         answerArr = arr;
     }
 
-    //  console.log('👾 arr', arr);
-
-
     answerArr.map(function (item) {
-        // console.log('👾 typeof item', typeof item);
+        //if we're provided with an array of qualtrics responses
+        //we need to select the right columns. 
+        //if it's alerady been htrrough multichoice questtion
+        //answer processing, that's not needed.
         if (item && typeof item == 'object') {
-           // console.log('😲😲😲 item', item);
             if (item && item[col]) {
                 item = item[col].trim();
             } else {
                 //this is probably a null, which you can't trim.
                item = item[col]
             }
-        } // else, item is item! 
-        console.log('😲 item', item);
+        } // else,  this is a multichoice question. it doesn't need a col selected. 
         if (response.hasOwnProperty(item)) {
             response[item][month]++;
         } else if (!config.multichoice) {
-
             response[item][month] = 0;
         }
-        response.Total[month]++;
+        response.Respondents[month]++;
     });
     return response;
 }
@@ -159,7 +156,6 @@ function aggTable(config) {
     // can't iterate over the rows object directly, because it might
     // come back with the wrong order.
     let sortedResponse = Object.entries(rows);
-
     sortedResponse = sortedResponse.sort(function ([k1, v1], [k2, v2]) {
         let order1 = orderOfThings[config.type].indexOf(k1),
             order2 = orderOfThings[config.type].indexOf(k2);
@@ -182,14 +178,16 @@ function aggTable(config) {
 
         order.map(function (month) {
             let val = months[month];
-            let total = rows.Total[month];
+            let respondents = rows.Respondents[month];
 
-            let valAsPercent = val / total * 100;
+            let valAsPercent = val / respondents * 100;
 
             let td2 = document.createElement("td");
             td2.appendChild(document.createTextNode(val));
             //add percent, if it's not 0. 
-            if (val > 0) {
+            //andd if it's not a multichoice question, because
+            //it REALLY doesn't work when the totals add up to too much. 
+            if ((val > 0) && (!config.multichoice)) {
                 //round to two decimals first, pls
                 valAsPercent = Math.round(valAsPercent * 100) / 100;
                 //  td2.appendChild(document.createElement("br"));

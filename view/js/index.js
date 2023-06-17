@@ -137,7 +137,9 @@ const orderOfThings = {
         "My colleagues/employees would continue to work on this",
         "I would continue to provide updates in my free time",
         "I would provide periodic but rare updates when I could.",
-        "I would close the project down", "Other, please specify", null
+        "I would close the project down", 
+        "Other, please specify", 
+        null // apparently this works just as well as the string null does. 
     ]
 }
 
