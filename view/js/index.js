@@ -151,41 +151,61 @@ const orderOfThings = {
         null]
 }
 
+const sorts = {
+    answerScale: function (k1, k2) {
+        let num1 = parseFloat(k1), num2 = parseFloat(k2);
+        //if they parsed into numbers, not NaNs, sort them numberwise. 
+        if (num1 && num2) {
+            return (num1 - num2);
+        } else if (num1) {
+            return -1;
+        } else if (num2) {
+            return 1;
+        } else {
+            return 0;
+        }
+    },
+    numeric : function(a,b) { return a-b;},
+    scale: function (a, b) {
+        let scale = orderOfThings.scale;
+        aScaleIndex = scale.indexOf(a["project-user-count"]);
+        bScaleIndex = scale.indexOf(b["project-user-count"]);
+
+        //handle nulls
+        if (!aScaleIndex && bScaleIndex) {
+            return 1; //b is "bigger"
+        }
+        if (!bScaleIndex && aScaleIndex) {
+            return -1; //a is "bigger" 
+        }
+        //normal non-null sort
+        if (aScaleIndex > bScaleIndex) {
+            return -1;
+        }
+        if (bScaleIndex > aScaleIndex) {
+            return 1;
+        }
+    }, age: function (a, b) {
+        let ages = agesByProjName;
+        let aDate = new Date(ages[a.ProjectPseudonym]);
+        let bDate = new Date(ages[b.ProjectPseudonym]);
+        if (aDate < bDate) {
+            return -1;
+        }
+        if (bDate < aDate) {
+            return 1;
+        }
+    }
+}
+
 const sortSurveyData = function (anArray, sortBy) {
     let response = anArray.sort(function (a, b) {
         if (sortBy == "age") {
-            let ages = agesByProjName;
-            let aDate = new Date(ages[a.ProjectPseudonym]);
-            let bDate = new Date(ages[b.ProjectPseudonym]);
-            if (aDate < bDate) {
-                return -1;
-            }
-            if (bDate < aDate) {
-                return 1;
-            }
-        }
-        else if (sortBy == "scale") {
-            let scale = orderOfThings.scale;
-            aScaleIndex = scale.indexOf(a["project-user-count"]);
-            bScaleIndex = scale.indexOf(b["project-user-count"]);
-
-            //handle nulls
-            if (!aScaleIndex && bScaleIndex) {
-                return 1; //b is "bigger"
-            }
-            if (!bScaleIndex && aScaleIndex) {
-                return -1; //a is "bigger" 
-            }
-            //normal non-null sort
-            if (aScaleIndex > bScaleIndex) {
-                return -1;
-            }
-            if (bScaleIndex > aScaleIndex) {
-                return 1;
-            }
-        } else if (sortBy == "orderedRowName") {
-            //this is for when the row has a specific orderr, but it's not alphabetic.
-            blah;
+            return anArray.sort(sorts.age);
+        } else if (sortBy == "scale") {
+            return anArray.sort(sorts.scale);
+        } else if (sortBy == "answerScale") {
+            return anArray.sort(sorts.answerScale);
         } else {
             if (a[sortBy] < b[sortBy]) {
                 return -1;
@@ -194,7 +214,6 @@ const sortSurveyData = function (anArray, sortBy) {
                 return 1;
             }
         }
-
         //if all else failed, they're equal: 
         return 0;
     });
@@ -259,7 +278,35 @@ const staffGraphs = [
         name: "you-role",
         type: "free-text-job-role",
         datalabels: false,
-        multichoice: true,
+        multichoice: true
+    },
+    {
+        name: "funds-others-now",
+        type: "free-text-number",
+        datalabels: true,
+        multichoice: false,
+        sortBy: "answerScale"
+    },
+    {
+        name: "funds-others-in-past",
+        type: "free-text-number",
+        datalabels: true,
+        multichoice: false,
+        sortBy: "answerScale"
+    },
+    {
+        name: "leadership-team-size",
+        type: "free-text-number",
+        datalabels: true,
+        multichoice: false,
+        sortBy: "answerScale"
+    },
+    {
+        name: "project-interns",
+        type: "free-text-number",
+        datalabels: true,
+        multichoice: false,
+        sortBy: "answerScale"
     }
 ];
 
@@ -357,6 +404,15 @@ const generateNumChart = function (variable) {
     }
 }
 
+/**
+ * @argument elemType {string} e.g. charrt, table.
+ * @argument elemName {string} unique id, usually the var it's outputting
+ * @argument anchor {string} parent element it lives in. 
+ * */
+const generateId = function (elemType, elemName, anchor) {
+    return `${elemType}${elemName}${anchor}`;
+}
+
 const generateElem = function (config, anAnchor, canvas) {
     let chartBox, a, legendHtml, header, txt;
     chartBox = document.createElement("div");
@@ -371,18 +427,20 @@ const generateElem = function (config, anAnchor, canvas) {
 
     let anchor = document.getElementById(a);
     let chartElemHtml;
+    let chartId = generateId('chart', config.name, a);
 
     if (canvas) {
-        chartElemHtml = `<canvas id="chart${config.name}${a}" width="300" height="400"></canvas>`;
+        chartElemHtml = `<canvas id="${chartId}" width="300" height="400"></canvas>`;
     } else {
-        chartElemHtml = `<div id="chart${config.name}${a}" width="300" height="400"></div>`;
+        chartElemHtml = `<div id="${chartId}" width="300" height="400"></div>`;
     }
 
     chartBox.innerHTML = chartElemHtml;
     chartBox.prepend(header);
 
     if (config.type) {
-        legendHtml = `<div id="legend${config.name}${a}" class="legend"></div>`;
+        let legendId = generateId('legend', config.name, a);
+        legendHtml = `<div id="${legendId}" class="legend"></div>`;
         chartBox.innerHTML += legendHtml;
     }
 

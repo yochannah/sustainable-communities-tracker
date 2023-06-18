@@ -4,12 +4,12 @@ layout: aggregate
 ---
 
 <div id="staffGraphs"></div>
-
+<div id="staffTables"></div>
 
 <script>
 
-    function generateStaffChart(config, anchor) {
-        // generateAggTable(config, anchor);
+    function generateLeaderRoleChart(config, anchor) {
+        let chartId = generateId('chart', config.name, anchor);
         //we don't actually need "m0" here, but countEntries expects it..
         let data = {
             m0: {
@@ -17,14 +17,15 @@ layout: aggregate
         };
 
         try {
-            // if (config.type == "free-text-job-role") {
             keys = jobtitles;
             keys.map(function (k) {
                 data[k] = { m0: 0 };
             });
 
             let roles = countEntries(config, "m0", survey0, data);
-            let rolesHtml = `<table>
+            let rolesHtml = `
+            <div class="aggGraph">
+            <table>
             <thead>
                 <tr>
                     <th>Role name</th>
@@ -33,22 +34,203 @@ layout: aggregate
             </thead>
             <tbody>
             `;
-            let metaKeys = ["m0", "Respondents"];
+            let metaKeys = ["m0"];
             Object.entries(roles).map(function ([roleName, roleVal]) {
                 if (metaKeys.indexOf(roleName) < 0) {
                     //so long as it is a REAL response answer...
                     let num = roleVal.m0;
-                    let asPercent = percent(roles.Respondents.m0, num);
+                    let asPercent = `
+                    (${percent(roles.Respondents.m0, num)})
+                    `;
+                    if (roleName == "Respondents") {
+                        asPercent = "";
+                    }
                     rolesHtml += `
                 <tr>
                     <td>${roleName}</td>
-                    <td>${num} (${asPercent})</td>
+                    <td>${num} ${asPercent}</td>
                 </tr>
                 `;
                 }
             });
-            rolesHtml += `</tbody></table>`;
-            document.getElementById(anchor).innerHTML += rolesHtml;
+            rolesHtml += `</tbody></table></div>`;
+            document.getElementById(chartId).innerHTML += rolesHtml;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    /**
+     * @argument {string[]} anArr array of Strings, which is at least partially comprised of integers or floats that have been made into strings att some point.
+     * @returns {Object} minimum and maximum floats in this array, if we manage to coerce them from strings.
+     * */
+    const getMinMaxNums = function (anArr) {
+        let response = {
+            min: "No numbers in this Array.",
+            max: "No numbers in this Array."
+        }, temp = [];
+        
+        anArr.map(function (item) {
+            if (item) {
+                let numItem = parseFloat(item);
+                if(numItem) {
+                    temp.push(numItem);
+                }
+            }
+            if(temp.length > 0) {
+                temp = temp.sort(sorts.numeric);
+                response.min = temp[0];
+                response.max = temp[temp.length-1];
+            }
+        });
+        return response;
+    }
+
+    const generateNumbChart = function (config, sortBy, elem) {
+        try {
+            let visData = sortData(config.name, config.sortBy, null, true);
+            let allVals = visData.m0.concat(visData.m6, visData.m2);
+            let minMax = getMinMaxNums(allVals);
+  
+            let fill = Array(visData.m0.length).fill(1);
+            let fill1 = Array(visData.m0.length).fill(0);
+            // this positions the labels on half-ticks, which looks a lot better.
+            let months = [
+                null,
+                "Month 0",
+                null,
+                "Month 6",
+                null,
+                "Month 12"
+            ];
+
+            //note that this returns a partially composed function,
+            //NOT a static value.
+            function datalabelsNumFormatter(dataset) {
+                if (config.datalabels) {
+                    return function (value, context) {
+                        let val = dataset[context.dataIndex];
+                        if (val) {
+                            //this is complicated
+                            //a long string that starts with a number will
+                            //parse into a number! and I want to truncate 
+                            // long strings, but not truncate numbers.
+                            //luckly, NONE of our genuine numeric values 
+                            //are longer than 6 chars (any OSS project 
+                            //would be delighted to have that many staff!) 
+                            //so truncating everything, regardless of type
+                            //will still only trucate the strings.
+                                if (val.length > 6) {
+                                    return val.slice(0,6) + "...";
+                                } else {
+                                    return val;
+                                }
+                            
+                            
+                        }
+                        return "";
+                    }
+                } else {
+                    return function () { return "" }; // no label
+                }
+            }
+            let theId = generateId('chart', config.name, elem);
+            return new Chart(document.getElementById(theId), {
+                type: 'bar',
+                data: {
+                    labels: visData.names,
+                    datasets: [
+                        {
+                            data: fill,
+                            backgroundColor: visData.colors.bg.m0,
+                            borderColor: visData.colors.border.m0,
+                            stack: 'Stack 0', datalabels: {
+                                formatter: datalabelsNumFormatter(visData.m0)
+                            }, yAxisID: 'y'
+                        }, {
+                            data: fill,
+                            backgroundColor: visData.colors.bg.m6,
+                            borderColor: visData.colors.border.m6,
+                            stack: 'Stack 0',
+                            datalabels: {
+                                formatter: datalabelsNumFormatter(visData.m6)
+                            }, yAxisID: 'y'
+                        }, {
+                            data: fill,
+                            datalabels: {
+                                formatter: datalabelsNumFormatter(visData.m12)
+                            },
+                            backgroundColor: visData.colors.bg.m12,
+                            borderColor: visData.colors.border.m12,
+                            stack: 'Stack 0',
+                            yAxisID: 'y'
+                        },
+                        {
+                            data: fill1,
+                            labels: visData.y2,
+                            yAxisID: 'y2',
+                            datalabels: {
+                                display: false
+                            }
+                        }
+                    ]
+                },
+                options: {
+                    aspectRatio: 0.7,
+                    scales: {
+                        x: {
+                            ticks: {
+                                callback: function (value, index, ticks) {
+                                    return months[index];
+                                }
+                            }
+                        },
+                        y: {
+
+                            position: 'left',
+                            ticks: {
+                                callback: function (value, index, ticks) {
+                                    return this.getLabelForValue(value);
+                                },
+                                autoSkip: false
+                            }
+                        },
+                        y2: {
+                            title: {
+                                display: true,
+                                text: sortLabels[sortBy]
+                            },
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false // only want the grid lines for one axis to show up
+                            },
+                            ticks: {
+                                callback: function (value, index, ticks) {
+                                    return visData.y2[index];
+                                },
+                                autoSkip: false
+                            }
+                        }
+                    },
+                    indexAxis: 'y',
+                    plugins: {
+                        subtitle: {
+                            display: true,
+                            text: function () {
+                                if (sortBy) {
+                                    return `Sorted by ${sortBy}, high to low`;
+                                } else {
+                                    return `Sorted by order of response to month0 surveys, most recent to earliest`;
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    }
+                },
+                // plugins: [htmlLegendPlugin]
+            });
         } catch (e) {
             console.error(e);
         }
@@ -56,10 +238,17 @@ layout: aggregate
 
     //this has to be done before we generate the graphs or it doesn't render, idk why
     staffGraphs.map(function (config) {
-        generateElem(config, "staffGraphs", false);
+        generateElem(config, "staffGraphs", true);
+        generateElem(config, "staffTables", false);
     });
     staffGraphs.map(function (config) {
-        generateStaffChart(config, "staffGraphs");
+        if (config.type == "free-text-job-role") {
+            generateLeaderRoleChart(config, "staffTables");
+        } else {
+            generateNumbChart(config, "scale", "staffGraphs");
+            generateAggTable(config, "staffTables");
+        }
     });
+
 
 </script>

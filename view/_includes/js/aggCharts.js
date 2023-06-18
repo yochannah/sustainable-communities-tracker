@@ -75,7 +75,7 @@ const htmlLegendPlugin = {
     }
 };
 
-function sortData(variable, sortBy, dataType) {
+function sortData(variable, sortBy, dataType, ignoreColors) {
     let responses = {};
 
     if (sortBy) {
@@ -100,7 +100,7 @@ function sortData(variable, sortBy, dataType) {
         };
     });
 
-    let m6And12 = function (arr,month) {
+    let m6And12 = function (arr, month) {
         arr.map(function (row) {
             let proj = row.ProjectPseudonym.trim();
             let val = row[variable];
@@ -110,6 +110,8 @@ function sortData(variable, sortBy, dataType) {
 
     m6And12(survey6, "m6");
     m6And12(survey12, "m12");
+
+
 
     // stripe the data, so the chart likes it.
     let visData = {
@@ -138,36 +140,38 @@ function sortData(variable, sortBy, dataType) {
         visData.m6.push(e.m6);
         visData.m12.push(e.m12);
         visData.y2.push(e.y2);
-        visData
-            .colors
-            .bg
-            .m0
-            .push(colorForChart(e.m0, true));
-        visData
-            .colors
-            .bg
-            .m6
-            .push(colorForChart(e.m6, true));
-        visData
-            .colors
-            .bg
-            .m12
-            .push(colorForChart(e.m12, true));
-        visData
-            .colors
-            .border
-            .m0
-            .push(colorForChart(e.m0));
-        visData
-            .colors
-            .border
-            .m6
-            .push(colorForChart(e.m6));
-        visData
-            .colors
-            .border
-            .m12
-            .push(colorForChart(e.m12));
+        if (!ignoreColors) {
+            visData
+                .colors
+                .bg
+                .m0
+                .push(colorForChart(e.m0, true));
+            visData
+                .colors
+                .bg
+                .m6
+                .push(colorForChart(e.m6, true));
+            visData
+                .colors
+                .bg
+                .m12
+                .push(colorForChart(e.m12, true));
+            visData
+                .colors
+                .border
+                .m0
+                .push(colorForChart(e.m0));
+            visData
+                .colors
+                .border
+                .m6
+                .push(colorForChart(e.m6));
+            visData
+                .colors
+                .border
+                .m12
+                .push(colorForChart(e.m12));
+        }
     });
     return visData;
 }

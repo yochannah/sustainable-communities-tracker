@@ -185,8 +185,23 @@ function aggTable(config) {
                 order2 = orderOfThings[config.type].indexOf(k2);
             return (order1 - order2);
         });
+    } else if (config.type == "free-text-number") {
+        //many of these responses, but not all, can be parsed as an int. 
+        sortedResponse = sortedResponse.sort(function ([k1, v1], [k2, v2]) {
+            let num1 =parseFloat(k1), num2 = parseFloat(k2);
+            //if they parsed into numbers, not NaNs, sort them numberwise. 
+            if(num1 && num2)  {
+            return (num1 - num2);
+            } else if (num1) {
+                return -1;
+            } else if (num2) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
     } else {
-        //if therre's a natural orrder, use itt, baby!
+        //if there's a natural orrder, use itt, baby!
         sortedResponse.sort();
     }
 
