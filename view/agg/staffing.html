@@ -69,18 +69,18 @@ layout: aggregate
             min: "No numbers in this Array.",
             max: "No numbers in this Array."
         }, temp = [];
-        
+
         anArr.map(function (item) {
             if (item) {
                 let numItem = parseFloat(item);
-                if(numItem) {
+                if (numItem) {
                     temp.push(numItem);
                 }
             }
-            if(temp.length > 0) {
+            if (temp.length > 0) {
                 temp = temp.sort(sorts.numeric);
                 response.min = temp[0];
-                response.max = temp[temp.length-1];
+                response.max = temp[temp.length - 1];
             }
         });
         return response;
@@ -88,10 +88,10 @@ layout: aggregate
 
     const generateNumbChart = function (config, sortBy, elem) {
         try {
-            let visData = sortData(config.name, config.sortBy, null, true);
+            let visData = sortData(config.name, sortBy, null, true);
             let allVals = visData.m0.concat(visData.m6, visData.m2);
             let minMax = getMinMaxNums(allVals);
-  
+
             let fill = Array(visData.m0.length).fill(1);
             let fill1 = Array(visData.m0.length).fill(0);
             // this positions the labels on half-ticks, which looks a lot better.
@@ -120,13 +120,13 @@ layout: aggregate
                             //would be delighted to have that many staff!) 
                             //so truncating everything, regardless of type
                             //will still only trucate the strings.
-                                if (val.length > 6) {
-                                    return val.slice(0,6) + "...";
-                                } else {
-                                    return val;
-                                }
-                            
-                            
+                            if (val.length > 6) {
+                                return val.slice(0, 6) + "...";
+                            } else {
+                                return val;
+                            }
+
+
                         }
                         return "";
                     }
@@ -134,6 +134,24 @@ layout: aggregate
                     return function () { return "" }; // no label
                 }
             }
+            bgFormatter = function (minMax, dataset, border) {
+                return function (value, context) {
+                    let val = dataset[value.dataIndex]
+                    val = parseFloat(val);
+                    if (!val){ 
+                        //it's a string! but we still need to be able to read it.
+                        // so we'll make it a white (0% opaque) background.
+                        val = 0;
+                    }
+                    let opacity = val / minMax.max;
+                    if (border) {
+                        opacity = opacity + 0.1;
+                        if (opacity > 1) { opacity = 1; }
+                    }
+                    return `rgba(54,162,235,${opacity})`;
+                }
+            };
+
             let theId = generateId('chart', config.name, elem);
             return new Chart(document.getElementById(theId), {
                 type: 'bar',
@@ -142,15 +160,15 @@ layout: aggregate
                     datasets: [
                         {
                             data: fill,
-                            backgroundColor: visData.colors.bg.m0,
-                            borderColor: visData.colors.border.m0,
+                            backgroundColor: bgFormatter(minMax, visData.m0),
+                            borderColor: bgFormatter(minMax, visData.m0, true),
                             stack: 'Stack 0', datalabels: {
                                 formatter: datalabelsNumFormatter(visData.m0)
                             }, yAxisID: 'y'
                         }, {
                             data: fill,
-                            backgroundColor: visData.colors.bg.m6,
-                            borderColor: visData.colors.border.m6,
+                            backgroundColor: bgFormatter(minMax, visData.m6),
+                            borderColor: bgFormatter(minMax, visData.m6, true),
                             stack: 'Stack 0',
                             datalabels: {
                                 formatter: datalabelsNumFormatter(visData.m6)
@@ -160,8 +178,8 @@ layout: aggregate
                             datalabels: {
                                 formatter: datalabelsNumFormatter(visData.m12)
                             },
-                            backgroundColor: visData.colors.bg.m12,
-                            borderColor: visData.colors.border.m12,
+                            backgroundColor: bgFormatter(minMax, visData.m12),
+                            borderColor: bgFormatter(minMax, visData.m12, true),
                             stack: 'Stack 0',
                             yAxisID: 'y'
                         },
@@ -245,7 +263,7 @@ layout: aggregate
         if (config.type == "free-text-job-role") {
             generateLeaderRoleChart(config, "staffTables");
         } else {
-            generateNumbChart(config, "scale", "staffGraphs");
+            generateNumbChart(config, "age", "staffGraphs");
             generateAggTable(config, "staffTables");
         }
     });

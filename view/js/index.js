@@ -165,7 +165,7 @@ const sorts = {
             return 0;
         }
     },
-    numeric : function(a,b) { return a-b;},
+    numeric: function (a, b) { return a - b; },
     scale: function (a, b) {
         let scale = orderOfThings.scale;
         aScaleIndex = scale.indexOf(a["project-user-count"]);
@@ -185,6 +185,7 @@ const sorts = {
         if (bScaleIndex > aScaleIndex) {
             return 1;
         }
+        return 0;
     }, age: function (a, b) {
         let ages = agesByProjName;
         let aDate = new Date(ages[a.ProjectPseudonym]);
@@ -192,31 +193,34 @@ const sorts = {
         if (aDate < bDate) {
             return -1;
         }
-        if (bDate < aDate) {
+        if (aDate > bDate) {
             return 1;
         }
+        return 0;
     }
 }
 
 const sortSurveyData = function (anArray, sortBy) {
-    let response = anArray.sort(function (a, b) {
-        if (sortBy == "age") {
-            return anArray.sort(sorts.age);
-        } else if (sortBy == "scale") {
-            return anArray.sort(sorts.scale);
-        } else if (sortBy == "answerScale") {
-            return anArray.sort(sorts.answerScale);
-        } else {
+    let response;
+
+    if (sortBy == "age") {
+        response = anArray.sort(sorts.age);
+    } else if (sortBy == "scale") {
+        response = anArray.sort(sorts.scale);
+    } else if (sortBy == "answerScale") {
+        response = anArray.sort(sorts.answerScale);
+    } else {
+        response = anArray.sort(function (a, b) {
             if (a[sortBy] < b[sortBy]) {
                 return -1;
             }
             if (b[sortBy] < a[sortBy]) {
                 return 1;
             }
-        }
-        //if all else failed, they're equal: 
-        return 0;
-    });
+            //if all else failed, they're equal: 
+            return 0;
+        });
+    }
     return response;
 }
 

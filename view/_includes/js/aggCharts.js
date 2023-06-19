@@ -76,7 +76,7 @@ const htmlLegendPlugin = {
 };
 
 function sortData(variable, sortBy, dataType, ignoreColors) {
-    let responses = {};
+    let responses = {}, sortedSurvey0;
 
     if (sortBy) {
         sortedSurvey0 = sortSurveyData(survey0, sortBy);
