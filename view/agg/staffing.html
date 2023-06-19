@@ -3,7 +3,10 @@ title: Staffing
 layout: aggregate
 ---
 
-<div id="staffGraphs"></div>
+<div id="leaderTable"></div>
+<div id="staffGraphsScale"></div>
+<div id="staffGraphsAge"></div>
+<div id="roleGraphs"></div>
 <div id="staffTables"></div>
 
 <script>
@@ -138,7 +141,7 @@ layout: aggregate
                 return function (value, context) {
                     let val = dataset[value.dataIndex]
                     val = parseFloat(val);
-                    if (!val){ 
+                    if (!val) {
                         //it's a string! but we still need to be able to read it.
                         // so we'll make it a white (0% opaque) background.
                         val = 0;
@@ -254,19 +257,106 @@ layout: aggregate
         }
     }
 
-    //this has to be done before we generate the graphs or it doesn't render, idk why
+    function generateLeaderTable(config, elem, anchor) {
+        let chartId = generateId('chart', config.name, anchor);
+        let data = {
+            Respondents: { m0: 0, m6: 0, m12: 0 }
+        };
+
+        try {
+            keys = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+            keys.map(function (k) {
+                data[k] = {
+                    m0: 0,
+                    m6: 0,
+                    m12: 0
+                }
+            });
+            console.log('😲 data', data);
+
+
+            countEntries(config, "m0", survey0, data);
+            countEntries(config, "m6", survey6, data);
+            countEntries(config, "m12", survey12, data);
+
+            let rolesHtml = `
+            <div class="aggGraph">
+            <table>
+            <thead>
+                <tr>
+                    <th># of members in leadership team</th>
+                    <th># of projects with this # of leaders: M0</th>
+                    <th># of projects with this # of leaders: M6</th>
+                    <th># of projects with this # of leaders: M12</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td># of respondents</td>
+                    <td>${data.Respondents.m0}</td>
+                    <td>${data.Respondents.m6}</td>
+                    <td>${data.Respondents.m12}</td>
+                </tr>
+            `;
+            let metaKeys = ["m0", "m6", "m12", "Respondents"];
+
+            let tableCell = function (fraction, total, month) {
+                let val = fraction[month];
+                let response = `
+                    <td>
+                    ${val}`;
+                if (val > 0) {
+                    response += `
+                    (${percent(total[month], val)})
+                    `;
+                }
+                response += `</td>`
+                return response;
+            };
+
+
+            Object.entries(data).map(function ([numOfLeaders, monthVal]) {
+                if (metaKeys.indexOf(numOfLeaders) < 0) {
+                    //so long as it is a REAL response answer...
+
+                    rolesHtml += `<tr>`;
+                    rolesHtml += `<td>${numOfLeaders}</td>`
+                    rolesHtml += tableCell(monthVal, data.Respondents, "m0");
+                    rolesHtml += tableCell(monthVal, data.Respondents, "m6");
+                    rolesHtml += tableCell(monthVal, data.Respondents, "m12");
+                    rolesHtml += `</tr>`;
+                }
+            });
+            rolesHtml += `</tbody></table></div>`;
+            document.getElementById(chartId).innerHTML += rolesHtml;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    leaderTables.map(function (config) {
+        generateElem(config, "leaderTable", false)
+    });
+    leaderTables.map(function (config) {
+        generateLeaderTable(config, "age", "leaderTable");
+    });
     staffGraphs.map(function (config) {
-        generateElem(config, "staffGraphs", true);
+        generateElem(config, "staffGraphsAge", true);
+        generateElem(config, "staffGraphsScale", true);
         generateElem(config, "staffTables", false);
     });
-    staffGraphs.map(function (config) {
-        if (config.type == "free-text-job-role") {
-            generateLeaderRoleChart(config, "staffTables");
-        } else {
-            generateNumbChart(config, "age", "staffGraphs");
-            generateAggTable(config, "staffTables");
-        }
+    roleGraphs.map(function (config) {
+        generateElem(config, "roleGraphs", true)
     });
+    roleGraphs.map(function (config) {
+        generateLeaderRoleChart(config, "roleGraphs");
+    });
+    staffGraphs.map(function (config) {
+        generateNumbChart(config, "age", "staffGraphsAge");
+        generateNumbChart(config, "scale", "staffGraphsScale");
+        generateAggTable(config, "staffTables");
+    });
+
 
 
 </script>

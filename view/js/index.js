@@ -277,13 +277,21 @@ const mcGraphs = [
         multichoice: true
     }];
 
-const staffGraphs = [
-    {
+    const roleGraphs = [    {
         name: "you-role",
         type: "free-text-job-role",
         datalabels: false,
         multichoice: true
-    },
+    }];
+
+    const leaderTables = [    {
+        name: "leadership-team-size",
+        type: "free-text-number",
+        datalabels: true,
+        multichoice: false
+    }];
+
+const staffGraphs = [
     {
         name: "funds-others-now",
         type: "free-text-number",
