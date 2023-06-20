@@ -176,8 +176,6 @@ function sortData(variable, sortBy, dataType, ignoreColors) {
     return visData;
 }
 
-
-
 const generateExpChart = function (config, sortBy, elem) {
     try {
         let visData = sortData(config.name, sortBy);

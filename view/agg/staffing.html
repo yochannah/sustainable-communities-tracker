@@ -314,11 +314,9 @@ layout: aggregate
                 return response;
             };
 
-
             Object.entries(data).map(function ([numOfLeaders, monthVal]) {
                 if (metaKeys.indexOf(numOfLeaders) < 0) {
                     //so long as it is a REAL response answer...
-
                     rolesHtml += `<tr>`;
                     rolesHtml += `<td>${numOfLeaders}</td>`
                     rolesHtml += tableCell(monthVal, data.Respondents, "m0");
@@ -327,6 +325,39 @@ layout: aggregate
                     rolesHtml += `</tr>`;
                 }
             });
+
+            let sumUp = function(data, toSum){
+                let response = {m0:0,m6:0,m12:0};
+                toSum.map(function(val){
+                    response.m0 += data[val]['m0'];
+                    response.m6 += data[val]['m6'];
+                    response.m12 += data[val]['m12'];
+                });
+                return response;
+            }
+
+            //I'm aggregating the aggregates into EVEN aggregater buckets
+            //aggregater is a word now, I declare it.
+            let aggAgg = {
+                "1": data[1],
+                "2": data[2],
+                "3 to 5": sumUp(data, [3,4,5]),
+                "6 to 9": sumUp(data, [6,7,8,9]),
+                "10+": sumUp(data, [10,11,12,13,14,15])
+            }
+
+           Object.entries(aggAgg).map(function([name, val]){
+
+            rolesHtml += `<tr>
+                <td>${name}</td>
+                <td>${val.m0} (${percent(data.Respondents.m0, val.m0)})</td>
+                <td>${val.m6} (${percent(data.Respondents.m0, val.m6)})</td>
+                <td>${val.m12} (${percent(data.Respondents.m0, val.m12)})</td>                
+                </tr>`;
+           });
+
+            
+
             rolesHtml += `</tbody></table></div>`;
             document.getElementById(chartId).innerHTML += rolesHtml;
         } catch (e) {

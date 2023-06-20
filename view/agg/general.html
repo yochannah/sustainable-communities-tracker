@@ -1,150 +1,209 @@
 ---
 title: GeneralAgg
-layout: aggregate
+layout: aggregate_reports
 ---
-<div>
-    <canvas id="timelineAnchor"></canvas>
-    <div>Mean project age:
-      <span id="meanProjAge"></span>
-      years
-    </div>
-    <div>Median project age:
-      <span id="medianProjAge"></span>
-      years
-    </div>
-    Project ages:
-    <table id="projAgeTable">
-      <thead>
-        <tr>
-          <th>0-4 years</th>
-          <th>5-9 years</th>
-          <th>10-19 years</th>
-          <th>20+ years</th>
-  
-        </tr>
-      </thead>
-      <tr>
-        <td id="age0"></td>
-        <td id="age5"></td>
-        <td id="age10"></td>
-        <td id="age20"></td>
-      </tr>
-    </table>
-  
-  </div>
-  
-  <script>
+<div class="aggGraph">
+  <canvas id="commitsGraph"></canvas>
+</div>
 
-  // we want the years for a histogram
-    let foundedYears = [];
-    timeData.map(function(proj) {
-      let time = luxon.DateTime.fromISO(proj["project-founded"]);
-      if (! time.invalid) {
-        foundedYears.push(time);
-      }
-    });
-  
-  // make buckets for each year
-    foundedYears = foundedYears.sort();
-    let yearsHist = {};
-    let start = foundedYears[0].year;
-    let end = foundedYears[foundedYears.length - 1].year;
-  
-    for (var i = start; i <= end; i++) {
-      yearsHist[i] = 0;
-    }
-  
-  // count projects founded in any year
-    foundedYears.map(function(proj) {
-      let yearProjFounded = proj.year;
-  
-  // add one more to the count for each project founded in this year
-      yearsHist[yearProjFounded]++;
-    })
-  
-    const tl = document.getElementById('timelineAnchor');
-  
-    new Chart(tl, {
-      type: 'bar',
-      data: {
-        datasets: [
-          {
-            label: '# of projects founded in this year',
-            data: yearsHist,
-            borderWidth: 1
-          }
-        ]
-      },
-      options: {
-        scales: {
-          x: {
-            type: 'time',
-            time: { // Luxon format string
-              unit: 'year'
+
+<div class="aggGraph">
+  <canvas id="timelineAnchor"></canvas>
+  <div>Mean project age:
+    <span id="meanProjAge"></span>
+    years
+  </div>
+  <div>Median project age:
+    <span id="medianProjAge"></span>
+    years
+  </div>
+  Project ages:
+  <table id="projAgeTable">
+    <thead>
+      <tr>
+        <th>0-4 years</th>
+        <th>5-9 years</th>
+        <th>10-19 years</th>
+        <th>20+ years</th>
+
+      </tr>
+    </thead>
+    <tr>
+      <td id="age0"></td>
+      <td id="age5"></td>
+      <td id="age10"></td>
+      <td id="age20"></td>
+    </tr>
+  </table>
+
+</div>
+
+<script>
+
+
+  const generateCommitChart = function (elem) {
+    try {
+      let visData = commits.checks.byCommits;
+
+      return new Chart(document.getElementById(elem), {
+        type: 'bar',
+        data: {
+          datasets: [
+            {
+              data: visData,
+              stack: 'Stack 0',
+              yAxisID: 'y',
+              parsing: {
+                yAxisKey: 'repoName', xAxisKey: 'commitCount'
+              },
+              datalabels: { display: false }
+            }
+          ]
+        },
+        options: {
+          aspectRatio: 0.7,
+          indexAxis: 'y',
+          scales: {
+            y: {
+              ticks: {
+                callback: function (value, index, ticks) {
+                  let nonAnon = this.getLabelForValue(value);
+                  let pseu = pseudonyms[nonAnon];
+                  return pseu;
+                },
+                autoSkip: false
+              }
+            }, x :{
+              type: 'logarithmic'}
+          },
+          plugins: {
+            legend: {
+              display: false
             }
           }
         }
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  ///////////////////////////////
+
+  // we want the years for a histogram
+  let foundedYears = [];
+  timeData.map(function (proj) {
+    let time = luxon.DateTime.fromISO(proj["project-founded"]);
+    if (!time.invalid) {
+      foundedYears.push(time);
+    }
+  });
+
+  // make buckets for each year
+  foundedYears = foundedYears.sort();
+  let yearsHist = {};
+  let start = foundedYears[0].year;
+  let end = foundedYears[foundedYears.length - 1].year;
+
+  for (var i = start; i <= end; i++) {
+    yearsHist[i] = 0;
+  }
+
+  // count projects founded in any year
+  foundedYears.map(function (proj) {
+    let yearProjFounded = proj.year;
+
+    // add one more to the count for each project founded in this year
+    yearsHist[yearProjFounded]++;
+  })
+
+  const tl = document.getElementById('timelineAnchor');
+
+  new Chart(tl, {
+    type: 'bar',
+    data: {
+      datasets: [
+        {
+          label: '# of projects founded in this year',
+          data: yearsHist,
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      scales: {
+        x: {
+          type: 'time',
+          time: { // Luxon format string
+            unit: 'year'
+          }
+        }
       }
-    });
-  
+    }
+  });
+
   // calculate ages of projects in years
   // as opposed to reporting year founded
-  
-    let projAges = foundedYears.map(function(projFounded) {
-  
-  // this is a hardcode. please still love me.
-      let surveyStart = luxon.DateTime.fromISO("2021-06-01");
-      let i = luxon.Interval.fromDateTimes(projFounded, surveyStart);
-      return i.length('years')
-    });
-  
+
+  let projAges = foundedYears.map(function (projFounded) {
+
+    // this is a hardcode. please still love me.
+    let surveyStart = luxon.DateTime.fromISO("2021-06-01");
+    let i = luxon.Interval.fromDateTimes(projFounded, surveyStart);
+    return i.length('years')
+  });
+
   // calculate mean
-    let totalAge = 0;
-    projAges.map(function(age) {
-      totalAge = totalAge + age;
-    });
-  
+  let totalAge = 0;
+  projAges.map(function (age) {
+    totalAge = totalAge + age;
+  });
+
   // round it a little, please. This rounds to one decimal
-    function round(num) {
-      return Math.round(num * 10) / 10;
-    }
-  
-    let meanAge = totalAge / projAges.length;
-    meanAge = round(meanAge);
-    document.getElementById("meanProjAge").innerHTML = meanAge;
-  
-    let medianAge,
-      middleVal;
-    if (projAges.length % 2 == 1) {
-      middleVal = projAges.length / 2 + 0.5
-      medianAge = projAges[middleVal];
-    } else {
-      middleVal = projAges.length / 2;
-      medianAge = (projAges[middleVal] + projAges[middleVal + 1]) / 2;
-    } medianAge = round(medianAge);
-    document.getElementById("medianProjAge").innerHTML = medianAge;
-  
+  function round(num) {
+    return Math.round(num * 10) / 10;
+  }
+
+  let meanAge = totalAge / projAges.length;
+  meanAge = round(meanAge);
+  document.getElementById("meanProjAge").innerHTML = meanAge;
+
+  let medianAge,
+    middleVal;
+  if (projAges.length % 2 == 1) {
+    middleVal = projAges.length / 2 + 0.5
+    medianAge = projAges[middleVal];
+  } else {
+    middleVal = projAges.length / 2;
+    medianAge = (projAges[middleVal] + projAges[middleVal + 1]) / 2;
+  } medianAge = round(medianAge);
+  document.getElementById("medianProjAge").innerHTML = medianAge;
+
   // calculate project ages in age buckets...
-    let ageBuckets = {
-      "zeroToFour": 0,
-      "fiveToNine": 0,
-      "tenToNineteen": 0,
-      "twentyPlus": 0
+  let ageBuckets = {
+    "zeroToFour": 0,
+    "fiveToNine": 0,
+    "tenToNineteen": 0,
+    "twentyPlus": 0
+  }
+
+  projAges.map(function (age) {
+    if (age < 5) {
+      ageBuckets.zeroToFour++;
+    } else if (age < 10) {
+      ageBuckets.fiveToNine++;
+    } else if (age < 20) {
+      ageBuckets.tenToNineteen++;
+    } else {
+      ageBuckets.twentyPlus++;
     }
-  
-    projAges.map(function(age) {
-      if (age < 5) {
-        ageBuckets.zeroToFour ++;
-      } else if (age < 10) {
-        ageBuckets.fiveToNine ++;
-      } else if (age < 20) {
-        ageBuckets.tenToNineteen ++;
-      } else {
-        ageBuckets.twentyPlus ++;
-      }
-    });
-    document.getElementById("age0").innerHTML = ageBuckets.zeroToFour;
-    document.getElementById("age5").innerHTML = ageBuckets.fiveToNine;
-    document.getElementById("age10").innerHTML = ageBuckets.tenToNineteen;
-    document.getElementById("age20").innerHTML = ageBuckets.twentyPlus;
-  </script>
+  });
+  document.getElementById("age0").innerHTML = ageBuckets.zeroToFour;
+  document.getElementById("age5").innerHTML = ageBuckets.fiveToNine;
+  document.getElementById("age10").innerHTML = ageBuckets.tenToNineteen;
+  document.getElementById("age20").innerHTML = ageBuckets.twentyPlus;
+
+  //
+  generateCommitChart('commitsGraph');
+
+</script>

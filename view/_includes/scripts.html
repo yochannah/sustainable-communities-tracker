@@ -42,6 +42,9 @@
       return job.role;
     });
 
+    const commits = {{site.data.aggregate.report_countCommits | jsonify}};
+    const pseudonyms = {{site.data.project-name-to-pseudonym | jsonify}};
+
     ages.map(function(proj){
       agesByProjName[proj.ProjectPseudonym] = proj["project-founded"];
     });
