@@ -2,8 +2,24 @@
 title: GeneralAgg
 layout: aggregate_reports
 ---
+
 <div class="aggGraph">
-  <canvas id="commitsGraph"></canvas>
+  <table>
+    <thead>
+      <th>Licence type</th>
+     <th> # of projects</th>
+    </thead>
+    <tbody id="licenceBody">
+
+    </tbody>
+  </table>
+</div>
+
+<div class="aggGraph">
+  <h3>Commits during the study period</h3>
+  <canvas id="commitsGraphAge"></canvas>
+  <canvas id="commitsGraphScale"></canvas>
+  <div id="noCommits"></div>
 </div>
 
 
@@ -40,10 +56,52 @@ layout: aggregate_reports
 
 <script>
 
+  const generateLicenceTable = function(){
+    let elem = document.getElementById("licenceBody");
+  };
 
-  const generateCommitChart = function (elem) {
+  generateLicenceTable()
+
+  const generateCommitChart = function (elem, sortBy) {
     try {
-      let visData = commits.checks.byCommits;
+      let visData = [];
+
+      commits.checks.byCommits.map(function(row){
+        let nonAnon = row.repoName;
+        let pseu = pseudonyms[nonAnon];
+        row.ProjectPseudonym = pseu;
+        let age = agesByProjName[pseu];
+        let size = sizesByProjName[pseu]
+        row.scale = row["project-user-count"] = size;
+        row.age = new Date(age).getFullYear();
+        if (!isNaN(row.age)) {
+          visData.push(row);
+        } else {
+          //NaNs are incomplete responses that gave urls
+          //dump nans - tthey'rer no use and they are confusing
+        }
+      });
+
+      if (sortBy) {
+        visData = visData.sort(sorts[sortBy]);
+      }
+
+      let none = document.getElementById("noCommits");
+    let commitlessRepos = [];
+    let commitfulRepos = Object.keys(commits.checks.byName);
+    
+    survey0.map(function(row){
+      let proj = row.ProjectPseudonym;
+      let hasCommits = (commitfulRepos.indexOf(proj) < 0);
+      if(!hasCommits) {
+        commitlessRepos.push(proj);
+      } else {
+        console.log('👾 proj', proj);
+      }
+    });
+
+    console.log('👾 commitlessRepos', commitlessRepos);
+    none.innerHTML = commitlessRepos.join(", ");
 
       return new Chart(document.getElementById(elem), {
         type: 'bar',
@@ -73,12 +131,32 @@ layout: aggregate_reports
                 },
                 autoSkip: false
               }
-            }, x :{
-              type: 'logarithmic'}
+            }, x: {
+      //        type: 'logarithmic'
+            }, y2: {
+              title: {
+                display: true,
+                text: sortBy
+              },
+              position: 'right',
+              grid: {
+                drawOnChartArea: false // only want the grid lines for one axis to show up
+              },
+              ticks: {
+                callback: function (value, index, ticks) {
+                  return visData[index][sortBy];
+                },
+                autoSkip: false
+              }
+            }
           },
           plugins: {
             legend: {
               display: false
+            },
+            title: {
+              display: true,
+              text: "Commits per project"
             }
           }
         }
@@ -204,6 +282,7 @@ layout: aggregate_reports
   document.getElementById("age20").innerHTML = ageBuckets.twentyPlus;
 
   //
-  generateCommitChart('commitsGraph');
+  generateCommitChart('commitsGraphAge',"age");
+  generateCommitChart('commitsGraphScale',"scale");
 
 </script>

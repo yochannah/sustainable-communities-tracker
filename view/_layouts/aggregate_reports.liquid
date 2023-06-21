@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: " en" }}">
+
+  {%- include head.html -%}
+
+  <body>
+
+    {%- include scripts.html -%}
+    {%- include header.html -%}
+
+    <script>
+      // let licences = " site.data.month0 | group_by_exp: "item","item.repoInfo.license" |jsonify ";
+
+      {% capture licences %}
+        {% for repo in site.data.month0 %}
+          {{repo | jsonify}}
+        {% endfor%}
+      {% endcapture %}
+      let licences = {{licences | jsonify}};
+    </script>
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        HELLOOOO {{ licences }}
+        <h1>{{ page.title }}</h1>
+
+        {{ page.content }}
+
+      </div>
+
+    </main>
+
+    {%- include footer.html -%}
+
+  </body>
+
+</html>
