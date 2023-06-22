@@ -9,19 +9,36 @@
     {%- include header.html -%}
 
     <script>
-      // let licences = " site.data.month0 | group_by_exp: "item","item.repoInfo.license" |jsonify ";
+      function aggregateRows(rows) {
+        let aggResponse = {};
 
-      {% capture licences %}
-        {% for repo in site.data.month0 %}
-          {{repo | jsonify}}
-        {% endfor%}
-      {% endcapture %}
-      let licences = {{licences | jsonify}};
+// count keys needed.
+        let keys = Object.keys(rows[0]);
+        rows.map(function(proj) {
+          keys.map(function(k) {
+            if (aggResponse.hasOwnProperty(k)) { // add one more layer
+              let pk = proj[k];
+              if (aggResponse[k].hasOwnProperty(pk)) {
+                aggResponse[k][pk]++;
+              } else {
+                aggResponse[k][pk] = 1;
+              }
+            } else {
+              aggResponse[k] = {};
+            }
+          });
+        });
+        return aggResponse
+      }
+      let contributing = {{site.data.All_months_community | jsonify}};
+      let contributingAgg = aggregateRows(contributing);
+
+      let licences = {{site.data.aggregate.Month0Licence | jsonify}};
+      let aggLicences = aggregateRows(licences);
     </script>
 
     <main class="page-content" aria-label="Content">
       <div class="wrapper">
-        HELLOOOO {{ licences }}
         <h1>{{ page.title }}</h1>
 
         {{ page.content }}

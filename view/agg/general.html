@@ -4,10 +4,23 @@ layout: aggregate_reports
 ---
 
 <div class="aggGraph">
+  <table id="contributing">
+    <thead>
+      <th>Licence type</th>
+      <th> # of projects</th>
+    </thead>
+    <tbody>
+
+    </tbody>
+  </table>
+</div>
+
+
+<div class="aggGraph">
   <table>
     <thead>
       <th>Licence type</th>
-     <th> # of projects</th>
+      <th> # of projects</th>
     </thead>
     <tbody id="licenceBody">
 
@@ -56,17 +69,108 @@ layout: aggregate_reports
 
 <script>
 
-  const generateLicenceTable = function(){
+  const generateLicenceTable = function () {
     let elem = document.getElementById("licenceBody");
+    let html = ``;
+    let vals = Object.entries(aggLicences["license - spdx_id"]);
+    vals = vals.sort(function (a, b) {
+      return sorts.numeric(a[1], b[1]);
+    }).reverse();
+    vals.map(function ([name, count]) {
+      html += `<tr>
+        <td>${name}</td>
+        <td>${count}</td>       
+      </tr>`;
+    });
+    elem.innerHTML = html;
   };
 
   generateLicenceTable()
+
+
+  const generateTableHead = function (cells) {
+    let html = `
+    <thead>
+      <tr>`;
+
+    cells.map(function (cell) {
+      html += `<th>${cell}</th>`;
+    });
+
+    html += `</tr>
+      </thead>
+    `
+    return html;
+  }
+  /**
+   * @argument {string} tableId - A string that correlates to a <table> element
+   * @argument {string[]} columns - An Array of string headers for columns
+   * @argument {Object[]} data - an array of aggregated values as k/v pairs that matches the columns
+   * @argument {string} sortBy - sort method from sorts
+  **/
+  const generateTable = function (config) {
+
+    let elem = document.getElementById(config.elemId);
+    let html = ``;
+    //we need a "primary" column to sort by
+    //and tto grab row names from
+    //but we can't sort an object, so cnvert it to aray of kv pairs
+    let primaryCol = Object.entries(config.data[0]); 
+      if (config.sortBy) {
+        primaryCol = primaryCol.sort(function (a, b) {
+          return sorts[config.sortBy](a[1], b[1]);
+        }).reverse();
+      }
+
+    html += generateTableHead(config.columns);
+
+    let cell = function (data) {
+      return `<td>${data}</td>`;
+    }
+    primaryCol.map(function ([name, count]) {
+      //don't add a row if keepnulls is false.
+      let printThisRow = (name !== "null"); 
+      //I know it's foul but null got stringified into null somewhere along tthe line.
+      //so we should only print "nulls" if keepnulls is true
+      printThisRow = printThisRow || config.keepNulls
+
+      if(printThisRow) {
+      //add primary column
+      html += `<tr>
+        ${cell(name)}
+        ${cell(count)}`  
+        //add all other columns if any
+        for(let i = 1; i < config.data.length; i++){
+          let theCell = config.data[i][name];
+          html += cell(theCell);
+        }
+        //close the tr
+        html += `</tr>`;
+      }
+    });
+    elem.innerHTML = html;
+  };
+
+  let tableConfig = [{
+    elemId : "contributing",
+    columns : ["Contributing guidance found?","Month0", "Month12"],
+    data : [contributingAgg.contributingGuidelines_m0,
+    contributingAgg.contributingGuidelines_m12],
+    sortBy : "numeric",
+    keepNulls : false
+}
+
+  ]
+
+  tableConfig.map(function(config){
+    generateTable(config);
+  });
 
   const generateCommitChart = function (elem, sortBy) {
     try {
       let visData = [];
 
-      commits.checks.byCommits.map(function(row){
+      commits.checks.byCommits.map(function (row) {
         let nonAnon = row.repoName;
         let pseu = pseudonyms[nonAnon];
         row.ProjectPseudonym = pseu;
@@ -85,23 +189,6 @@ layout: aggregate_reports
       if (sortBy) {
         visData = visData.sort(sorts[sortBy]);
       }
-
-      let none = document.getElementById("noCommits");
-    let commitlessRepos = [];
-    let commitfulRepos = Object.keys(commits.checks.byName);
-    
-    survey0.map(function(row){
-      let proj = row.ProjectPseudonym;
-      let hasCommits = (commitfulRepos.indexOf(proj) < 0);
-      if(!hasCommits) {
-        commitlessRepos.push(proj);
-      } else {
-        console.log('👾 proj', proj);
-      }
-    });
-
-    console.log('👾 commitlessRepos', commitlessRepos);
-    none.innerHTML = commitlessRepos.join(", ");
 
       return new Chart(document.getElementById(elem), {
         type: 'bar',
@@ -132,7 +219,7 @@ layout: aggregate_reports
                 autoSkip: false
               }
             }, x: {
-      //        type: 'logarithmic'
+              //        type: 'logarithmic'
             }, y2: {
               title: {
                 display: true,
@@ -282,7 +369,7 @@ layout: aggregate_reports
   document.getElementById("age20").innerHTML = ageBuckets.twentyPlus;
 
   //
-  generateCommitChart('commitsGraphAge',"age");
-  generateCommitChart('commitsGraphScale',"scale");
+  generateCommitChart('commitsGraphAge', "age");
+  generateCommitChart('commitsGraphScale', "scale");
 
 </script>
