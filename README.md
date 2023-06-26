@@ -5,7 +5,15 @@
 
 This code was used in a year-long study looking at CHAOSS and other sustainability metrics that might affect open communities that user version control hosting sites for collaboration. This mostly ended up being and/or open source, open science communities, and mostly on GitHub. 
 
-## To set up
+## Code components
+
+There are two main components within this code. 
+
+1. One is the **data visualisation component**, which runs on [Jekyll](https://jekyllrb.com/), with lots of javascript-based processing, since Jekyll can generate static sites but doesn't always allow advanced data manipulation. The entry point for this section is in the `view` folder.
+2. The second is the **data collection component**. This is fully written in Javascript. The entry point is in index.js in this folder. 
+
+## Data collection
+### To set up
 
 1. You'll need a recent version of node. Run `npm install` to get the dependencies.
 2. in your .bashrc or .zshrc set up a githup api access token. It should look somethingg like this: `EXPORT github_sustain_sw_token=123456678sdfsdfsdfsdfsdfsdf`
@@ -18,7 +26,7 @@ This code was used in a year-long study looking at CHAOSS and other sustainabili
     node index.js --month 12 --urlList /path/to/urllist.txt
     ```
 
-## UI view
+## Data visualisation component
 
 Once you've run stats on a repo, there's a minimal UI to view the json and data more visually. To use it:
 
