@@ -1,7 +1,9 @@
-# sustainable-communities-tracker
-sustainable-communities-tracker
+# Sustainable communities tracker
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8082469.svg)](https://doi.org/10.5281/zenodo.8082469) 
 [![Node.js CI](https://github.com/yochannah/sustainable-communities-tracker/actions/workflows/node.js.yml/badge.svg)](https://github.com/yochannah/sustainable-communities-tracker/actions/workflows/node.js.yml)
+
+This code was used in a year-long study looking at CHAOSS and other sustainability metrics that might affect open communities that user version control hosting sites for collaboration. This mostly ended up being and/or open source, open science communities, and mostly on GitHub. 
 
 ## To set up
 
