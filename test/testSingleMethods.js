@@ -87,14 +87,30 @@ let expectedStillAliveReport = {
       kitten_mitten: 'ACTIVATED',
       ooga_bmaagal: 'INACTIVE',
       ooga_nachuga: 'ONGOING',
-      ooga_nistoveva: 'ONGOING', 
-      sevivon_sovssovsov: 'ONGOING' 
+      ooga_nistoveva: 'ONGOING',
+      sevivon_sovssovsov: 'ONGOING'
     },
     statusCounts: {
       ACTIVATED: 1,
       DECLINED: 1,
       INACTIVE: 1,
       ONGOING: 3
+    },
+    "byStatus": {
+      "ONGOING": [
+        "ooga_nistoveva",
+        "ooga_nachuga",
+        "sevivon_sovssovsov"
+      ],
+      "DECLINED": [
+        "kitten_catten"
+      ],
+      "INACTIVE": [
+        "ooga_bmaagal"
+      ],
+      "ACTIVATED": [
+        "kitten_mitten"
+      ]
     }
   },
   successfulResults: 6,
