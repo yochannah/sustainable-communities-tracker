@@ -15,6 +15,18 @@ layout: aggregate_reports
   </table>
 </div>
 
+<div class="aggGraph">
+  <table id="codeOfConduct">
+    <thead>
+      <th>Licence type</th>
+      <th> # of projects</th>
+    </thead>
+    <tbody>
+
+    </tbody>
+  </table>
+</div>
+
 
 <div class="aggGraph">
   <table>
@@ -156,6 +168,13 @@ layout: aggregate_reports
     columns : ["Contributing guidance found?","Month0", "Month12"],
     data : [contributingAgg.contributingGuidelines_m0,
     contributingAgg.contributingGuidelines_m12],
+    sortBy : "numeric",
+    keepNulls : false
+},{
+    elemId : "codeOfConduct",
+    columns : ["Code of Conduct found?","Month0", "Month12"],
+    data : [contributingAgg.cocPresent_m0,
+    contributingAgg.cocPresent_m12],
     sortBy : "numeric",
     keepNulls : false
 }
