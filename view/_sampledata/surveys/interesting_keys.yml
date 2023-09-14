@@ -1,0 +1,28 @@
+fixed_responses:
+  - RecordedDate
+  - project-open-contrib
+  - project-user-count
+  - project-user-potentl
+  - project-interns
+  - you-role
+  - leadership-team-size 
+  - you-paid 
+  - funds-grant-funds
+  - funds-others-pick-up
+  - funds-others-now
+  - funds-others-in-past
+  - future-funding-plans
+  - future-one-year
+  - future-five-years
+  - future-cant-maintain
+  - "funds-others-in-past - Parent Topics"
+  - "funds-others-in-past - Topics Unknown"
+free_text_responses: 
+  - project-open-contrib_3_TEXT
+  - project-user-count_7_TEXT
+  - project-user-potentl_7_TEXT
+  - you-paid_5_TEXT
+  - future-one-year_6_TEXTs
+  - future-five-years_6_TEXT
+  - future-cant-maintain_6_TEXT
+  - anything-else
