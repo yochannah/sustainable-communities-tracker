@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Copy sample data for public environment
-        run: pwd && mkdir _data && cp _sampledata/* -r _data
+        run: cd view && mkdir _data && cp _sampledata/* -r _data
         
    # Build view
   build-view:
@@ -60,7 +60,7 @@ jobs:
         uses: actions/configure-pages@v3
       - name: Build with Jekyll
         # Outputs to the './_site' directory by default
-        run: cd view && bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+        run: pwd && bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
         env:
           JEKYLL_ENV: production
       - name: Upload artifact
