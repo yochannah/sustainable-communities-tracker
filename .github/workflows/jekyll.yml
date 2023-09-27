@@ -42,7 +42,7 @@ jobs:
       - name: Change to Jekyll directory
         run: cd view && bundle install
       - name: Copy sample data for public environment
-        run: cd view && mkdir _data && cp _sampledata/* -r _data && ls _sampledata
+        run: cd view && mkdir _data && cp _sampledata/* -r _data && ls _data
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v3
