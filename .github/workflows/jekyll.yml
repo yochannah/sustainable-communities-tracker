@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Copy sample data for public environment
-        run: pwd && mkdir _data && cp _sampledata/* -r _data
+        run: ls && mkdir _data && cp _sampledata/* -r _data
         
    # Build view
   build-view:
