@@ -23,7 +23,7 @@ email: yochannah.yehudi@postgrad.manchester.ac.uk
 description: >- # this means to ignore newlines until "baseurl:"
   Quick visualisation for json gathered for sustainability communities tracker project.
 baseurl: "/sustainable-communities-tracker" # the subpath of your site, e.g. /blog
-url: "yochannah.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+url: "http://yochannah.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: yoyehudi
 github_username:  yochannah
 
