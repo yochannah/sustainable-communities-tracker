@@ -1,0 +1,1 @@
+{"isActive":false,"explanation":"Returns true if there was activity in this repo in the last month.","commitCount":0,"config":{"org":"ooga","repo":"bmaagal","since":"2021-12-07T00:00:00.000+00:00","until":"2022-01-07T00:00:00.000+00:00","method":"wasActive","filePath":"test/data_prep/test_files","owner":"ooga","octokit":{}},"dateRetrieved":"2023-09-05T15:22:18.934+01:00"}

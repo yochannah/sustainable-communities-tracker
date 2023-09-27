@@ -1,0 +1,468 @@
+const sortLabels = {
+    "scale": "Project Size",
+    "age": "Project Age"
+};
+
+const colForChart = {
+    "Yes": {
+        border: colors.solid.blue,
+        bg: colors.faded.blue
+    },
+    "No": {
+        border: colors.solid.yellow,
+        bg: colors.faded.yellow
+    },
+    "No answer": {
+        border: colors.solid.grey,
+        bg: colors.faded.grey
+    },
+    "1-10": {
+        border: colors.scaled.c30,
+        bg: colors.scaled.c20
+    },
+    "10-20": {
+        border: colors.scaled.c40,
+        bg: colors.scaled.c30
+    },
+    "20-50": {
+        border: colors.scaled.c50,
+        bg: colors.scaled.c40
+    },
+    "50-100": {
+        border: colors.scaled.c60,
+        bg: colors.scaled.c50
+    },
+    "100-1000": {
+        border: colors.scaled.c70,
+        bg: colors.scaled.c60
+    },
+    "1000-10,000": {
+        border: colors.scaled.c80,
+        bg: colors.scaled.c70
+    },
+    "still active and being maintained/updated, me still contributing": {
+        border: colors.solid.purple,
+        bg: colors.faded.purple
+    },
+    "still active and being maintained/updated by my colleagues": {
+        border: colors.solid.blue,
+        bg: colors.faded.blue
+    },
+    "still active and being maintained/updated by my community": {
+        border: colors.solid.green,
+        bg: colors.faded.green
+    },
+    "finalised with occasional updates": {
+        border: colors.solid.orange,
+        bg: colors.faded.orange
+    },
+    "wrapped up and no longer active": {
+        border: colors.solid.red,
+        bg: colors.faded.red
+    },
+    "Other, please specify": {
+        border: colors.solid.grey,
+        bg: colors.faded.grey
+    },
+    "My community members would keep this project running.": {
+        border: colors.solid.green,
+        bg: colors.faded.green
+    },
+    "My colleagues/employees would continue to work on this": {
+        border: colors.solid.blue,
+        bg: colors.faded.blue
+    },
+    "I would continue to provide updates in my free time": {
+        border: colors.solid.purple,
+        bg: colors.faded.purple
+    },
+    "I would provide periodic but rare updates when I could.": {
+        border: colors.solid.orange,
+        bg: colors.faded.orange
+    },
+    "I would close the project down": {
+        border: colors.solid.red,
+        bg: colors.faded.red
+    }
+}
+
+//never update this directly, please update by reference to colForChart.
+//kthx 
+const colForLegend = {
+    scale: {
+        "1-10": colForChart["1-10"],
+        "10-20": colForChart["10-20"],
+        "20-50": colForChart["20-50"],
+        "50-100": colForChart["50-100"],
+        "100-1000": colForChart["100-1000"],
+        "1000-10,000": colForChart["1000-10,000"],
+        "No answer": colForChart["No answer"]
+    },
+    bool: {
+        "Yes": colForChart["Yes"],
+        "No": colForChart["No"],
+        "No answer": colForChart["No answer"]
+    },
+    activity: {
+        "still active and being maintained/updated, me still contributing": colForChart["still active and being maintained/updated, me still contributing"],
+        "still active and being maintained/updated by my colleagues": colForChart["still active and being maintained/updated by my colleagues"],
+        "still active and being maintained/updated by my community": colForChart["still active and being maintained/updated by my community"],
+        "finalised with occasional updates": colForChart["finalised with occasional updates"],
+        "wrapped up and no longer active": colForChart["wrapped up and no longer active"],
+        "Other, please specify": colForChart["Other, please specify"],
+        "No answer": colForChart["No answer"]
+    }, maintenance: {
+        "My community members would keep this project running.": colForChart["My community members would keep this project running."],
+        "My colleagues/employees would continue to work on this": colForChart["My colleagues/employees would continue to work on this"],
+        "I would continue to provide updates in my free time": colForChart["I would continue to provide updates in my free time"],
+        "I would provide periodic but rare updates when I could.": colForChart["I would provide periodic but rare updates when I could."],
+        "I would close the project down": colForChart["I would close the project down"]
+    }
+}
+
+const orderOfThings = {
+    scale: ["1-10", "10-20", "20-50", "50-100", "100-1000", "1000-10,000", "Other, please specify", "No answer", "null"],
+    bool: ["Yes", "No", "No answer", "null"],
+    activity: [
+        "still active and being maintained/updated, me still contributing",
+        "still active and being maintained/updated by my colleagues",
+        "still active and being maintained/updated by my community",
+        "finalised with occasional updates",
+        "wrapped up and no longer active",
+        "Other, please specify",
+        "No answer",
+        "null"
+    ], maintenance: [
+        "My community members would keep this project running.",
+        "My colleagues/employees would continue to work on this",
+        "I would continue to provide updates in my free time",
+        "I would provide periodic but rare updates when I could.",
+        "I would close the project down",
+        "Other, please specify",
+        null // apparently this works just as well as the string null does. 
+    ],
+    permanence: [
+        "No",
+        "Other, please specify",
+        "Yes, as a staff member with a permanent contract",
+        "Yes, as a student",
+        "Yes, as a staff member with a temporary or fixed-term contract",
+        "Other, please specify",
+        null]
+}
+
+const sorts = {
+    answerScale: function (k1, k2) {
+        let num1 = parseFloat(k1), num2 = parseFloat(k2);
+        //if they parsed into numbers, not NaNs, sort them numberwise. 
+        if (num1 && num2) {
+            return (num1 - num2);
+        } else if (num1) {
+            return -1;
+        } else if (num2) {
+            return 1;
+        } else {
+            return 0;
+        }
+    },
+    numeric: function (a, b) { return a - b; },
+    scale: function (a, b) {
+        let scale = orderOfThings.scale;
+        aScaleIndex = scale.indexOf(a["project-user-count"]);
+        bScaleIndex = scale.indexOf(b["project-user-count"]);
+
+        //handle nulls
+        if (!aScaleIndex && bScaleIndex) {
+            return 1; //b is "bigger"
+        }
+        if (!bScaleIndex && aScaleIndex) {
+            return -1; //a is "bigger" 
+        }
+        //normal non-null sort
+        if (aScaleIndex > bScaleIndex) {
+            return -1;
+        }
+        if (bScaleIndex > aScaleIndex) {
+            return 1;
+        }
+        return 0;
+    }, age: function (a, b) {
+        let ages = agesByProjName;
+        let aDate = new Date(ages[a.ProjectPseudonym]);
+        let bDate = new Date(ages[b.ProjectPseudonym]);
+        if (aDate < bDate) {
+            return -1;
+        }
+        if (aDate > bDate) {
+            return 1;
+        }
+        return 0;
+    }
+}
+
+const sortSurveyData = function (anArray, sortBy) {
+    let response;
+
+    if (sortBy == "age") {
+        response = anArray.sort(sorts.age);
+    } else if (sortBy == "scale") {
+        response = anArray.sort(sorts.scale);
+    } else if (sortBy == "answerScale") {
+        response = anArray.sort(sorts.answerScale);
+    } else {
+        response = anArray.sort(function (a, b) {
+            if (a[sortBy] < b[sortBy]) {
+                return -1;
+            }
+            if (b[sortBy] < a[sortBy]) {
+                return 1;
+            }
+            //if all else failed, they're equal: 
+            return 0;
+        });
+    }
+    return response;
+}
+
+//right now all our separators are tabs. 
+//also, mcstring was intended to mean "M C string", as in 
+// multiple choice string, but now it's making me laugh
+// like M C hammer or boaty mcboatface. 
+const multichoiceToArr = function (mcString) {
+    let separator = /[\t]+/gm;
+    let separated;
+    if (mcString) {
+        separated = mcString.trim().split(separator);
+        //sometimes an other might still get in here, 
+        //if it's part of a longer string. This is infuriating, 
+        //but I don't want to ddo a massively complex regex to fix it
+        // so we'll just nip it out of the array. 
+        //we snip two items out. 
+        //One is "Other" and the other is " please specify"
+        if (separated.length > 1) {
+            return separated;
+        } else {
+            return mcString.trim();
+        }
+    } else if (mcString == "Other, please specify") {
+        return mcString;
+    }
+    else {
+        return null;
+    }
+}
+
+const graphs = [
+    { name: "project-open-contrib", type: "bool", datalabels: true },
+    { name: "funds-grant-funds", type: "bool", datalabels: true },
+    { name: "funds-others-pick-up", type: "bool", datalabels: true },
+    { name: "future-funding-plans", type: "bool", datalabels: true },
+    { name: "project-user-count", type: "scale", datalabels: true },
+    { name: "project-user-potentl", type: "scale", datalabels: true },
+    { name: "future-one-year", type: "activity", datalabels: false },
+    { name: "future-five-years", type: "activity", datalabels: false }
+];
+
+const mcGraphs = [
+    {
+        name: "future-cant-maintain",
+        type: "maintenance",
+        datalabels: false,
+        multichoice: true
+    },
+    {
+        name: "you-paid",
+        type: "permanence",
+        datalabels: false,
+        multichoice: true
+    }];
+
+    const roleGraphs = [    {
+        name: "you-role",
+        type: "free-text-job-role",
+        datalabels: false,
+        multichoice: true
+    }];
+
+    const leaderTables = [    {
+        name: "leadership-team-size",
+        type: "free-text-number",
+        datalabels: true,
+        multichoice: false
+    }];
+
+const staffGraphs = [
+    {
+        name: "funds-others-now",
+        type: "free-text-number",
+        datalabels: true,
+        multichoice: false,
+        sortBy: "answerScale"
+    },
+    {
+        name: "funds-others-in-past",
+        type: "free-text-number",
+        datalabels: true,
+        multichoice: false,
+        sortBy: "answerScale"
+    },
+    {
+        name: "leadership-team-size",
+        type: "free-text-number",
+        datalabels: true,
+        multichoice: false,
+        sortBy: "answerScale"
+    },
+    {
+        name: "project-interns",
+        type: "free-text-number",
+        datalabels: true,
+        multichoice: false,
+        sortBy: "answerScale"
+    }
+];
+
+//these will require a tidy
+const numericGraphs = [
+    "leadership-team-size"
+];
+
+//filter incomplete answers. I feel like there's a more concise way to do it. 
+survey0 = survey0.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
+survey6 = survey6.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
+survey12 = survey12.filter(answer => (answer["project-open-contrib"] == "Yes") || (answer["project-open-contrib"] == "No"));
+
+const surveys = [survey0, survey6, survey12];
+
+//aggregate stats across rows
+function agg_completed_bool(survey, variable) {
+    return survey.reduce(function (newVal, answer, i) {
+        //init datastore object
+        if (i === 1) {
+            newVal = {
+                "Yes": 0,
+                "No": 0
+            }
+        } else {
+            if (!(answer[variable] in newVal)) {
+                // console.debug('null value, not adding', answer, answer[variable]);
+            } else {
+                newVal[answer[variable]]++;
+            }
+        }
+        return newVal;
+    });
+}
+
+//maybe this can be deletedd? idk? I liked some of these grraphs
+function generateDataSet(variable) {
+    return surveys.map(function (survey, i) {
+        return {
+            data: agg_completed_bool(survey, variable),
+            label: datasetLabels[i],
+            backgroundColor: backgroundColor[i],
+            borderColor: borderColor[i],
+            borderWidth: 1
+        }
+    });
+};
+
+const generateChart = function (variable) {
+    try {
+        return new Chart(document.getElementById('chart' + variable), {
+            type: 'bar',
+            data: {
+                datasets: generateDataSet(variable)
+            },
+            options: {
+
+                plugins: {
+                    title: {
+                        text: questionText[variable],
+                        display: true
+                    }
+                },
+                backgroundColor: backgroundColor,
+                borderColor: borderColor
+            }
+        });
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+const generateNumChart = function (variable) {
+    try {
+        return new Chart(document.getElementById('chart' + variable), {
+            type: 'bar',
+            data: {
+                datasets: generateDataSet(variable)
+            },
+            options: {
+                indexAxis: 'x',
+                plugins: {
+                    title: {
+                        text: questionText[variable],
+                        display: true
+                    }
+                },
+                backgroundColor: backgroundColor,
+                borderColor: borderColor
+            }
+
+        });
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+/**
+ * @argument elemType {string} e.g. charrt, table.
+ * @argument elemName {string} unique id, usually the var it's outputting
+ * @argument anchor {string} parent element it lives in. 
+ * */
+const generateId = function (elemType, elemName, anchor) {
+    return `${elemType}${elemName}${anchor}`;
+}
+
+const generateElem = function (config, anAnchor, canvas) {
+    let chartBox, a, legendHtml, header, txt;
+    chartBox = document.createElement("div");
+    chartBox.classList = "aggGraph";
+
+    header = document.createElement("div");
+    header.classList = "questionText";
+    txt = document.createTextNode(questionText[config.name]);
+    header.appendChild(txt);
+
+    if (anAnchor) { a = anAnchor; } else { a = "aggregateAnchor" }
+
+    let anchor = document.getElementById(a);
+    let chartElemHtml;
+    let chartId = generateId('chart', config.name, a);
+
+    if (canvas) {
+        chartElemHtml = `<canvas id="${chartId}" width="300" height="400"></canvas>`;
+    } else {
+        chartElemHtml = `<div id="${chartId}" width="300" height="400"></div>`;
+    }
+
+    chartBox.innerHTML = chartElemHtml;
+    chartBox.prepend(header);
+
+    if (config.type) {
+        let legendId = generateId('legend', config.name, a);
+        legendHtml = `<div id="${legendId}" class="legend"></div>`;
+        chartBox.innerHTML += legendHtml;
+    }
+
+    anchor.appendChild(chartBox);
+}
+
+function percent(bigNum, littleNum) {
+    //cal the percentage...
+    let valAsPercent = littleNum / bigNum * 100;
+    //two decimals is enough, thx
+    valAsPercent = Math.round(valAsPercent * 100) / 100;
+    return `${valAsPercent}%`;
+}

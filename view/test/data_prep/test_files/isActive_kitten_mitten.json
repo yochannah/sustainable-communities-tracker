@@ -1,0 +1,1 @@
+{"isActive":false,"explanation":"Returns true if there was activity in this repo in the last month.","commitCount":0,"config":{"org":"kitten","repo":"mitten","since":"2022-05-15T00:00:00.000+01:00","until":"2022-06-15T00:00:00.000+01:00","method":"isActive","filePath":"test/data_prep/test_files","owner":"kitten","octokit":{}},"dateRetrieved":"2023-09-05T15:22:18.925+01:00"}

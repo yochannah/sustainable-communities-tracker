@@ -3,19 +3,19 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.7.1 -->
-<title>Staffing | Sustainable communities tracker</title>
+<title>Still Alive | Sustainable communities tracker</title>
 <meta name="generator" content="Jekyll v4.3.2" />
-<meta property="og:title" content="Staffing" />
+<meta property="og:title" content="Still Alive" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Quick visualisation for json gathered for sustainability communities tracker project." />
 <meta property="og:description" content="Quick visualisation for json gathered for sustainability communities tracker project." />
-<link rel="canonical" href="http://localhost:4000/agg/staffing.html" />
-<meta property="og:url" content="http://localhost:4000/agg/staffing.html" />
+<link rel="canonical" href="http://localhost:4000/still_alive.html" />
+<meta property="og:url" content="http://localhost:4000/still_alive.html" />
 <meta property="og:site_name" content="Sustainable communities tracker" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Staffing" />
+<meta property="twitter:title" content="Still Alive" />
 <script type="application/ld+json">
-{"@type":"WebPage","headline":"Staffing","url":"http://localhost:4000/agg/staffing.html","description":"Quick visualisation for json gathered for sustainability communities tracker project.","@context":"https://schema.org"}</script>
+{"@type":"WebPage","headline":"Still Alive","url":"http://localhost:4000/still_alive.html","description":"Quick visualisation for json gathered for sustainability communities tracker project.","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Sustainable communities tracker" /></head>
 <body><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.js"></script>
@@ -732,402 +732,184 @@ function aggTable(config) {
       </nav></div>
 </header>
 <main class="page-content" aria-label="Content">
-    <div class="wrapper">
+      <div class="sidebar_style">
+        <!-- yes, I know this isn't very semantic at all--><div class="sidebar">
+  <div>
+    <h4>Status meanings</h4>
+    <dl>
+      <div class="declined">
+        <dt class="declined status">Declined:
+        </dt>
+        <dd>Was active, now inactive</dd>
+      </div>
+      <div class="activated">
+        <dt class="activated status">Activated:
+        </dt>
+        <dd>Was inactive, now active</dd>
+      </div>
 
-      <h1>Staffing</h1>
+      <div class="ongoing">
+        <dt class="ongoing status">Ongoing:
+        </dt>
+        <dd>Was active at start and end of study</dd>
+      </div>
+      <div class="inactive">
+        <dt class="inactive status">Inactive:
+        </dt>
+        <dd>Was inactive at start and end of study</dd>
+      </div>
+    </dl>
+    
 
-      <div id="leaderTable"></div>
-<div id="staffGraphsScale"></div>
-<div id="staffGraphsAge"></div>
-<div id="roleGraphs"></div>
-<div id="staffTables"></div>
+    
+
+    
+
+      <h4 class="status ACTIVATED">ACTIVATED</h4>
+      <div class="statuses">
+        
+        
+      </div>
+    
+
+      <h4 class="status DECLINED">DECLINED</h4>
+      <div class="statuses">
+        
+        
+      </div>
+    
+
+      <h4 class="status INACTIVE">INACTIVE</h4>
+      <div class="statuses">
+        
+        
+      </div>
+    
+
+      <h4 class="status ONGOING">ONGOING</h4>
+      <div class="statuses">
+        
+        
+      </div>
+    
+  </div>
+
+  <div>URLs queried: , Successful results retrieved for:  repos.
+  </div>
+</div><div class="vis">
+
+          <h1>Still Alive</h1>
+
+          <div>
+    
+    <h3>Still Alive breakdown by repo</h3>
+    <h4>Counts </h4>
+    <canvas id="stillAliveSummary"  ></canvas>
+
+</div>
 
 <script>
 
-    function generateLeaderRoleChart(config, anchor) {
-        let chartId = generateId('chart', config.name, anchor);
-        //we don't actually need "m0" here, but countEntries expects it..
-        let data = {
-            m0: {
-            }, Respondents: { m0: 0 }
-        };
+    const statusCounts = null,
+    aliveArr = null;
 
-        try {
-            keys = jobtitles;
-            keys.map(function (k) {
-                data[k] = { m0: 0 };
-            });
+    let statusColors = sc = { // sugar so it doesn't get too long
+        counts : [],
+        colors : [],
+        borders : []
+    };
 
-            let roles = countEntries(config, "m0", survey0, data);
-            let rolesHtml = `
-            <div class="aggGraph">
-            <table>
-            <thead>
-                <tr>
-                    <th>Role name</th>
-                    <th># of respondents</th>
-                </tr>
-            </thead>
-            <tbody>
-            `;
-            let metaKeys = ["m0"];
-            Object.entries(roles).map(function ([roleName, roleVal]) {
-                if (metaKeys.indexOf(roleName) < 0) {
-                    //so long as it is a REAL response answer...
-                    let num = roleVal.m0;
-                    let asPercent = `
-                    (${percent(roles.Respondents.m0, num)})
-                    `;
-                    if (roleName == "Respondents") {
-                        asPercent = "";
-                    }
-                    rolesHtml += `
-                <tr>
-                    <td>${roleName}</td>
-                    <td>${num} ${asPercent}</td>
-                </tr>
-                `;
-                }
-            });
-            rolesHtml += `</tbody></table></div>`;
-            document.getElementById(chartId).innerHTML += rolesHtml;
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    /**
-     * @argument {string[]} anArr array of Strings, which is at least partially comprised of integers or floats that have been made into strings att some point.
-     * @returns {Object} minimum and maximum floats in this array, if we manage to coerce them from strings.
-     * */
-    const getMinMaxNums = function (anArr) {
-        let response = {
-            min: "No numbers in this Array.",
-            max: "No numbers in this Array."
-        }, temp = [];
-
-        anArr.map(function (item) {
-            if (item) {
-                let numItem = parseFloat(item);
-                if (numItem) {
-                    temp.push(numItem);
-                }
-            }
-            if (temp.length > 0) {
-                temp = temp.sort(sorts.numeric);
-                response.min = temp[0];
-                response.max = temp[temp.length - 1];
-            }
+    //format the data so we can colour the bars nicely. 
+    for (status in statusCounts) {
+        let color = backgroundColors[status],
+        border= borderColors[status];
+        sc.counts.push({
+            status : status,
+            count : statusCounts[status]
         });
-        return response;
+        sc.colors.push(color);
+        sc.borders.push(border);
     }
 
-    const generateNumbChart = function (config, sortBy, elem) {
-        try {
-            let visData = sortData(config.name, sortBy, null, true);
-            let allVals = visData.m0.concat(visData.m6, visData.m2);
-            let minMax = getMinMaxNums(allVals);
-
-            let fill = Array(visData.m0.length).fill(1);
-            let fill1 = Array(visData.m0.length).fill(0);
-            // this positions the labels on half-ticks, which looks a lot better.
-            let months = [
-                null,
-                "Month 0",
-                null,
-                "Month 6",
-                null,
-                "Month 12"
-            ];
-
-            //note that this returns a partially composed function,
-            //NOT a static value.
-            function datalabelsNumFormatter(dataset) {
-                if (config.datalabels) {
-                    return function (value, context) {
-                        let val = dataset[context.dataIndex];
-                        if (val) {
-                            //this is complicated
-                            //a long string that starts with a number will
-                            //parse into a number! and I want to truncate 
-                            // long strings, but not truncate numbers.
-                            //luckly, NONE of our genuine numeric values 
-                            //are longer than 6 chars (any OSS project 
-                            //would be delighted to have that many staff!) 
-                            //so truncating everything, regardless of type
-                            //will still only trucate the strings.
-                            if (val.length > 6) {
-                                return val.slice(0, 6) + "...";
-                            } else {
-                                return val;
-                            }
-
-
-                        }
-                        return "";
-                    }
-                } else {
-                    return function () { return "" }; // no label
+    const config = {
+        type: 'bar',
+        data: {
+            datasets: [{
+                label: 'Repo activity, mid 2021 to mid/late 2022.',
+                data: sc.counts,
+                backgroundColor: sc.colors,
+                borderColor : sc.borders,
+                borderWidth:1
+            }]
+        },
+        options: {
+            parsing:{
+                xAxisKey : "status",
+                yAxisKey : "count"
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
                 }
             }
-            bgFormatter = function (minMax, dataset, border) {
-                return function (value, context) {
-                    let val = dataset[value.dataIndex]
-                    val = parseFloat(val);
-                    if (!val) {
-                        //it's a string! but we still need to be able to read it.
-                        // so we'll make it a white (0% opaque) background.
-                        val = 0;
-                    }
-                    let opacity = val / minMax.max;
-                    if (border) {
-                        opacity = opacity + 0.1;
-                        if (opacity > 1) { opacity = 1; }
-                    }
-                    return `rgba(54,162,235,${opacity})`;
-                }
-            };
+        },
+        plugins: { legend: false }
+    };
 
-            let theId = generateId('chart', config.name, elem);
-            return new Chart(document.getElementById(theId), {
-                type: 'bar',
-                data: {
-                    labels: visData.names,
-                    datasets: [
-                        {
-                            data: fill,
-                            backgroundColor: bgFormatter(minMax, visData.m0),
-                            borderColor: bgFormatter(minMax, visData.m0, true),
-                            stack: 'Stack 0', datalabels: {
-                                formatter: datalabelsNumFormatter(visData.m0)
-                            }, yAxisID: 'y'
-                        }, {
-                            data: fill,
-                            backgroundColor: bgFormatter(minMax, visData.m6),
-                            borderColor: bgFormatter(minMax, visData.m6, true),
-                            stack: 'Stack 0',
-                            datalabels: {
-                                formatter: datalabelsNumFormatter(visData.m6)
-                            }, yAxisID: 'y'
-                        }, {
-                            data: fill,
-                            datalabels: {
-                                formatter: datalabelsNumFormatter(visData.m12)
-                            },
-                            backgroundColor: bgFormatter(minMax, visData.m12),
-                            borderColor: bgFormatter(minMax, visData.m12, true),
-                            stack: 'Stack 0',
-                            yAxisID: 'y'
-                        },
-                        {
-                            data: fill1,
-                            labels: visData.y2,
-                            yAxisID: 'y2',
-                            datalabels: {
-                                display: false
-                            }
-                        }
-                    ]
-                },
-                options: {
-                    aspectRatio: 0.7,
-                    scales: {
-                        x: {
-                            ticks: {
-                                callback: function (value, index, ticks) {
-                                    return months[index];
-                                }
-                            }
-                        },
-                        y: {
+    let chart = new Chart(
+        document.getElementById('stillAliveSummary'), config);
 
-                            position: 'left',
-                            ticks: {
-                                callback: function (value, index, ticks) {
-                                    return this.getLabelForValue(value);
-                                },
-                                autoSkip: false
-                            }
-                        },
-                        y2: {
-                            title: {
-                                display: true,
-                                text: sortLabels[sortBy]
-                            },
-                            position: 'right',
-                            grid: {
-                                drawOnChartArea: false // only want the grid lines for one axis to show up
-                            },
-                            ticks: {
-                                callback: function (value, index, ticks) {
-                                    return visData.y2[index];
-                                },
-                                autoSkip: false
-                            }
-                        }
-                    },
-                    indexAxis: 'y',
-                    plugins: {
-                        subtitle: {
-                            display: true,
-                            text: function () {
-                                if (sortBy) {
-                                    return `Sorted by ${sortBy}, high to low`;
-                                } else {
-                                    return `Sorted by order of response to month0 surveys, most recent to earliest`;
-                                }
-                            }
-                        },
-                        legend: {
-                            display: false
-                        }
-                    }
-                },
-                // plugins: [htmlLegendPlugin]
-            });
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    function generateLeaderTable(config, elem, anchor) {
-        let chartId = generateId('chart', config.name, anchor);
-        let data = {
-            Respondents: { m0: 0, m6: 0, m12: 0 }
-        };
-
-        try {
-            keys = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-            keys.map(function (k) {
-                data[k] = {
-                    m0: 0,
-                    m6: 0,
-                    m12: 0
-                }
-            });
-            console.log('😲 data', data);
-
-
-            countEntries(config, "m0", survey0, data);
-            countEntries(config, "m6", survey6, data);
-            countEntries(config, "m12", survey12, data);
-
-            let rolesHtml = `
-            <div class="aggGraph">
-            <table>
-            <thead>
-                <tr>
-                    <th># of members in leadership team</th>
-                    <th># of projects with this # of leaders: M0</th>
-                    <th># of projects with this # of leaders: M6</th>
-                    <th># of projects with this # of leaders: M12</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td># of respondents</td>
-                    <td>${data.Respondents.m0}</td>
-                    <td>${data.Respondents.m6}</td>
-                    <td>${data.Respondents.m12}</td>
-                </tr>
-            `;
-            let metaKeys = ["m0", "m6", "m12", "Respondents"];
-
-            let tableCell = function (fraction, total, month) {
-                let val = fraction[month];
-                let response = `
-                    <td>
-                    ${val}`;
-                if (val > 0) {
-                    response += `
-                    (${percent(total[month], val)})
-                    `;
-                }
-                response += `</td>`
-                return response;
-            };
-
-            Object.entries(data).map(function ([numOfLeaders, monthVal]) {
-                if (metaKeys.indexOf(numOfLeaders) < 0) {
-                    //so long as it is a REAL response answer...
-                    rolesHtml += `<tr>`;
-                    rolesHtml += `<td>${numOfLeaders}</td>`
-                    rolesHtml += tableCell(monthVal, data.Respondents, "m0");
-                    rolesHtml += tableCell(monthVal, data.Respondents, "m6");
-                    rolesHtml += tableCell(monthVal, data.Respondents, "m12");
-                    rolesHtml += `</tr>`;
-                }
-            });
-
-            let sumUp = function(data, toSum){
-                let response = {m0:0,m6:0,m12:0};
-                toSum.map(function(val){
-                    response.m0 += data[val]['m0'];
-                    response.m6 += data[val]['m6'];
-                    response.m12 += data[val]['m12'];
-                });
-                return response;
-            }
-
-            //I'm aggregating the aggregates into EVEN aggregater buckets
-            //aggregater is a word now, I declare it.
-            let aggAgg = {
-                "1": data[1],
-                "2": data[2],
-                "3 to 5": sumUp(data, [3,4,5]),
-                "6 to 9": sumUp(data, [6,7,8,9]),
-                "10+": sumUp(data, [10,11,12,13,14,15])
-            }
-
-           Object.entries(aggAgg).map(function([name, val]){
-
-            rolesHtml += `<tr>
-                <td>${name}</td>
-                <td>${val.m0} (${percent(data.Respondents.m0, val.m0)})</td>
-                <td>${val.m6} (${percent(data.Respondents.m0, val.m6)})</td>
-                <td>${val.m12} (${percent(data.Respondents.m0, val.m12)})</td>                
-                </tr>`;
-           });
-
-            
-
-            rolesHtml += `</tbody></table></div>`;
-            document.getElementById(chartId).innerHTML += rolesHtml;
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    leaderTables.map(function (config) {
-        generateElem(config, "leaderTable", false)
-    });
-    leaderTables.map(function (config) {
-        generateLeaderTable(config, "age", "leaderTable");
-    });
-    staffGraphs.map(function (config) {
-        generateElem(config, "staffGraphsAge", true);
-        generateElem(config, "staffGraphsScale", true);
-        generateElem(config, "staffTables", false);
-    });
-    roleGraphs.map(function (config) {
-        generateElem(config, "roleGraphs", true)
-    });
-    roleGraphs.map(function (config) {
-        generateLeaderRoleChart(config, "roleGraphs");
-    });
-    staffGraphs.map(function (config) {
-        generateNumbChart(config, "age", "staffGraphsAge");
-        generateNumbChart(config, "scale", "staffGraphsScale");
-        generateAggTable(config, "staffTables");
-    });
-
-
-
-</script>
-
+</script><div>
+    
+    <h3>Commit count breakdown by repo (logarithmic scale)</h3>
+    <div id="legend-container"></div>
+    <canvas id="commitSummary"></canvas>
+    <div>URLs queried: , Successful results retrieved for:  repos.
     </div>
+</div>
 
-  </main><footer class="site-footer h-card">
+<script>
+    let commitArr = null;
+
+    const commitConfig = {
+        type: 'bar',
+        data: {
+            datasets: [{
+                data: commitArr,
+                backgroundColor: bgColorsArray(commitArr, aliveArr),
+                borderColor: bgColorsArray(commitArr, aliveArr,true) ,
+                borderWidth:1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    type: 'logarithmic'
+                }
+            },
+            parsing: {
+                xAxisKey: 'repoName',
+                yAxisKey: 'commitCount'
+            },
+            plugins: {
+                htmlLegend: {
+                    // ID of the container to put the legend in
+                    containerID: 'legend-container',
+                },
+                legend: {
+                    display: false,
+                }
+            }
+        },
+        plugins: [htmlLegendPlugin]
+    };
+
+    new Chart(
+        document.getElementById('commitSummary'), commitConfig);
+
+</script></div>
+</main><footer class="site-footer h-card">
   <data class="u-url" href="/"></data>
 
   <div class="wrapper">
@@ -1152,5 +934,4 @@ function aggTable(config) {
 
 </footer>
 </body>
-
 </html>
