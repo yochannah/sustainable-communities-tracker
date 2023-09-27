@@ -44,6 +44,7 @@ jobs:
 
    # Copy sample data
   copy-data:
+    needs: setup-env
     runs-on: ubuntu-latest
     steps:
       - name: Copy sample data for public environment
@@ -52,7 +53,7 @@ jobs:
    # Build view
   build-view:
     runs-on: ubuntu-latest
-    needs: [setup-env, copy-data]
+    needs: copy-data
     steps:
       - name: Setup Pages
         id: pages
