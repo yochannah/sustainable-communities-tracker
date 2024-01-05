@@ -1,0 +1,20 @@
+---
+title: Time To Close
+layout: repos_aggregated
+---
+
+
+<div class="aggGraph">
+  <h3>Time To Close Issues and PRs</h3>
+  <canvas id="prsAge"></canvas>
+  <canvas id="prsScale"></canvas>
+  <div id="noCommits"></div>
+</div>
+
+
+
+<script>
+  generateTable('prsGraphAge', "age");
+  generateTable('prsGraphScale', "scale");
+
+</script>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+
+  {%- include head.html -%}
+  <body>
+
+    {%- include header.html -%}
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        {% capture repo_list %}
+          {% for repo in site.data.repo.repo %}
+            {{ repo.reponame }}
+            {% if forloop.last == false %}::{% endif %}
+          {% endfor %}
+        {% endcapture %}
+
+        {% assign repo_array = repo_list | split: '::' | sort_natural %}
+        
+        <script>
+          //I'll be the first to admit that outputting liquid into json
+          //is a bit cursed. It works, I'm confident it's correct, and I
+          // don't need to maintain it long term, so we'll survive. 
+        var aggData = [
+        {% for repo in repo_array %}
+          {% assign repoClean = repo | strip %} 
+          {% assign project = site.data.project-name-to-pseudonym[repoClean] %}
+          {% assign info = site.data.month0[repoClean] %}
+          {% assign info6 = site.data.month6[repoClean] %}
+          {% assign info12 = site.data.month12[repoClean] %}
+
+          {
+            "name" : {{ project | jsonify }},
+            "commits" :  {
+            "m0" : {{ info.commitCount | jsonify}},
+            "m6" : {{ info6.commitCount | jsonify}},
+            "m12": {{ info12.commitCount | jsonify}}
+          },
+          "pr" : {
+            "m0" : {{ info.timeToMerge.timeToClose.pr | jsonify}},
+            "m6" : {{ info6.timeToMerge.timeToClose.pr | jsonify}},
+            "m12": {{ info12.timeToMerge.timeToClose.pr | jsonify}}
+          },
+          "issue" : {
+            "m0" : {{ info.timeToMerge.timeToClose.issue | jsonify}},
+            "m6" : {{ info6.timeToMerge.timeToClose.issue | jsonify}},
+            "m12": {{ info12.timeToMerge.timeToClose.issue | jsonify}}
+          },
+          "committers" : {
+            "m0" : {{ info.contributors.size | jsonify}},
+            "m6" : {{ info6.contributors.size | jsonify}},
+            "m12": {{ info12.contributors.size | jsonify}}
+          }
+        }{% if forloop.last == false %} , {% endif %}
+
+        {% endfor %}
+        ];
+        </script>
+
+      </div>
+
+
+    </main>
+
+    {%- include footer.html -%}
+
+  </body>
+
+</html>
