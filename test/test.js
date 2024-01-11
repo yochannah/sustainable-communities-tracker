@@ -44,7 +44,6 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
         assert.equal(result.issues.closed, 5184);
         assert.equal(result.issues.all,
           result.issues.closed + result.issues.open);
-
       });
     });
 
@@ -55,18 +54,19 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
           assert.strictEqual(hammerTime.pr.mean.ms, 37195311);
         });
         it('for issues', function() {
-          assert.equal(hammerTime.issue.mean.ms, 104784230);
+          assert.strictEqual(hammerTime.issue.mean.ms, 104784230);
         });
       });
       describe('should return median time to close correctly', function() {
         it('for PRs', function() {
-          assert.equal(hammerTime.pr.median.ms, 2295000);
+          assert.strictEqual(hammerTime.pr.median.ms, 2295000);
         });
         it('for issues', function() {
           assert.strictEqual(hammerTime.issue.median.ms, 176219000);
         });
         it('should cast string-numbers into real numbers', function(){
-          return true;
+          assert.equal(typeof hammerTime.issue.median.ms, "number");
+          assert.notEqual(typeof hammerTime.issue.median.ms, "string");
         });
       });
     });
