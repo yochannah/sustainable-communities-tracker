@@ -33,10 +33,11 @@ function fakeIssues(howMany, isPrOrIssue, state) {
     }
 
     let isItClosed = isClosed(state,i),
+    closeTimeinMs = (now - closeTimes[i]).toString();
     response = {
       id: new Date().valueOf() +i, //this is hacky, if we ever care about ids
                                    //right now we don't really. But be aware.
-      created_at: (now - closeTimes[i])+"", // simulates strings. Should be handled gracefully.
+      created_at: closeTimeinMs, 
       closed: isClosed(state,i),
       pr_or_issue: prOrIssue,
     }

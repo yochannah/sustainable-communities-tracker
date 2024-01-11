@@ -420,7 +420,7 @@ async function timeToMergePrOrIssue(config) {
     }
 
     //calculate closed/merged time if known
-    let createdTime = new Date(response.created_at);
+    let createdTime = new Date(parseInt(response.created_at, 10));
 
     if (response.closed) {
       let closedTime = new Date(response.merged_at || response.closed_at);
@@ -467,8 +467,10 @@ async function timeToMergePrOrIssue(config) {
 function calculateMedian(anArray) {
   //needs to be sorted if we want to get the middlest  (median) value
   if (anArray.length) {
+    // sometime we end up with strings, and an alphabetic string sort DOES NOT give a numeric median... 
+    // so MAKE SURE we have numbers: 
+    anArray = anArray.map(item => parseInt(item, 10));
     anArray.sort();
-
     let len = anArray.length,
       middlePosition = len / 2,
       middlestValue;
@@ -498,7 +500,7 @@ function calculateMean(anArray) {
   // so we round it.
   if (anArray.length) {
     let sum = anArray.reduce(function (a, b) {
-      return a + b;
+      return parseInt(a, 10) + parseInt(b, 10);
     });
     return Math.round(sum / anArray.length);
   } else {
