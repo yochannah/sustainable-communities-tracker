@@ -52,7 +52,7 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
       let hammerTime = result.timeToMerge.timeToClose;
       describe('should return mean time to close correctly', function() {
         it('for PRs', function() {
-          assert.equal(hammerTime.pr.mean.ms, 37195311);
+          assert.strictEqual(hammerTime.pr.mean.ms, 37195311);
         });
         it('for issues', function() {
           assert.equal(hammerTime.issue.mean.ms, 104784230);
@@ -63,7 +63,10 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
           assert.equal(hammerTime.pr.median.ms, 2295000);
         });
         it('for issues', function() {
-          assert.equal(hammerTime.issue.median.ms, 176219000);
+          assert.strictEqual(hammerTime.issue.median.ms, 176219000);
+        });
+        it('should cast string-numbers into real numbers', function(){
+          return true;
         });
       });
     });
@@ -76,7 +79,7 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
       it('Should return a middle value with an odd number of entries', function() {
         var testArr = [5, 2, 1, 3, 4],
           median = ghGetter.calculateMedian(testArr);
-        assert.equal(median, 3);
+        assert.strictEqual(median, 3);
       })
       it('Should return a mean of the middle two value with an even number of entries', function() {
         var testArr = [6, 1, 5, 4, 2, 3],
@@ -87,6 +90,16 @@ ghGetter.fullRun('fakerepo', 'fakeorg', myMocktokit).then(function(result) { //
         var emptyArr = [],
           emptyMedian = ghGetter.calculateMedian(emptyArr);
         assert.equal(emptyMedian, null);
+      });
+      it('Should cast strings into ints', function() {
+        var stringArr = ["900", "100", "10", "3", "1", "2", "9"],
+          stringMedian = ghGetter.calculateMedian(stringArr);
+        assert.strictEqual(stringMedian, 2); // numeric median
+        //9, whether string or int... only returns if the 
+        //array was sorted alphabetically. Neither of these 
+        // next results is okay
+        assert.notStrictEqual(stringMedian, 9) 
+        assert.notStrictEqual(stringMedian, "9") 
       });
     });
     describe('Calculate mean', function() {

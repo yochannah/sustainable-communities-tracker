@@ -1,6 +1,6 @@
 
 const headers = require("./fake_header"),
- closeTimes = require("./fake_times_to_close");
+ closeTimes = require("./fake_times_to_close_string");
 
 function isClosed(state, i) {
   //this function returns boolean false for open if state is open,
@@ -36,7 +36,7 @@ function fakeIssues(howMany, isPrOrIssue, state) {
     response = {
       id: new Date().valueOf() +i, //this is hacky, if we ever care about ids
                                    //right now we don't really. But be aware.
-      created_at: now - closeTimes[i],
+      created_at: (now - closeTimes[i])+"", // simulates strings. Should be handled gracefully.
       closed: isClosed(state,i),
       pr_or_issue: prOrIssue,
     }
