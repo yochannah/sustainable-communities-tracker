@@ -6,7 +6,7 @@ study_repos="view/_data"
 since="2022-01-18T12:48:29Z"
 until="2024-01-10T12:48:29Z"
 
-repos=("https://github.com/open-life-science/open-life-science.github.io" "https://github.com/open-life-science/branding")
+#repos=("https://github.com/open-life-science/open-life-science.github.io" "https://github.com/open-life-science/branding")
 
 echo "//--- with variables:" 
 echo "  --- since: $since"
@@ -21,6 +21,11 @@ else
   echo "  - creating 'repos' dir to store shallow-cloned repos"
   mkdir repos
 fi
+
+while read -r line; do 
+  repos+=("$line")
+done <repos.txt
+
 cd repos
 echo "  - Cloning study repos to $study_repos folder"
 
