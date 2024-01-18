@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "testSingle" : "mocha ./test/testSingleMethods.js"
+    "testSingle" : "mocha ./test/testSingleMethods.js",
+    "localMethods" : "./src/localMethods.sh"
   },
 
   "repository": {
