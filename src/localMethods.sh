@@ -2,11 +2,15 @@
 
 echo "//--- SUSTAINABLILITY INDICATORS REPO CLONING ---//"
 
-study_repos="view/_data"
+study_repos="../localData"
+repo_list="repos.txt"
 since="2022-01-18T12:48:29Z"
 until="2024-01-10T12:48:29Z"
 
-#repos=("https://github.com/open-life-science/open-life-science.github.io" "https://github.com/open-life-science/branding")
+if [[ ! -e "$study_repos" ]]; then
+  echo "  🚨 [FAILURE] To run this script, make sure to start your config with folder at \"$study_repos\" containing a list of repos in \"$repo_list\""
+  exit
+fi
 
 echo "//--- with variables:" 
 echo "  --- since: $since"
@@ -14,7 +18,6 @@ echo "  --- until: $until"
 
 cd "$study_repos"
 # If there's no dir to clone repos into, create it
-# String
 if [[ -e "repos" ]]; then
   echo "  🐞 [DEBUG] Folder structure exists, skipping to clone step"
 else
@@ -23,10 +26,10 @@ else
   mkdir reports
 fi
 
-echo "  👉 [INFO ] Reading study repos list from \`${study_repos}/repos.txt\`"
+echo "  👉 [INFO ] Reading study repos list from \`${study_repos}/${repo_list}\`"
 while read -r line; do 
   repos+=("$line")
-done <repos.txt
+done <$repo_list
 
 cd repos
 echo "  👉 [INFO ] Cloning study repos to \`$study_repos\` folder"
@@ -54,13 +57,21 @@ sanitise_url(){
 
 save_git_log() {
   gitFolder=$(sanitise_url $2)
-  gitLogFile="report.txt"
-  #echo "  🗂 [DEBUG] LOGFILE IS " $gitLogFile
-  cd ../reports
-  mkdir -p $gitFolder
+  gitLogFile="report.json"
+  reportPath="reports"
+  repoPath="repos"
+  currentRoot="$(pwd)"
+  currentReport="$currentRoot/../$reportPath/$gitFolder/$gitLogFile"
+  currentRepo="$currentRoot/$repoPath/$gitFolder"
+  echo "  🗂  [DEBUG] LOGFILE IS " $currentReport
+  mkdir -p ../$reportPath/$gitFolder
 
-        #todo SINCE, UNTIL. 
-  git log --format="{\"author\": \"%an\", \"date\": \"%ad\"}">$gitFolder/$gitLogFile
+  #todo SINCE, UNTIL. 
+  cd $gitFolder
+  echo "[" >$currentReport
+  git log --date=short --format="{\"author\": \"%ce\", \"date\": \"%ad\", \"commit\": \"%h\"},">>$currentReport
+  echo "]" >>$currentReport
+  cd -
 }
 
 # Get a list of repos and clone all
@@ -75,4 +86,4 @@ for repo in "${repos[@]}"; do
 done
 
 
-echo "//--- ------------------END------------------ ---//"
+echo "//--- ----------------🌈 END 🌈---------------- ---//"
