@@ -4,8 +4,8 @@ echo "//--- SUSTAINABLILITY INDICATORS REPO CLONING ---//"
 
 study_repos="../localData"
 repo_list="repos.txt"
-since="2022-01-18T12:48:29Z"
-until="2024-01-10T12:48:29Z"
+since="2023-01-18T12:48:29Z"
+until="2023-04-25T12:48:29Z"
 
 if [[ ! -e "$study_repos" ]]; then
   echo "  🚨 [FAILURE] To run this script, make sure to start your config with folder at \"$study_repos\" containing a list of repos in \"$repo_list\""
@@ -69,7 +69,7 @@ save_git_log() {
   #todo SINCE, UNTIL. 
   cd $gitFolder
   echo "[" >$currentReport
-  git log --date=short --format="{\"author\": \"%ce\", \"date\": \"%ad\", \"commit\": \"%h\"},">>$currentReport
+  git log --date=short --since=$since --until=$until --format="{\"author\": \"%ce\", \"date\": \"%ad\", \"commit\": \"%h\"},">>$currentReport
   echo "]" >>$currentReport
   cd -
 }
@@ -79,11 +79,8 @@ for repo in "${repos[@]}"; do
     clone_repo $since "$repo"
 done
 
-## use --since and --until to create short log
-
 for repo in "${repos[@]}"; do
     save_git_log $since "$repo"
 done
-
 
 echo "//--- ----------------🌈 END 🌈---------------- ---//"
