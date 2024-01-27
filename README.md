@@ -36,7 +36,9 @@ Setup:
 2. Copy sample.tsv into localData. Tweak the repo names and dates, and/or add any lines you need to, to add more repos. 
 3. You may also need to give the script permissions to run, e.g.: 
     ```bash
-    cd sustainable-communities-tracker/src
+    #go to the folder containing the script
+    cd sustainable-communities-tracker/src/localMethods
+    #change the script to be executable
     chmod +x localMethods.sh
     ```
     

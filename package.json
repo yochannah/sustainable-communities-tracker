@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha",
     "testSingle" : "mocha ./test/testSingleMethods.js",
-    "localMethods" : "./src/localMethods.sh"
+    "localMethods" : "./src/localMethods/localMethods.sh"
   },
 
   "repository": {
