@@ -25,6 +25,26 @@ There are two main components within this code.
     ```bash
     node index.js --month 12 --urlList /path/to/urllist.txt
     ```
+### Local git-based stats
+In some cases, using the GitHub API is not the most efficient way to handle things - generally repos with LOTS of commits. Cloning stuff locally and assessing the logs works for anything that's _git_ specific rather than _GitHub_ specific. 
+
+To run the local scripts: 
+
+Setup: 
+
+1. Create a directory in the parent directory of this repo, and call it `localData`
+2. Copy sample.tsv into localData. Tweak the repo names and dates, and/or add any lines you need to, to add more repos. 
+3. You may also need to give the script permissions to run, e.g.: 
+    ```bash
+    cd sustainable-communities-tracker/src
+    chmod +x localMethods.sh
+    ```
+    
+Run: 
+
+```node
+npm run localMethods
+```
 
 ## Data visualisation component
 
