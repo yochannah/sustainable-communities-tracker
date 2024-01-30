@@ -46,7 +46,7 @@ The above setup steps, as one copy-pastable block:
     #go to the folder containing this code.
     cd sustainable-communities-tracker
     #change the script to be executable
-    chmod +x /src/localMethods/localMethods.sh
+    chmod +x src/localMethods/localMethods.sh
     
     # make a folder to store all the output data 
     mkdir ../localData
